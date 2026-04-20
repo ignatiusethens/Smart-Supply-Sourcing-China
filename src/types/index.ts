@@ -220,6 +220,24 @@ export interface Invoice {
   updatedAt: string;
 }
 
+// Payment Record Types (for dashboard/history views)
+export interface PaymentRecord {
+  id: string;
+  orderId: string;
+  referenceCode: string;
+  amount: number;
+  method: PaymentMethod;
+  status: PaymentStatus;
+  items: Array<{
+    id: string;
+    productName: string;
+    quantity: number;
+    unitPrice: number;
+  }>;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // Cart Types (Client-side only)
 export interface CartItem {
   productId: string;

@@ -257,7 +257,7 @@ export interface CheckoutFormData {
 }
 
 export function validateCheckoutForm(data: CheckoutFormData): { valid: boolean; errors: FormErrors } {
-  return validateForm(data, {
+  return validateForm(data as unknown as Record<string, unknown>, {
     shippingAddress: (value) => validateAddress(value as string),
     shippingCity: (value) => validateRequired(value as string, 'City'),
     contactName: (value) => {
@@ -291,7 +291,7 @@ export interface SourcingRequestFormData {
 export function validateSourcingRequestForm(
   data: SourcingRequestFormData
 ): { valid: boolean; errors: FormErrors } {
-  return validateForm(data, {
+  return validateForm(data as unknown as Record<string, unknown>, {
     itemDescription: (value) => {
       const required = validateRequired(value as string, 'Item description');
       if (!required.valid) return required;

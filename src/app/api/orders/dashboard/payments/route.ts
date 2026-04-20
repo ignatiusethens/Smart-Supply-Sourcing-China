@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const response: ApiResponse<PaginatedResponse<any>> = {
       success: true,
       data: {
-        payments,
+        data: payments,
         pagination: {
           page,
           limit,

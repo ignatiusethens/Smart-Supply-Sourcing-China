@@ -7,22 +7,7 @@ import { InvoiceList } from '@/components/buyer/InvoiceList';
 import { TransactionFilter } from '@/components/buyer/TransactionFilter';
 import Link from 'next/link';
 
-interface PaymentRecord {
-  id: string;
-  orderId: string;
-  referenceCode: string;
-  amount: number;
-  method: 'mpesa' | 'bank-transfer';
-  status: string;
-  items: Array<{
-    id: string;
-    productName: string;
-    quantity: number;
-    unitPrice: number;
-  }>;
-  createdAt: string;
-  updatedAt: string;
-}
+import { PaymentRecord } from '@/types';
 
 interface DashboardData {
   outstandingBalance: number;
@@ -65,7 +50,7 @@ export default function DashboardPage() {
 
         const paymentsData = await paymentsResponse.json();
         if (paymentsData.success && paymentsData.data) {
-          setPayments(paymentsData.data.payments || []);
+          setPayments(paymentsData.data.data || []);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');

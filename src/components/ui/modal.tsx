@@ -143,7 +143,7 @@ export function Modal({
 
       {/* Modal Content */}
       <div
-        ref={containerRef}
+        ref={containerRef as React.RefObject<HTMLDivElement>}
         className={cn(
           'relative w-full bg-white dark:bg-slate-900 rounded-lg shadow-xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-hidden flex flex-col',
           sizeClasses[size],

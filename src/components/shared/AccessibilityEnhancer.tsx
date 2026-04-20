@@ -287,7 +287,7 @@ export function AccessibleFormField({
         )}
       </label>
       
-      {React.cloneElement(children as React.ReactElement, {
+      {React.cloneElement(children as React.ReactElement<any>, {
         id,
         'aria-describedby': describedBy,
         'aria-invalid': error ? 'true' : 'false',

@@ -2,24 +2,7 @@
 
 import { formatCurrency, formatDate } from '@/lib/utils/formatting';
 import { Badge } from '@/components/ui/badge';
-import { PaymentStatus } from '@/types';
-
-interface PaymentRecord {
-  id: string;
-  orderId: string;
-  referenceCode: string;
-  amount: number;
-  method: 'mpesa' | 'bank-transfer';
-  status: PaymentStatus;
-  items: Array<{
-    id: string;
-    productName: string;
-    quantity: number;
-    unitPrice: number;
-  }>;
-  createdAt: string;
-  updatedAt: string;
-}
+import { PaymentStatus, PaymentRecord } from '@/types';
 
 interface PaymentHistoryTableProps {
   payments: PaymentRecord[];

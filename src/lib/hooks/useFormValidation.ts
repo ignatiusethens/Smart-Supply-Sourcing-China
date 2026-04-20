@@ -61,9 +61,8 @@ export function useFormValidation<T extends Record<string, any>>({
   const validateField = useCallback(
     async (field: keyof T): Promise<boolean> => {
       try {
-        // Create a partial schema for the field
-        const fieldSchema = schema.pick({ [field]: true } as any);
-        await fieldSchema.parseAsync({ [field]: values[field] });
+        // Validate the entire object but only check for errors on this field
+        await schema.parseAsync(values);
         
         setErrors((prev) => {
           const newErrors = { ...prev };
@@ -74,14 +73,21 @@ export function useFormValidation<T extends Record<string, any>>({
         return true;
       } catch (error) {
         if (error instanceof z.ZodError) {
-          const fieldError = error.errors[0];
-          setErrors((prev) => ({
-            ...prev,
-            [field]: {
-              message: fieldError.message,
-              type: fieldError.code,
-            },
-          }));
+          // Find errors for this specific field
+          const fieldErrors = error.issues.filter(err => 
+            err.path.length > 0 && err.path[0] === field
+          );
+          
+          if (fieldErrors.length > 0) {
+            const fieldError = fieldErrors[0];
+            setErrors((prev) => ({
+              ...prev,
+              [field]: {
+                message: fieldError.message,
+                type: fieldError.code,
+              },
+            }));
+          }
         }
         return false;
       }
@@ -98,7 +104,7 @@ export function useFormValidation<T extends Record<string, any>>({
     } catch (error) {
       if (error instanceof z.ZodError) {
         const newErrors: FormErrors = {};
-        error.errors.forEach((err) => {
+        error.issues.forEach((err) => {
           const field = err.path[0] as string;
           newErrors[field] = {
             message: err.message,
@@ -248,7 +254,7 @@ export function useFieldValidation<T>(
         return true;
       } catch (err) {
         if (err instanceof z.ZodError) {
-          setError(err.errors[0]?.message);
+          setError(err.issues[0]?.message);
         }
         return false;
       }

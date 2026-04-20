@@ -150,7 +150,7 @@ export function QuoteReviewCard({ quote, onAccept, onError, isLoading = false }:
         <div className="mb-6">
           <h3 className="text-lg font-semibold mb-4">Select Payment Method</h3>
           <PaymentMethodSelector
-            totalAmount={quote.totalAmount}
+            orderTotal={quote.totalAmount}
             selectedMethod={selectedPaymentMethod}
             onMethodChange={setSelectedPaymentMethod}
           />

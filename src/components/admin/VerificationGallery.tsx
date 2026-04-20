@@ -5,18 +5,25 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, ZoomIn, Download } from 'lucide-react';
-import { PaymentProof } from '@/types';
+import { PaymentProof, InvoiceVerificationFile } from '@/types';
+
+type VerificationFile = PaymentProof | InvoiceVerificationFile;
 
 interface VerificationGalleryProps {
-  proofs: PaymentProof[];
+  proofs?: PaymentProof[];
+  files?: InvoiceVerificationFile[];
   isLoading?: boolean;
+  onDelete?: (fileId: string) => Promise<void>;
 }
 
-export function VerificationGallery({ proofs, isLoading = false }: VerificationGalleryProps) {
-  const [selectedProof, setSelectedProof] = useState<PaymentProof | null>(null);
+export function VerificationGallery({ proofs, files, isLoading = false, onDelete }: VerificationGalleryProps) {
+  const [selectedProof, setSelectedProof] = useState<VerificationFile | null>(null);
   const [zoomLevel, setZoomLevel] = useState(100);
 
-  const isImage = (proof: PaymentProof) => {
+  // Use either proofs or files
+  const items: VerificationFile[] = proofs || files || [];
+
+  const isImage = (proof: VerificationFile) => {
     return proof.fileType.startsWith('image/');
   };
 
@@ -28,7 +35,7 @@ export function VerificationGallery({ proofs, isLoading = false }: VerificationG
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
 
-  const handleDownload = (proof: PaymentProof) => {
+  const handleDownload = (proof: VerificationFile) => {
     const link = document.createElement('a');
     link.href = proof.cloudinaryUrl;
     link.download = proof.fileName;
@@ -42,23 +49,23 @@ export function VerificationGallery({ proofs, isLoading = false }: VerificationG
       <div 
         className="flex items-center justify-center h-64 bg-gray-50 rounded-lg border border-gray-200"
         role="status"
-        aria-label="Loading payment proofs"
+        aria-label="Loading verification files"
       >
-        <div className="text-gray-500">Loading proofs...</div>
+        <div className="text-gray-500">Loading files...</div>
       </div>
     );
   }
 
-  if (proofs.length === 0) {
+  if (items.length === 0) {
     return (
       <div 
         className="flex items-center justify-center h-64 bg-gray-50 rounded-lg border border-gray-200"
         role="status"
-        aria-label="No payment proofs available"
+        aria-label="No verification files available"
       >
         <div className="text-center">
-          <div className="text-gray-500 mb-2">No payment proofs uploaded</div>
-          <div className="text-sm text-gray-400">Payment proofs will appear here once uploaded</div>
+          <div className="text-gray-500 mb-2">No verification files uploaded</div>
+          <div className="text-sm text-gray-400">Verification files will appear here once uploaded</div>
         </div>
       </div>
     );
@@ -70,9 +77,9 @@ export function VerificationGallery({ proofs, isLoading = false }: VerificationG
       <div 
         className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
         role="region"
-        aria-label="Payment proof gallery"
+        aria-label="Verification file gallery"
       >
-        {proofs.map((proof) => (
+        {items.map((proof) => (
           <button
             key={proof.id}
             className="relative group cursor-pointer rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
@@ -83,7 +90,7 @@ export function VerificationGallery({ proofs, isLoading = false }: VerificationG
               <div className="relative w-full h-32 bg-gray-100">
                 <Image
                   src={proof.cloudinaryUrl}
-                  alt={`Payment proof: ${proof.fileName}`}
+                  alt={`Verification file: ${proof.fileName}`}
                   fill
                   className="object-cover group-hover:opacity-75 transition-opacity"
                 />
@@ -105,19 +112,33 @@ export function VerificationGallery({ proofs, isLoading = false }: VerificationG
             >
               {proof.fileType.split('/')[1].toUpperCase()}
             </Badge>
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(proof.id);
+                }}
+                className="absolute top-2 left-2 text-red-600 hover:text-red-800 bg-white/80 hover:bg-white"
+                aria-label={`Delete ${proof.fileName}`}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            )}
           </button>
         ))}
       </div>
 
-      {/* Proof List */}
+      {/* File List */}
       <div className="space-y-2">
         <h3 className="font-semibold text-sm text-gray-700">Uploaded Files</h3>
         <div 
           className="space-y-2"
           role="list"
-          aria-label="List of uploaded payment proof files"
+          aria-label="List of uploaded verification files"
         >
-          {proofs.map((proof) => (
+          {items.map((proof) => (
             <div
               key={proof.id}
               className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors"
@@ -148,6 +169,17 @@ export function VerificationGallery({ proofs, isLoading = false }: VerificationG
                 >
                   <Download className="w-4 h-4" aria-hidden="true" />
                 </Button>
+                {onDelete && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onDelete(proof.id)}
+                    className="text-red-600 hover:text-red-800 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-500"
+                    aria-label={`Delete ${proof.fileName}`}
+                  >
+                    <X className="w-4 h-4" aria-hidden="true" />
+                  </Button>
+                )}
               </div>
             </div>
           ))}

@@ -16,7 +16,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<MeResponse
   const auth = await requireAuth(request);
 
   if (!auth.success) {
-    return auth.response;
+    return auth.response as NextResponse<MeResponse>;
   }
 
   return NextResponse.json(

@@ -23,7 +23,7 @@ const badgeVariants = cva(
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends React.HTMLAttributes<HTMLElement>,
     VariantProps<typeof badgeVariants> {
   /**
    * Screen reader description for the badge
@@ -36,25 +36,41 @@ export interface BadgeProps
 }
 
 function Badge({ className, variant, srDescription, interactive, children, ...props }: BadgeProps) {
-  const Component = interactive ? 'button' : 'div';
-  
+  if (interactive) {
+    return (
+      <button 
+        className={cn(
+          badgeVariants({ variant }), 
+          'cursor-pointer hover:opacity-80',
+          className
+        )} 
+        role="button"
+        tabIndex={0}
+        aria-label={srDescription}
+        {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+      >
+        {children}
+        {srDescription && (
+          <span className="sr-only">{srDescription}</span>
+        )}
+      </button>
+    );
+  }
+
   return (
-    <Component 
+    <div 
       className={cn(
         badgeVariants({ variant }), 
-        interactive && 'cursor-pointer hover:opacity-80',
         className
       )} 
-      role={interactive ? 'button' : undefined}
-      tabIndex={interactive ? 0 : undefined}
       aria-label={srDescription}
-      {...props}
+      {...(props as React.HTMLAttributes<HTMLDivElement>)}
     >
       {children}
       {srDescription && (
         <span className="sr-only">{srDescription}</span>
       )}
-    </Component>
+    </div>
   );
 }
 

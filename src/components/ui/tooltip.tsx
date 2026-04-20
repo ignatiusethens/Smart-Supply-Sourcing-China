@@ -61,7 +61,7 @@ export function Tooltip({
 }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const tooltipId = useRef(`tooltip-${Math.random().toString(36).substr(2, 9)}`);
   const prefersReducedMotion = useReducedMotion();
 
@@ -119,7 +119,7 @@ export function Tooltip({
   }, []);
 
   // Clone the child element and add event handlers
-  const trigger = React.cloneElement(children, {
+  const trigger = React.cloneElement(children as React.ReactElement<any>, {
     onMouseEnter: handleMouseEnter,
     onMouseLeave: handleMouseLeave,
     onFocus: handleFocus,

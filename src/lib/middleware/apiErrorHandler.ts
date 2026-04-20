@@ -52,7 +52,7 @@ export function handleApiError(error: unknown): NextResponse<ApiErrorResponse> {
 
   // Handle Zod validation errors
   if (error instanceof ZodError) {
-    const firstError = error.errors[0];
+    const firstError = error.issues[0];
     const message = firstError
       ? `${firstError.path.join('.')}: ${firstError.message}`
       : 'Validation error';
