@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../styles/accessibility.css";
 
 :root {
   --background: #ffffff;
@@ -10,6 +11,18 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* Responsive breakpoints */
+  /* Mobile: < 768px */
+  /* Tablet: 768px - 1919px */
+  /* Desktop: >= 1920px */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  --breakpoint-tablet: 768px;
+  --breakpoint-desktop: 1920px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,8 +32,284 @@
   }
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus indicators for keyboard navigation */
+:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Ensure touch targets are at least 44x44px for mobile accessibility */
+@media (max-width: 768px) {
+  button,
+  a[role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  [role="button"],
+  input[type="checkbox"],
+  input[type="radio"],
+  select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Improve form input touch targets */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  textarea,
+  select {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.75rem;
+  }
+}
+
+/* Tablet and desktop optimizations */
+@media (min-width: 768px) {
+  body {
+    font-size: 1rem;
+  }
+}
+
+/* Desktop optimizations */
+@media (min-width: 1920px) {
+  body {
+    font-size: 1.0625rem;
+  }
+}
+
+/* Prevent horizontal scroll on mobile */
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Responsive container padding */
+.container {
+  @apply px-4 sm:px-6 md:px-8 lg:px-12;
+}
+
+/* Mobile-first grid utilities */
+.grid-responsive {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6;
+}
+
+/* Touch-friendly link/button spacing */
+a,
+button {
+  @apply transition-colors duration-200;
+}
+
+/* Ensure images are responsive */
+img {
+  @apply max-w-full h-auto;
+}
+
+/* ============================================
+   ACCESSIBILITY UTILITIES
+   WCAG AA Compliance
+   ============================================ */
+
+/* Screen reader only content - visually hidden but accessible */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Make sr-only content visible when focused */
+.sr-only:focus,
+.sr-only:active {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Not screen reader only - reverse sr-only when needed */
+.not-sr-only {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Enhanced focus indicators for better visibility */
+.focus-visible-enhanced:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  button,
+  a {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced motion support for users with vestibular disorders */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Skip navigation link styling */
+.skip-nav {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #2563eb;
+  color: white;
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+  z-index: 100;
+}
+
+.skip-nav:focus {
+  top: 0;
+}
+
+/* Ensure sufficient color contrast for links */
+a {
+  text-decoration-skip-ink: auto;
+}
+
+/* Focus trap for modals */
+.focus-trap {
+  position: relative;
+}
+
+.focus-trap:focus {
+  outline: none;
+}
+
+/* Keyboard navigation indicators */
+.keyboard-nav-active *:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Touch target size enforcement */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Accessible form error states */
+input:invalid:not(:placeholder-shown),
+textarea:invalid:not(:placeholder-shown),
+select:invalid:not(:placeholder-shown) {
+  border-color: #dc2626;
+}
+
+input:invalid:not(:placeholder-shown):focus,
+textarea:invalid:not(:placeholder-shown):focus,
+select:invalid:not(:placeholder-shown):focus {
+  outline-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* Accessible disabled state */
+:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Loading state for screen readers */
+[aria-busy="true"] {
+  cursor: wait;
+}
+
+/* Required field indicator */
+.required::after {
+  content: " *";
+  color: #dc2626;
+  font-weight: bold;
+}
+
+/* Visually indicate current page in navigation */
+[aria-current="page"] {
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+/* Ensure proper spacing for readability */
+p,
+li,
+dd {
+  line-height: 1.6;
+}
+
+/* Improve readability with max-width for text content */
+.readable-content {
+  max-width: 65ch;
+}
+
+/* Color contrast helpers - WCAG AA compliant colors */
+.text-contrast-high {
+  color: #000000;
+}
+
+.bg-contrast-high {
+  background-color: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .text-contrast-high {
+    color: #ffffff;
+  }
+
+  .bg-contrast-high {
+    background-color: #000000;
+  }
 }
