@@ -15,7 +15,8 @@
     "prepare": "husky",
     "db:migrate": "node scripts/migrate-database.js",
     "db:test": "node scripts/test-cloudinary.js",
-    "setup": "npm run db:migrate && npm run db:test"
+    "db:passwords": "node scripts/update-passwords.js",
+    "setup": "npm run db:migrate && npm run db:test && npm run db:passwords"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
