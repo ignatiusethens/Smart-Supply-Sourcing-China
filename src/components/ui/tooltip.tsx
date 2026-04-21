@@ -62,7 +62,7 @@ export function Tooltip({
   const [isVisible, setIsVisible] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const tooltipId = useRef(`tooltip-${Math.random().toString(36).substr(2, 9)}`);
+  const [tooltipId] = useState(() => `tooltip-${Date.now()}-${Math.floor(Math.random() * 10000)}`);
   const prefersReducedMotion = useReducedMotion();
 
   const showTooltip = () => {
@@ -119,13 +119,13 @@ export function Tooltip({
   }, []);
 
   // Clone the child element and add event handlers
-  const trigger = React.cloneElement(children as React.ReactElement<any>, {
+  const trigger = React.cloneElement(children as React.ReactElement<React.HTMLAttributes<HTMLElement>>, {
     onMouseEnter: handleMouseEnter,
     onMouseLeave: handleMouseLeave,
     onFocus: handleFocus,
     onBlur: handleBlur,
     onKeyDown: handleKeyDown,
-    'aria-describedby': isVisible ? tooltipId.current : undefined,
+    'aria-describedby': isVisible ? tooltipId : undefined,
   });
 
   return (
@@ -134,7 +134,7 @@ export function Tooltip({
       
       {isVisible && !disabled && (
         <div
-          id={tooltipId.current}
+          id={tooltipId}
           role="tooltip"
           className={cn(
             'absolute z-50 px-2 py-1 text-xs font-medium text-white bg-slate-900 dark:bg-slate-100 dark:text-slate-900 rounded shadow-lg whitespace-nowrap max-w-xs',

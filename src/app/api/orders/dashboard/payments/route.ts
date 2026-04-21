@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const { payments, total } = await getBuyerPaymentHistory(userId, page, limit);
     const totalPages = Math.ceil(total / limit);
 
-    const response: ApiResponse<PaginatedResponse<any>> = {
+    const response: ApiResponse<PaginatedResponse<unknown>> = {
       success: true,
       data: {
         data: payments,

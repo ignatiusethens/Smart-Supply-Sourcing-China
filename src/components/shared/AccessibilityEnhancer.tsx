@@ -6,7 +6,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { checkColorContrast } from '@/lib/utils/accessibility';
 import { useAnnouncer } from '@/lib/hooks/useAccessibility';
 
@@ -287,7 +287,7 @@ export function AccessibleFormField({
         )}
       </label>
       
-      {React.cloneElement(children as React.ReactElement<any>, {
+      {React.cloneElement(children as React.ReactElement<React.HTMLAttributes<HTMLElement>>, {
         id,
         'aria-describedby': describedBy,
         'aria-invalid': error ? 'true' : 'false',
@@ -333,15 +333,8 @@ export function ColorContrastChecker({
   text = 'Sample Text',
   className = ''
 }: ColorContrastCheckerProps) {
-  const [contrastResult, setContrastResult] = useState<{
-    ratio: number;
-    passesAA: boolean;
-    passesAAA: boolean;
-  } | null>(null);
-
-  useEffect(() => {
-    const result = checkColorContrast(foreground, background);
-    setContrastResult(result);
+  const contrastResult = useMemo(() => {
+    return checkColorContrast(foreground, background);
   }, [foreground, background]);
 
   if (!contrastResult) return null;

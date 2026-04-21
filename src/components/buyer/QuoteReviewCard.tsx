@@ -18,7 +18,6 @@ export function QuoteReviewCard({ quote, onAccept, onError, isLoading = false }:
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>('bank-transfer');
   const [daysRemaining, setDaysRemaining] = useState<number>(0);
   const [isExpired, setIsExpired] = useState(false);
-  const [showPaymentSelector, setShowPaymentSelector] = useState(false);
 
   useEffect(() => {
     const calculateTimeRemaining = () => {
