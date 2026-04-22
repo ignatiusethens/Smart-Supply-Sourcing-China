@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCartStore } from '@/lib/stores/cartStore';
 import { ShoppingCart, Menu, X, Bell, Search, User } from 'lucide-react';
 import { useAnnouncer } from '@/lib/hooks/useAccessibility';
+import { useAuthStore } from '@/lib/stores/authStore';
 
 interface HeaderProps {
   userRole?: 'buyer' | 'admin';
@@ -14,6 +15,7 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const cartItems = useCartStore((state) => state.totalItems);
   const { announce } = useAnnouncer();
+  const { isAuthenticated, user } = useAuthStore();
 
   const buyerLinks = [
     {
@@ -160,45 +162,69 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           {userRole === 'buyer' && (
             <>
-              {/* Cart icon */}
-              <Link
-                href="/cart"
-                aria-label={`Shopping cart with ${cartItems} item${cartItems === 1 ? '' : 's'}`}
-                className="relative inline-flex items-center justify-center h-10 w-10 rounded-md text-primary-600 hover:text-primary-900 hover:bg-primary-50 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-              >
-                <ShoppingCart className="h-5 w-5" aria-hidden="true" />
-                {cartItems > 0 && (
-                  <>
-                    <span
-                      className="absolute top-1 right-1 w-4 h-4 bg-accent-500 text-white text-xs rounded-full flex items-center justify-center font-bold leading-none"
-                      aria-hidden="true"
-                    >
-                      {cartItems > 99 ? '99+' : cartItems}
-                    </span>
-                    <span className="sr-only">
-                      {cartItems} item{cartItems === 1 ? '' : 's'} in cart
-                    </span>
-                  </>
-                )}
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  {/* Cart icon */}
+                  <Link
+                    href="/cart"
+                    aria-label={`Shopping cart with ${cartItems} item${cartItems === 1 ? '' : 's'}`}
+                    className="relative inline-flex items-center justify-center h-10 w-10 rounded-md text-primary-600 hover:text-primary-900 hover:bg-primary-50 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                  >
+                    <ShoppingCart className="h-5 w-5" aria-hidden="true" />
+                    {cartItems > 0 && (
+                      <>
+                        <span
+                          className="absolute top-1 right-1 w-4 h-4 bg-accent-500 text-white text-xs rounded-full flex items-center justify-center font-bold leading-none"
+                          aria-hidden="true"
+                        >
+                          {cartItems > 99 ? '99+' : cartItems}
+                        </span>
+                        <span className="sr-only">
+                          {cartItems} item{cartItems === 1 ? '' : 's'} in cart
+                        </span>
+                      </>
+                    )}
+                  </Link>
 
-              {/* Bell / notifications icon */}
-              <button
-                type="button"
-                className="inline-flex items-center justify-center h-10 w-10 rounded-md text-primary-600 hover:text-primary-900 hover:bg-primary-50 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-                aria-label="Notifications"
-              >
-                <Bell className="h-5 w-5" aria-hidden="true" />
-              </button>
+                  {/* Bell / notifications icon */}
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center h-10 w-10 rounded-md text-primary-600 hover:text-primary-900 hover:bg-primary-50 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                    aria-label="Notifications"
+                  >
+                    <Bell className="h-5 w-5" aria-hidden="true" />
+                  </button>
 
-              {/* User avatar */}
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-                aria-label="Go to account dashboard"
-              >
-                <User className="h-4 w-4" aria-hidden="true" />
-              </Link>
+                  {/* User avatar */}
+                  <Link
+                    href={
+                      user?.role === 'admin' ? '/admin/dashboard' : '/dashboard'
+                    }
+                    className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                    aria-label="Go to account dashboard"
+                  >
+                    <User className="h-4 w-4" aria-hidden="true" />
+                  </Link>
+                </>
+              ) : (
+                <>
+                  {/* Login button */}
+                  <Link
+                    href="/login"
+                    className="hidden sm:inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-primary-700 border border-primary-300 rounded-lg hover:bg-primary-50 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                  >
+                    Log In
+                  </Link>
+
+                  {/* Sign Up button */}
+                  <Link
+                    href="/register"
+                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </>
           )}
 
