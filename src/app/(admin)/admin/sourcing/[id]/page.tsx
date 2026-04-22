@@ -20,7 +20,7 @@ export default function SourcingRequestDetailPage() {
     const fetchRequest = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/sourcing/requests/${requestId}`);
+        const response = await authFetch(`/api/sourcing/requests/${requestId}`);
         const data = await response.json();
 
         if (data.success) {
@@ -42,7 +42,7 @@ export default function SourcingRequestDetailPage() {
 
   const handleUpdateStatus = async (status: string) => {
     try {
-      const response = await fetch(`/api/sourcing/requests/${requestId}`, {
+      const response = await authFetch(`/api/sourcing/requests/${requestId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
