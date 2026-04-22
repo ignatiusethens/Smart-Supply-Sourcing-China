@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCartStore } from '@/lib/stores/cartStore';
 import { ShoppingCart, Menu, X, Bell, Search, User } from 'lucide-react';
 import { useAnnouncer } from '@/lib/hooks/useAccessibility';
@@ -89,12 +90,13 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
           className="flex items-center gap-2 flex-shrink-0 focus-visible:rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
           aria-label="Smart Supply Sourcing - Go to homepage"
         >
-          <span
-            className="text-blue-600 text-2xl font-bold leading-none select-none"
-            aria-hidden="true"
-          >
-            ◇
-          </span>
+          <Image
+            src="/logo.png"
+            alt="Smart Supply Sourcing logo"
+            width={36}
+            height={36}
+            className="rounded-full"
+          />
           <span className="hidden sm:inline text-blue-600 font-bold text-base md:text-lg whitespace-nowrap">
             Smart Supply Sourcing
           </span>

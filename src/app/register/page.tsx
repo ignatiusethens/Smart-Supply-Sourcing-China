@@ -56,9 +56,11 @@ export default function RegisterPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">SS</span>
-            </div>
+            <img
+              src="/logo.png"
+              alt="Smart Supply Sourcing"
+              className="w-10 h-10 rounded-full object-cover"
+            />
             <span className="text-xl font-bold text-gray-900">
               Smart Supply Sourcing
             </span>

@@ -76,9 +76,11 @@ function SidebarNav() {
       {/* Logo / brand */}
       <div className="px-5 py-5 border-b border-primary-100">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-blue-600 flex items-center justify-center">
-            <span className="text-white text-xs font-bold">SS</span>
-          </div>
+          <img
+            src="/logo.png"
+            alt="Smart Supply Sourcing"
+            className="w-7 h-7 rounded-full object-cover"
+          />
           <span className="text-sm font-bold text-primary-800">
             Smart Supply
           </span>
