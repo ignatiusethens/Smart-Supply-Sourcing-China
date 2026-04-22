@@ -2,262 +2,289 @@
 
 import React from 'react';
 import { ProductFilters, Category, AvailabilityStatus } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { CATEGORIES } from '@/lib/utils/constants';
-import { formatCurrency } from '@/lib/utils/formatting';
-import { X } from 'lucide-react';
+
+// Lead time filter options (UI-only, used for display/UX)
+export type LeadTimeOption = 'instant' | 'within-7-days' | 'extended-14-plus';
 
 interface FilterPanelProps {
   filters: ProductFilters;
   onFilterChange: (filters: ProductFilters) => void;
   priceRange?: { min: number; max: number };
+  onRequestPriceList?: () => void;
 }
+
+const CATEGORY_LABELS: Record<Category, string> = {
+  'pumps-motors': 'Pumps & Motors',
+  'energy-systems': 'Energy Systems',
+  'fluid-control': 'Fluid Control',
+  electrical: 'Electrical',
+  storage: 'Storage',
+};
+
+const AVAILABILITY_OPTIONS: { value: AvailabilityStatus; label: string }[] = [
+  { value: 'in-stock', label: 'Ready Stock (M-Pesa)' },
+  { value: 'pre-order', label: 'Pre-order (Bank)' },
+];
+
+const LEAD_TIME_OPTIONS: { value: LeadTimeOption; label: string }[] = [
+  { value: 'instant', label: 'Instant Dispatch' },
+  { value: 'within-7-days', label: 'Within 7 Days' },
+  { value: 'extended-14-plus', label: 'Extended (14+ Days)' },
+];
 
 export function FilterPanel({
   filters,
   onFilterChange,
   priceRange = { min: 0, max: 1000000 },
+  onRequestPriceList,
 }: FilterPanelProps) {
-  const [localFilters, setLocalFilters] = React.useState(filters);
+  const [leadTime, setLeadTime] = React.useState<LeadTimeOption[]>([]);
+
+  // Derive state from props instead of maintaining local state
+  const allProductsSelected = filters.categories.length === 0;
+
+  const handleAllProductsToggle = () => {
+    const cleared = { ...filters, categories: [] };
+    onFilterChange(cleared);
+  };
 
   const handleCategoryToggle = (category: Category) => {
-    const newCategories = localFilters.categories.includes(category)
-      ? localFilters.categories.filter(c => c !== category)
-      : [...localFilters.categories, category];
+    const newCategories = filters.categories.includes(category)
+      ? filters.categories.filter((c) => c !== category)
+      : [...filters.categories, category];
 
-    const updated = { ...localFilters, categories: newCategories };
-    setLocalFilters(updated);
+    const updated = { ...filters, categories: newCategories };
     onFilterChange(updated);
   };
 
   const handleAvailabilityToggle = (availability: AvailabilityStatus) => {
-    const newAvailability = localFilters.availability.includes(availability)
-      ? localFilters.availability.filter(a => a !== availability)
-      : [...localFilters.availability, availability];
+    const newAvailability = filters.availability.includes(availability)
+      ? filters.availability.filter((a) => a !== availability)
+      : [...filters.availability, availability];
 
-    const updated = { ...localFilters, availability: newAvailability };
-    setLocalFilters(updated);
+    const updated = { ...filters, availability: newAvailability };
     onFilterChange(updated);
   };
 
-  const handlePriceChange = (field: 'min' | 'max', value: number) => {
-    const newPriceRange = { ...localFilters.priceRange, [field]: value };
-    const updated = { ...localFilters, priceRange: newPriceRange };
-    setLocalFilters(updated);
+  const handleLeadTimeToggle = (option: LeadTimeOption) => {
+    setLeadTime((prev) =>
+      prev.includes(option)
+        ? prev.filter((l) => l !== option)
+        : [...prev, option]
+    );
+    // Lead time is a UI-only filter for now; extend ProductFilters if backend support is added
+  };
+
+  const handlePriceChange = (field: 'min' | 'max', value: string) => {
+    const numValue =
+      value === '' ? (field === 'min' ? 0 : priceRange.max) : Number(value);
+    const newPriceRange = { ...filters.priceRange, [field]: numValue };
+    const updated = { ...filters, priceRange: newPriceRange };
     onFilterChange(updated);
   };
 
-  const handleSearchChange = (query: string) => {
-    const updated = { ...localFilters, searchQuery: query };
-    setLocalFilters(updated);
-    onFilterChange(updated);
-  };
-
-  const handleClearAll = () => {
+  const handleReset = () => {
     const cleared: ProductFilters = {
       categories: [],
       availability: [],
       priceRange: { min: 0, max: priceRange.max },
       searchQuery: '',
     };
-    setLocalFilters(cleared);
+    setLeadTime([]);
     onFilterChange(cleared);
   };
 
-  const hasActiveFilters =
-    localFilters.categories.length > 0 ||
-    localFilters.availability.length > 0 ||
-    localFilters.searchQuery.length > 0 ||
-    localFilters.priceRange.min > 0 ||
-    localFilters.priceRange.max < priceRange.max;
-
   return (
-    <div className="space-y-3 sm:space-y-4 md:space-y-5">
-      {/* Search */}
-      <Card>
-        <CardHeader className="pb-2 sm:pb-3">
-          <CardTitle className="text-sm sm:text-base md:text-lg">Search</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Input
-            id="product-search"
-            placeholder="Search products..."
-            value={localFilters.searchQuery}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="text-sm sm:text-base h-10 sm:h-11 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
-            aria-label="Search products by name or specifications"
-          />
-        </CardContent>
-      </Card>
+    <div className="flex flex-col h-full bg-white">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-primary-200">
+        <h2 className="text-sm font-semibold text-primary-800">Filters</h2>
+        <button
+          onClick={handleReset}
+          className="text-xs font-medium text-info-600 hover:text-info-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-info-500 rounded px-1"
+          aria-label="Reset all filters"
+        >
+          Reset
+        </button>
+      </div>
 
-      {/* Categories */}
-      <Card>
-        <CardHeader className="pb-2 sm:pb-3">
-          <CardTitle className="text-sm sm:text-base md:text-lg">Categories</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 sm:space-y-2.5">
-          {CATEGORIES.map((category) => (
-            <label 
-              key={category} 
-              className="flex items-center gap-2 sm:gap-3 cursor-pointer p-1 sm:p-1.5 rounded hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors focus-within:ring-2 focus-within:ring-offset-1 focus-within:ring-blue-500"
-            >
+      <div className="flex-1 overflow-y-auto">
+        {/* CATEGORY */}
+        <div className="px-4 py-4 border-b border-primary-200">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary-500 mb-3">
+            Category
+          </p>
+          <div className="space-y-2">
+            {/* All Products */}
+            <label className="flex items-center gap-2.5 cursor-pointer group">
               <input
                 type="checkbox"
-                id={`category-${category}`}
-                checked={localFilters.categories.includes(category)}
-                onChange={() => handleCategoryToggle(category)}
-                className="w-4 h-4 sm:w-5 sm:h-5 rounded cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
-                aria-label={`Filter by ${category.replace('-', ' ')} category`}
+                checked={allProductsSelected}
+                onChange={handleAllProductsToggle}
+                className="w-4 h-4 rounded border-primary-300 text-info-600 focus-visible:ring-2 focus-visible:ring-info-500 cursor-pointer"
+                aria-label="Show all product categories"
               />
-              <span className="text-xs sm:text-sm md:text-base capitalize">
-                {category.replace('-', ' ')}
+              <span
+                className={`text-sm font-medium ${
+                  allProductsSelected
+                    ? 'text-info-600'
+                    : 'text-primary-700 group-hover:text-primary-900'
+                }`}
+              >
+                All Products
               </span>
             </label>
-          ))}
-        </CardContent>
-      </Card>
 
-      {/* Availability */}
-      <Card>
-        <CardHeader className="pb-2 sm:pb-3">
-          <CardTitle className="text-sm sm:text-base md:text-lg">Availability</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 sm:space-y-2.5">
-          {(['in-stock', 'pre-order', 'out-of-stock'] as AvailabilityStatus[]).map(
-            (availability) => (
-              <label 
-                key={availability} 
-                className="flex items-center gap-2 sm:gap-3 cursor-pointer p-1 sm:p-1.5 rounded hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors focus-within:ring-2 focus-within:ring-offset-1 focus-within:ring-blue-500"
+            {/* Individual categories */}
+            {CATEGORIES.map((category) => (
+              <label
+                key={category}
+                className="flex items-center gap-2.5 cursor-pointer group"
               >
                 <input
                   type="checkbox"
-                  id={`availability-${availability}`}
-                  checked={localFilters.availability.includes(availability)}
-                  onChange={() => handleAvailabilityToggle(availability)}
-                  className="w-4 h-4 sm:w-5 sm:h-5 rounded cursor-pointer focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
-                  aria-label={`Filter by ${availability.replace('-', ' ')} availability`}
+                  id={`category-${category}`}
+                  checked={filters.categories.includes(category)}
+                  onChange={() => handleCategoryToggle(category)}
+                  className="w-4 h-4 rounded border-primary-300 text-info-600 focus-visible:ring-2 focus-visible:ring-info-500 cursor-pointer"
+                  aria-label={`Filter by ${CATEGORY_LABELS[category]} category`}
                 />
-                <span className="text-xs sm:text-sm md:text-base capitalize">
-                  {availability.replace('-', ' ')}
+                <span className="text-sm text-primary-700 group-hover:text-primary-900">
+                  {CATEGORY_LABELS[category]}
                 </span>
               </label>
-            )
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Price Range */}
-      <Card>
-        <CardHeader className="pb-2 sm:pb-3">
-          <CardTitle className="text-sm sm:text-base md:text-lg">Price Range</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 sm:space-y-4">
-          <div>
-            <label 
-              htmlFor="min-price"
-              className="text-xs sm:text-sm font-medium"
-            >
-              Min Price
-            </label>
-            <Input
-              id="min-price"
-              type="number"
-              min={priceRange.min}
-              max={priceRange.max}
-              value={localFilters.priceRange.min}
-              onChange={(e) => handlePriceChange('min', Number(e.target.value))}
-              className="mt-1 sm:mt-1.5 text-sm sm:text-base h-10 sm:h-11 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
-              aria-label="Minimum price filter"
-            />
-            <p className="text-xs text-slate-500 mt-1 sm:mt-1.5">
-              {formatCurrency(localFilters.priceRange.min)}
-            </p>
+            ))}
           </div>
+        </div>
 
-          <div>
-            <label 
-              htmlFor="max-price"
-              className="text-xs sm:text-sm font-medium"
-            >
-              Max Price
-            </label>
-            <Input
-              id="max-price"
-              type="number"
-              min={priceRange.min}
-              max={priceRange.max}
-              value={localFilters.priceRange.max}
-              onChange={(e) => handlePriceChange('max', Number(e.target.value))}
-              className="mt-1 sm:mt-1.5 text-sm sm:text-base h-10 sm:h-11 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
-              aria-label="Maximum price filter"
-            />
-            <p className="text-xs text-slate-500 mt-1 sm:mt-1.5">
-              {formatCurrency(localFilters.priceRange.max)}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Active Filters */}
-      {hasActiveFilters && (
-        <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
-          <CardContent className="pt-3 sm:pt-4">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <span className="text-xs sm:text-sm font-medium">Active Filters</span>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleClearAll}
-                className="h-auto p-0 text-xs sm:text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
-                aria-label="Clear all active filters"
+        {/* AVAILABILITY */}
+        <div className="px-4 py-4 border-b border-primary-200">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary-500 mb-3">
+            Availability
+          </p>
+          <div className="space-y-2">
+            {AVAILABILITY_OPTIONS.map(({ value, label }) => (
+              <label
+                key={value}
+                className="flex items-center gap-2.5 cursor-pointer group"
               >
-                Clear All
-              </Button>
+                <input
+                  type="checkbox"
+                  id={`availability-${value}`}
+                  checked={filters.availability.includes(value)}
+                  onChange={() => handleAvailabilityToggle(value)}
+                  className="w-4 h-4 rounded border-primary-300 text-info-600 focus-visible:ring-2 focus-visible:ring-info-500 cursor-pointer"
+                  aria-label={`Filter by ${label}`}
+                />
+                <span className="text-sm text-primary-700 group-hover:text-primary-900">
+                  {label}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* LEAD TIME */}
+        <div className="px-4 py-4 border-b border-primary-200">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary-500 mb-3">
+            Lead Time
+          </p>
+          <div className="space-y-2">
+            {LEAD_TIME_OPTIONS.map(({ value, label }) => (
+              <label
+                key={value}
+                className="flex items-center gap-2.5 cursor-pointer group"
+              >
+                <input
+                  type="checkbox"
+                  id={`lead-time-${value}`}
+                  checked={leadTime.includes(value)}
+                  onChange={() => handleLeadTimeToggle(value)}
+                  className="w-4 h-4 rounded border-primary-300 text-info-600 focus-visible:ring-2 focus-visible:ring-info-500 cursor-pointer"
+                  aria-label={`Filter by lead time: ${label}`}
+                />
+                <span className="text-sm text-primary-700 group-hover:text-primary-900">
+                  {label}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* PRICE RANGE */}
+        <div className="px-4 py-4 border-b border-primary-200">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary-500 mb-3">
+            Price Range
+          </p>
+          <div className="flex items-center gap-2">
+            <div className="flex-1">
+              <label
+                htmlFor="price-min"
+                className="text-xs text-primary-500 mb-1 block"
+              >
+                MIN
+              </label>
+              <Input
+                id="price-min"
+                type="number"
+                min={0}
+                max={priceRange.max}
+                value={
+                  filters.priceRange.min === 0 ? '' : filters.priceRange.min
+                }
+                placeholder="0"
+                onChange={(e) => handlePriceChange('min', e.target.value)}
+                className="h-8 text-sm border-primary-300 focus-visible:ring-info-500"
+                aria-label="Minimum price filter"
+              />
             </div>
-            <div className="flex flex-wrap gap-2">
-              {localFilters.categories.map((cat) => (
-                <Badge key={cat} variant="secondary" className="gap-1 text-xs sm:text-sm">
-                  {cat.replace('-', ' ')}
-                  <button
-                    onClick={() => handleCategoryToggle(cat)}
-                    className="ml-1 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-blue-500 rounded"
-                    aria-label={`Remove ${cat} filter`}
-                  >
-                    <X className="w-3 h-3 sm:w-4 sm:h-4" aria-hidden="true" />
-                  </button>
-                </Badge>
-              ))}
-              {localFilters.availability.map((avail) => (
-                <Badge key={avail} variant="secondary" className="gap-1 text-xs sm:text-sm">
-                  {avail.replace('-', ' ')}
-                  <button
-                    onClick={() => handleAvailabilityToggle(avail)}
-                    className="ml-1 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-blue-500 rounded"
-                    aria-label={`Remove ${avail} filter`}
-                  >
-                    <X className="w-3 h-3 sm:w-4 sm:h-4" aria-hidden="true" />
-                  </button>
-                </Badge>
-              ))}
-              {localFilters.searchQuery && (
-                <Badge variant="secondary" className="gap-1 text-xs sm:text-sm">
-                  Search: {localFilters.searchQuery}
-                  <button
-                    onClick={() => handleSearchChange('')}
-                    className="ml-1 hover:text-red-600 focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-blue-500 rounded"
-                    aria-label="Remove search filter"
-                  >
-                    <X className="w-3 h-3 sm:w-4 sm:h-4" aria-hidden="true" />
-                  </button>
-                </Badge>
-              )}
+            <span className="text-primary-400 mt-5">—</span>
+            <div className="flex-1">
+              <label
+                htmlFor="price-max"
+                className="text-xs text-primary-500 mb-1 block"
+              >
+                MAX
+              </label>
+              <Input
+                id="price-max"
+                type="number"
+                min={0}
+                max={priceRange.max}
+                value={
+                  filters.priceRange.max === priceRange.max
+                    ? ''
+                    : filters.priceRange.max
+                }
+                placeholder="Any"
+                onChange={(e) => handlePriceChange('max', e.target.value)}
+                className="h-8 text-sm border-primary-300 focus-visible:ring-info-500"
+                aria-label="Maximum price filter"
+              />
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom info box */}
+      <div className="px-4 py-4 border-t border-primary-200 bg-primary-50">
+        <p className="text-xs text-primary-500 mb-3 leading-relaxed">
+          M-Pesa payments are cleared instantly. Bank transfers may take 1–3
+          business days.
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full text-xs border-primary-300 text-primary-600 hover:bg-primary-100 focus-visible:ring-2 focus-visible:ring-info-500"
+          onClick={onRequestPriceList}
+          aria-label="Request full price list"
+        >
+          Request Full Price List
+        </Button>
+      </div>
     </div>
   );
 }

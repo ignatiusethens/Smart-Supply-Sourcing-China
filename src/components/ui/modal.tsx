@@ -9,7 +9,11 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Button } from './button';
-import { useFocusTrap, useFocusRestore, useReducedMotion } from '@/lib/hooks/useAccessibility';
+import {
+  useFocusTrap,
+  useFocusRestore,
+  useReducedMotion,
+} from '@/lib/hooks/useAccessibility';
 import { cn } from '@/lib/utils/cn';
 
 interface ModalProps {
@@ -129,7 +133,7 @@ export function Modal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
-      aria-describedby={description ? "modal-description" : undefined}
+      aria-describedby={description ? 'modal-description' : undefined}
     >
       {/* Overlay */}
       <div
@@ -145,14 +149,14 @@ export function Modal({
       <div
         ref={containerRef as React.RefObject<HTMLDivElement>}
         className={cn(
-          'relative w-full bg-white dark:bg-slate-900 rounded-lg shadow-xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-hidden flex flex-col',
+          'relative w-full bg-white dark:bg-slate-900 rounded-lg shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-hidden flex flex-col',
           sizeClasses[size],
           !prefersReducedMotion && 'transition-all duration-200 ease-out',
           className
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex items-center justify-between p-6 border-b border-primary-200 dark:border-slate-800">
           <div className="flex-1 min-w-0">
             <h2
               id="modal-title"
@@ -175,7 +179,7 @@ export function Modal({
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="ml-4 flex-shrink-0"
+              className="ml-4 flex-shrink-0 hover:bg-primary-100"
               aria-label="Close modal"
             >
               <X className="h-4 w-4" aria-hidden="true" />
@@ -184,9 +188,7 @@ export function Modal({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto p-6">{children}</div>
       </div>
     </div>
   );
@@ -204,7 +206,7 @@ export function ModalFooter({ children, className }: ModalFooterProps) {
   return (
     <div
       className={cn(
-        'flex items-center justify-end gap-3 p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50',
+        'flex items-center justify-end gap-3 p-6 border-t border-primary-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50',
         className
       )}
     >
@@ -251,11 +253,7 @@ export function ConfirmationModal({
         <p className="text-slate-600 dark:text-slate-400">{message}</p>
 
         <ModalFooter>
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isLoading}
-          >
+          <Button variant="outline" onClick={onClose} disabled={isLoading}>
             {cancelText}
           </Button>
           <Button

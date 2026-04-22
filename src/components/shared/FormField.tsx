@@ -13,11 +13,17 @@ interface BaseFormFieldProps {
   className?: string;
 }
 
-interface InputFormFieldProps extends BaseFormFieldProps, Omit<InputHTMLAttributes<HTMLInputElement>, 'className'> {
+interface InputFormFieldProps
+  extends
+    BaseFormFieldProps,
+    Omit<InputHTMLAttributes<HTMLInputElement>, 'className'> {
   type?: 'text' | 'email' | 'tel' | 'number' | 'password';
 }
 
-interface TextareaFormFieldProps extends BaseFormFieldProps, Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'className'> {}
+interface TextareaFormFieldProps
+  extends
+    BaseFormFieldProps,
+    Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'className'> {}
 
 /**
  * Input form field with label and error display
@@ -42,20 +48,27 @@ export function FormField({
         className="block text-sm font-medium text-slate-700 dark:text-slate-300"
       >
         {label}
-        {required && <span className="text-red-500 ml-1" aria-label="required">*</span>}
+        {required && (
+          <span className="text-red-500 ml-1" aria-label="required">
+            *
+          </span>
+        )}
       </label>
 
       <input
         id={fieldId}
         className={`
           w-full px-3 py-2 border rounded-md shadow-sm
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+          focus:outline-none focus:ring-2 focus:ring-info-500 focus:border-info-500
           disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed
           dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100
           ${error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-slate-300'}
         `}
         aria-invalid={!!error}
-        aria-describedby={`${error ? errorId : ''} ${helpText ? helpId : ''}`.trim() || undefined}
+        aria-describedby={
+          `${error ? errorId : ''} ${helpText ? helpId : ''}`.trim() ||
+          undefined
+        }
         aria-required={required}
         {...inputProps}
       />
@@ -67,7 +80,11 @@ export function FormField({
       )}
 
       {error && (
-        <p id={errorId} className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p
+          id={errorId}
+          className="text-sm text-red-600 dark:text-red-400"
+          role="alert"
+        >
           {error}
         </p>
       )}
@@ -98,20 +115,27 @@ export function TextareaField({
         className="block text-sm font-medium text-slate-700 dark:text-slate-300"
       >
         {label}
-        {required && <span className="text-red-500 ml-1" aria-label="required">*</span>}
+        {required && (
+          <span className="text-red-500 ml-1" aria-label="required">
+            *
+          </span>
+        )}
       </label>
 
       <textarea
         id={fieldId}
         className={`
           w-full px-3 py-2 border rounded-md shadow-sm
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+          focus:outline-none focus:ring-2 focus:ring-info-500 focus:border-info-500
           disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed
           dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100
           ${error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-slate-300'}
         `}
         aria-invalid={!!error}
-        aria-describedby={`${error ? errorId : ''} ${helpText ? helpId : ''}`.trim() || undefined}
+        aria-describedby={
+          `${error ? errorId : ''} ${helpText ? helpId : ''}`.trim() ||
+          undefined
+        }
         aria-required={required}
         {...textareaProps}
       />
@@ -123,7 +147,11 @@ export function TextareaField({
       )}
 
       {error && (
-        <p id={errorId} className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p
+          id={errorId}
+          className="text-sm text-red-600 dark:text-red-400"
+          role="alert"
+        >
           {error}
         </p>
       )}
@@ -163,7 +191,11 @@ export function SelectField({
         className="block text-sm font-medium text-slate-700 dark:text-slate-300"
       >
         {label}
-        {required && <span className="text-red-500 ml-1" aria-label="required">*</span>}
+        {required && (
+          <span className="text-red-500 ml-1" aria-label="required">
+            *
+          </span>
+        )}
       </label>
 
       <select
@@ -172,13 +204,16 @@ export function SelectField({
         onChange={(e) => onChange(e.target.value)}
         className={`
           w-full px-3 py-2 border rounded-md shadow-sm
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+          focus:outline-none focus:ring-2 focus:ring-info-500 focus:border-info-500
           disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed
           dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100
           ${error ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-slate-300'}
         `}
         aria-invalid={!!error}
-        aria-describedby={`${error ? errorId : ''} ${helpText ? helpId : ''}`.trim() || undefined}
+        aria-describedby={
+          `${error ? errorId : ''} ${helpText ? helpId : ''}`.trim() ||
+          undefined
+        }
         aria-required={required}
       >
         {placeholder && (
@@ -200,7 +235,11 @@ export function SelectField({
       )}
 
       {error && (
-        <p id={errorId} className="text-sm text-red-600 dark:text-red-400" role="alert">
+        <p
+          id={errorId}
+          className="text-sm text-red-600 dark:text-red-400"
+          role="alert"
+        >
           {error}
         </p>
       )}

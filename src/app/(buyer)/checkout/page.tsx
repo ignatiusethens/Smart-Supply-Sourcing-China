@@ -3,12 +3,15 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BuyerLayout } from '@/components/layout/BuyerLayout';
-import { CheckoutForm, CheckoutFormData } from '@/components/buyer/CheckoutForm';
+import {
+  CheckoutForm,
+  CheckoutFormData,
+} from '@/components/buyer/CheckoutForm';
 import { useCartStore } from '@/lib/stores/cartStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -33,7 +36,7 @@ export default function CheckoutPage() {
 
       // Prepare order data
       const orderData = {
-        items: items.map(item => ({
+        items: items.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
         })),
@@ -78,7 +81,8 @@ export default function CheckoutPage() {
         router.push(`/payment/bank-transfer?orderId=${orderId}`);
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
       console.error('Checkout error:', err);
     } finally {
@@ -89,9 +93,11 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <BuyerLayout>
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="text-center py-12">
-            <p className="text-slate-600 dark:text-slate-400 mb-4">Your cart is empty</p>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">
+              Your cart is empty
+            </p>
             <Link href="/catalog">
               <Button>Continue Shopping</Button>
             </Link>
@@ -103,16 +109,29 @@ export default function CheckoutPage() {
 
   return (
     <BuyerLayout>
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Breadcrumb */}
-        <div className="mb-6">
-          <Link href="/cart" className="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Cart
-          </Link>
-        </div>
-
-        <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+        <nav aria-label="Breadcrumb" className="mb-6">
+          <ol className="flex items-center gap-2 text-sm text-slate-500">
+            <li>
+              <Link
+                href="/catalog"
+                className="hover:text-blue-600 transition-colors"
+              >
+                Catalog
+              </Link>
+            </li>
+            <li aria-hidden="true">
+              <ChevronRight className="h-4 w-4" />
+            </li>
+            <li
+              className="text-slate-800 dark:text-slate-200 font-medium"
+              aria-current="page"
+            >
+              Secure Checkout
+            </li>
+          </ol>
+        </nav>
 
         {/* Error Message */}
         {error && (
@@ -131,11 +150,8 @@ export default function CheckoutPage() {
           </Card>
         )}
 
-        {/* Checkout Form */}
-        <CheckoutForm
-          onSubmit={handleSubmit}
-          isLoading={isLoading}
-        />
+        {/* Two-column checkout layout */}
+        <CheckoutForm onSubmit={handleSubmit} isLoading={isLoading} />
       </div>
     </BuyerLayout>
   );

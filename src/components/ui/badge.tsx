@@ -7,13 +7,18 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: 'border-transparent bg-slate-900 text-slate-50 hover:bg-slate-800 dark:bg-slate-50 dark:text-slate-900 dark:hover:bg-slate-100',
-        secondary: 'border-transparent bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-50 dark:hover:bg-slate-700',
-        destructive: 'border-transparent bg-red-500 text-slate-50 hover:bg-red-600 dark:hover:bg-red-600',
+        default:
+          'border-transparent bg-primary-800 text-white hover:bg-primary-700',
+        secondary:
+          'border-transparent bg-primary-100 text-primary-700 hover:bg-primary-200',
+        destructive: 'bg-error-50 text-error-700 border border-error-500',
         outline: 'text-slate-950 dark:text-slate-50',
-        success: 'border-transparent bg-green-500 text-white hover:bg-green-600',
-        warning: 'border-transparent bg-yellow-500 text-white hover:bg-yellow-600',
-        info: 'border-transparent bg-blue-500 text-white hover:bg-blue-600',
+        success: 'bg-success-50 text-success-700 border border-success-500',
+        warning: 'bg-warning-50 text-warning-700 border border-warning-500',
+        error: 'bg-error-50 text-error-700 border border-error-500',
+        info: 'bg-info-50 text-info-700 border border-info-500',
+        mpesa: 'border-transparent bg-green-500 text-white text-xs font-bold',
+        bank: 'border-transparent bg-blue-500 text-white text-xs font-bold',
       },
     },
     defaultVariants: {
@@ -23,7 +28,8 @@ const badgeVariants = cva(
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLElement>,
+  extends
+    React.HTMLAttributes<HTMLElement>,
     VariantProps<typeof badgeVariants> {
   /**
    * Screen reader description for the badge
@@ -35,41 +41,41 @@ export interface BadgeProps
   interactive?: boolean;
 }
 
-function Badge({ className, variant, srDescription, interactive, children, ...props }: BadgeProps) {
+function Badge({
+  className,
+  variant,
+  srDescription,
+  interactive,
+  children,
+  ...props
+}: BadgeProps) {
   if (interactive) {
     return (
-      <button 
+      <button
         className={cn(
-          badgeVariants({ variant }), 
+          badgeVariants({ variant }),
           'cursor-pointer hover:opacity-80',
           className
-        )} 
+        )}
         role="button"
         tabIndex={0}
         aria-label={srDescription}
         {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
       >
         {children}
-        {srDescription && (
-          <span className="sr-only">{srDescription}</span>
-        )}
+        {srDescription && <span className="sr-only">{srDescription}</span>}
       </button>
     );
   }
 
   return (
-    <div 
-      className={cn(
-        badgeVariants({ variant }), 
-        className
-      )} 
+    <div
+      className={cn(badgeVariants({ variant }), className)}
       aria-label={srDescription}
       {...(props as React.HTMLAttributes<HTMLDivElement>)}
     >
       {children}
-      {srDescription && (
-        <span className="sr-only">{srDescription}</span>
-      )}
+      {srDescription && <span className="sr-only">{srDescription}</span>}
     </div>
   );
 }

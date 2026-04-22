@@ -41,7 +41,7 @@ export function LoadingSpinner({
       <div className="flex flex-col items-center gap-3">
         <Loader2
           className={cn(
-            'animate-spin text-blue-600 dark:text-blue-400',
+            'animate-spin text-accent-600 dark:text-accent-400',
             sizeClasses[size]
           )}
           aria-hidden="true"
@@ -97,7 +97,7 @@ export function Skeleton({ className, count = 1 }: SkeletonProps) {
         <div
           key={i}
           className={cn(
-            'animate-pulse bg-gray-200 dark:bg-gray-700 rounded',
+            'animate-pulse bg-primary-200 dark:bg-gray-700 rounded',
             className
           )}
           role="status"

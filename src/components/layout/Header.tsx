@@ -3,8 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useCartStore } from '@/lib/stores/cartStore';
-import { Button } from '@/components/ui/button';
-import { ShoppingCart, Menu, X } from 'lucide-react';
+import { ShoppingCart, Menu, X, Bell, Search, User } from 'lucide-react';
 import { useAnnouncer } from '@/lib/hooks/useAccessibility';
 
 interface HeaderProps {
@@ -17,17 +16,35 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
   const { announce } = useAnnouncer();
 
   const buyerLinks = [
-    { href: '/catalog', label: 'Catalog', description: 'Browse product catalog' },
-    { href: '/orders', label: 'Orders', description: 'View your orders' },
-    { href: '/dashboard', label: 'Dashboard', description: 'Account dashboard' },
-    { href: '/sourcing/request', label: 'Sourcing', description: 'Request custom sourcing' },
+    {
+      href: '/catalog',
+      label: 'Catalog',
+      description: 'Browse product catalog',
+    },
+    {
+      href: '/sourcing/request',
+      label: 'Sourcing',
+      description: 'Request custom sourcing',
+    },
   ];
 
   const adminLinks = [
-    { href: '/admin/dashboard', label: 'Dashboard', description: 'Admin dashboard' },
+    {
+      href: '/admin/dashboard',
+      label: 'Dashboard',
+      description: 'Admin dashboard',
+    },
     { href: '/admin/orders', label: 'Orders', description: 'Manage orders' },
-    { href: '/admin/ledger', label: 'Ledger', description: 'Payment reconciliation' },
-    { href: '/admin/sourcing', label: 'Sourcing', description: 'Manage sourcing requests' },
+    {
+      href: '/admin/ledger',
+      label: 'Ledger',
+      description: 'Payment reconciliation',
+    },
+    {
+      href: '/admin/sourcing',
+      label: 'Sourcing',
+      description: 'Manage sourcing requests',
+    },
   ];
 
   const links = userRole === 'admin' ? adminLinks : buyerLinks;
@@ -35,10 +52,7 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
   const handleMobileMenuToggle = () => {
     const newState = !mobileMenuOpen;
     setMobileMenuOpen(newState);
-    announce(
-      `Navigation menu ${newState ? 'opened' : 'closed'}`,
-      'polite'
-    );
+    announce(`Navigation menu ${newState ? 'opened' : 'closed'}`, 'polite');
   };
 
   const handleMobileMenuClose = () => {
@@ -53,63 +67,110 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
   };
 
   return (
-    <header 
-      className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950"
+    <header
+      className="sticky top-0 z-50 w-full bg-white border-b border-primary-200 shadow-sm"
       role="banner"
     >
-      <div className="container mx-auto h-16 flex items-center justify-between">
+      {/* Skip navigation link for accessibility */}
+      <a
+        href="#main-content"
+        className="skip-nav"
+        aria-label="Skip to main content"
+      >
+        Skip to main content
+      </a>
+
+      <div className="container mx-auto h-16 flex items-center justify-between gap-4">
         {/* Logo */}
-        <Link 
-          href="/" 
-          className="flex items-center gap-2 font-bold text-lg focus-visible:rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 flex-shrink-0"
+        <Link
+          href="/"
+          className="flex items-center gap-2 flex-shrink-0 focus-visible:rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
           aria-label="Smart Supply Sourcing - Go to homepage"
         >
-          <div 
-            className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white text-xs font-bold"
+          <span
+            className="text-blue-600 text-2xl font-bold leading-none select-none"
             aria-hidden="true"
           >
-            SSS
-          </div>
-          <span className="hidden sm:inline text-base md:text-lg">Smart Supply</span>
+            ◇
+          </span>
+          <span className="hidden sm:inline text-blue-600 font-bold text-base md:text-lg whitespace-nowrap">
+            Smart Supply Sourcing
+          </span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav 
-          className="hidden md:flex items-center gap-1" 
-          aria-label="Main navigation"
-          role="navigation"
-        >
-          {links.map((link) => (
-            <Link key={link.href} href={link.href}>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="focus-visible:rounded-md text-sm lg:text-base"
+        {/* Desktop Navigation — center */}
+        {userRole === 'buyer' && (
+          <nav
+            className="hidden md:flex items-center gap-6"
+            aria-label="Main navigation"
+            role="navigation"
+          >
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-primary-700 hover:text-primary-900 font-medium text-sm transition-colors duration-200 focus-visible:rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                 aria-label={link.description}
               >
                 {link.label}
-              </Button>
-            </Link>
-          ))}
-        </nav>
+              </Link>
+            ))}
+          </nav>
+        )}
+
+        {/* Admin Desktop Navigation */}
+        {userRole === 'admin' && (
+          <nav
+            className="hidden md:flex items-center gap-1"
+            aria-label="Admin navigation"
+            role="navigation"
+          >
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="px-3 py-2 text-primary-700 hover:text-primary-900 font-medium text-sm rounded-md hover:bg-primary-50 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                aria-label={link.description}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        )}
+
+        {/* Search bar — center (buyer only, desktop) */}
+        {userRole === 'buyer' && (
+          <div className="hidden md:flex flex-1 max-w-md mx-4">
+            <div className="relative w-full">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-400 pointer-events-none"
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                placeholder="Search products, orders, or quotes..."
+                className="w-full pl-9 pr-4 py-2 text-sm border border-primary-200 rounded-lg bg-primary-50 text-primary-800 placeholder-primary-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors duration-200"
+                aria-label="Search products, orders, or quotes"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Right side actions */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           {userRole === 'buyer' && (
-            <Link 
-              href="/cart" 
-              aria-label={`Shopping cart with ${cartItems} item${cartItems === 1 ? '' : 's'}`}
-            >
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="relative focus-visible:rounded-md h-10 w-10 sm:h-11 sm:w-11"
+            <>
+              {/* Cart icon */}
+              <Link
+                href="/cart"
+                aria-label={`Shopping cart with ${cartItems} item${cartItems === 1 ? '' : 's'}`}
+                className="relative inline-flex items-center justify-center h-10 w-10 rounded-md text-primary-600 hover:text-primary-900 hover:bg-primary-50 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
               >
-                <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
+                <ShoppingCart className="h-5 w-5" aria-hidden="true" />
                 {cartItems > 0 && (
                   <>
-                    <span 
-                      className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold"
+                    <span
+                      className="absolute top-1 right-1 w-4 h-4 bg-accent-500 text-white text-xs rounded-full flex items-center justify-center font-bold leading-none"
                       aria-hidden="true"
                     >
                       {cartItems > 99 ? '99+' : cartItems}
@@ -119,61 +180,96 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
                     </span>
                   </>
                 )}
-              </Button>
-            </Link>
+              </Link>
+
+              {/* Bell / notifications icon */}
+              <button
+                type="button"
+                className="inline-flex items-center justify-center h-10 w-10 rounded-md text-primary-600 hover:text-primary-900 hover:bg-primary-50 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5" aria-hidden="true" />
+              </button>
+
+              {/* User avatar */}
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                aria-label="Go to account dashboard"
+              >
+                <User className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </>
           )}
 
           {/* Mobile menu button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden focus-visible:rounded-md h-10 w-10 sm:h-11 sm:w-11"
+          <button
+            type="button"
+            className="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-md text-primary-600 hover:text-primary-900 hover:bg-primary-50 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             onClick={handleMobileMenuToggle}
             onKeyDown={handleKeyDown}
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-menu"
-            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-label={
+              mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'
+            }
           >
             {mobileMenuOpen ? (
-              <X className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
+              <X className="h-5 w-5" aria-hidden="true" />
             ) : (
-              <Menu className="h-5 w-5 sm:h-6 sm:w-6" aria-hidden="true" />
+              <Menu className="h-5 w-5" aria-hidden="true" />
             )}
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* Mobile Navigation */}
-      {mobileMenuOpen && (
-        <nav 
-          id="mobile-menu"
-          className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 max-h-[calc(100vh-4rem)] overflow-y-auto"
-          aria-label="Mobile navigation"
-          role="navigation"
-          onKeyDown={handleKeyDown}
-        >
-          <div className="container mx-auto py-4 space-y-2">
-            <div className="sr-only" aria-live="polite">
-              Mobile navigation menu opened. Press Escape to close.
-            </div>
-            {links.map((link, index) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={handleMobileMenuClose}
-              >
-                <Button 
-                  variant="ghost" 
-                  className="w-full justify-start focus-visible:rounded-md h-12 text-base"
-                  aria-label={link.description}
-                >
-                  {link.label}
-                </Button>
-              </Link>
-            ))}
+      <nav
+        id="mobile-menu"
+        className={`md:hidden border-t border-primary-200 bg-white overflow-hidden transition-all duration-300 ease-in-out ${
+          mobileMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+        }`}
+        aria-label="Mobile navigation"
+        role="navigation"
+        aria-hidden={!mobileMenuOpen}
+        onKeyDown={handleKeyDown}
+      >
+        <div className="container mx-auto py-4 space-y-1">
+          <div className="sr-only" aria-live="polite">
+            {mobileMenuOpen
+              ? 'Mobile navigation menu opened. Press Escape to close.'
+              : ''}
           </div>
-        </nav>
-      )}
+
+          {/* Mobile search */}
+          {userRole === 'buyer' && (
+            <div className="relative mb-3">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-400 pointer-events-none"
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                placeholder="Search products, orders, or quotes..."
+                className="w-full pl-9 pr-4 py-3 text-sm border border-primary-200 rounded-lg bg-primary-50 text-primary-800 placeholder-primary-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors duration-200"
+                aria-label="Search products, orders, or quotes"
+              />
+            </div>
+          )}
+
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={handleMobileMenuClose}
+              className="flex items-center w-full px-3 py-3 text-primary-700 hover:text-primary-900 hover:bg-primary-50 font-medium text-base rounded-md transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+              aria-label={link.description}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      </nav>
     </header>
   );
 }

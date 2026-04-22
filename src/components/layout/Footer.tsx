@@ -7,134 +7,127 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950 mt-auto">
-      <div className="container mx-auto py-8 sm:py-10 md:py-12 lg:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 mb-8 sm:mb-10 md:mb-12">
-          {/* Company Info */}
+    <footer className="bg-primary-900 text-white mt-auto" role="contentinfo">
+      <div className="container mx-auto py-10 sm:py-12 md:py-16">
+        {/* 4-column grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-10 md:mb-12">
+          {/* Column 1: Brand */}
           <div>
-            <h3 className="font-bold text-base sm:text-lg md:text-xl mb-3 sm:mb-4">Smart Supply Sourcing</h3>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            <div className="flex items-center gap-2 mb-3">
+              <span
+                className="text-white text-2xl font-bold leading-none select-none"
+                aria-hidden="true"
+              >
+                ◇
+              </span>
+              <span className="text-white font-bold text-base">
+                Smart Supply Sourcing
+              </span>
+            </div>
+            <p className="text-primary-400 text-sm leading-relaxed">
               Your trusted B2B industrial equipment marketplace in Kenya.
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* Column 2: Sourcing */}
           <div>
-            <h4 className="font-semibold text-sm sm:text-base md:text-lg mb-3 sm:mb-4">Quick Links</h4>
-            <ul className="space-y-2 text-xs sm:text-sm">
+            <h4 className="font-semibold text-sm uppercase tracking-wider text-primary-300 mb-4">
+              Sourcing
+            </h4>
+            <ul className="space-y-2 text-sm" role="list">
               <li>
-                <Link 
-                  href="/catalog" 
-                  className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 rounded"
+                <Link
+                  href="/catalog"
+                  className="text-primary-400 hover:text-white transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400 rounded"
                 >
                   Catalog
                 </Link>
               </li>
               <li>
-                <Link 
-                  href="/sourcing/request" 
-                  className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 rounded"
+                <Link
+                  href="/sourcing/request"
+                  className="text-primary-400 hover:text-white transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400 rounded"
                 >
-                  Sourcing
+                  Bulk Sourcing
                 </Link>
               </li>
               <li>
-                <Link 
-                  href="/orders" 
-                  className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 rounded"
+                <Link
+                  href="/orders"
+                  className="text-primary-400 hover:text-white transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400 rounded"
                 >
-                  Orders
+                  Global Logistics
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Support */}
+          {/* Column 3: Payment Methods */}
           <div>
-            <h4 className="font-semibold text-sm sm:text-base md:text-lg mb-3 sm:mb-4">Support</h4>
-            <ul className="space-y-2 text-xs sm:text-sm">
+            <h4 className="font-semibold text-sm uppercase tracking-wider text-primary-300 mb-4">
+              Payment Methods
+            </h4>
+            <ul className="space-y-2 text-sm" role="list">
               <li>
-                <a 
-                  href="mailto:support@smartsupply.co.ke" 
-                  className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 rounded"
-                >
-                  Email Support
-                </a>
+                <span className="text-primary-400">M-Pesa Instant</span>
               </li>
               <li>
-                <a 
-                  href="tel:+254712345678" 
-                  className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 rounded"
-                >
-                  Call Us
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#" 
-                  className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 rounded"
-                >
-                  FAQ
-                </a>
+                <span className="text-primary-400">Bank Transfer 1–3 Days</span>
               </li>
             </ul>
           </div>
 
-          {/* Legal */}
+          {/* Column 4: Support */}
           <div>
-            <h4 className="font-semibold text-sm sm:text-base md:text-lg mb-3 sm:mb-4">Legal</h4>
-            <ul className="space-y-2 text-xs sm:text-sm">
+            <h4 className="font-semibold text-sm uppercase tracking-wider text-primary-300 mb-4">
+              Support
+            </h4>
+            <ul className="space-y-2 text-sm" role="list">
               <li>
-                <a 
-                  href="#" 
-                  className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 rounded"
+                <a
+                  href="#"
+                  className="text-primary-400 hover:text-white transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400 rounded"
                 >
-                  Privacy Policy
+                  Help Center
                 </a>
               </li>
               <li>
-                <a 
-                  href="#" 
-                  className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 rounded"
+                <a
+                  href="mailto:sales@smartsupply.co.ke"
+                  className="text-primary-400 hover:text-white transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400 rounded"
+                >
+                  Contact Sales
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className="text-primary-400 hover:text-white transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400 rounded"
                 >
                   Terms of Service
-                </a>
-              </li>
-              <li>
-                <a 
-                  href="#" 
-                  className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 rounded"
-                >
-                  Contact
                 </a>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom */}
-        <div className="border-t border-slate-200 dark:border-slate-800 pt-6 sm:pt-8 md:pt-10 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 text-center sm:text-left">
+        {/* Bottom bar */}
+        <div className="border-t border-primary-700 pt-6 sm:pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-primary-400 text-sm text-center sm:text-left">
             © {currentYear} Smart Supply Sourcing. All rights reserved.
           </p>
-          <div className="flex gap-4 sm:gap-6">
-            <a 
-              href="#" 
-              className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 rounded text-xs sm:text-sm"
+          <div className="flex gap-6">
+            <a
+              href="#"
+              className="text-primary-400 hover:text-white transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400 rounded text-sm"
             >
-              Twitter
+              Privacy Policy
             </a>
-            <a 
-              href="#" 
-              className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 rounded text-xs sm:text-sm"
+            <a
+              href="#"
+              className="text-primary-400 hover:text-white transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-400 rounded text-sm"
             >
-              LinkedIn
-            </a>
-            <a 
-              href="#" 
-              className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 rounded text-xs sm:text-sm"
-            >
-              Facebook
+              Compliance
             </a>
           </div>
         </div>
