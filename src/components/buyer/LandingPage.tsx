@@ -159,11 +159,11 @@ export function LandingPage({
               {recentQuotes.slice(0, 3).map((quote) => {
                 const quoteRef = `SSS-${new Date(quote.createdAt).getFullYear()}-${quote.id.slice(0, 6).toUpperCase()}`;
                 return (
-                  <div
+                  <Link
                     key={quote.id}
-                    className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                    href={`/sourcing/quote/${quote.id}`}
+                    className="block overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5"
                   >
-                    {/* Card content */}
                     <div className="p-6">
                       <div className="mb-4 flex items-start justify-between">
                         <div>
@@ -196,15 +196,12 @@ export function LandingPage({
                         </p>
                       </div>
 
-                      <Link
-                        href={`/sourcing/quote/${quote.id}`}
-                        className="inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700"
-                      >
+                      <span className="inline-flex items-center gap-1 text-sm font-semibold text-blue-600">
                         View Details
                         <span aria-hidden="true">→</span>
-                      </Link>
+                      </span>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
