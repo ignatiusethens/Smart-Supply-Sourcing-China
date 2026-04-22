@@ -371,7 +371,6 @@ export default function OrdersPage() {
         if (data.success && data.data) {
           const list: Order[] = data.data.data ?? data.data ?? [];
           setOrders(list);
-          setFilteredOrders(list);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
