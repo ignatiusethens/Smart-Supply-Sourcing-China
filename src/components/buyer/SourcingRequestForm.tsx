@@ -120,9 +120,14 @@ export function SourcingRequestForm({
         submitFormData.append('attachments', file);
       });
 
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('auth-token')
+          : null;
       const response = await fetch('/api/sourcing/requests', {
         method: 'POST',
         body: submitFormData,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       if (!response.ok) {
