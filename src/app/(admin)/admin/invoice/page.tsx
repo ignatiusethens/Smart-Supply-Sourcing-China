@@ -1,4 +1,5 @@
 'use client';
+import { authFetch } from '@/lib/api/auth-client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -32,7 +33,7 @@ export default function InvoicesPage() {
           params.append('status', statusFilter);
         }
 
-        const response = await fetch(`/api/invoices?${params.toString()}`);
+        const response = await authFetch(`/api/invoices?${params.toString()}`);
         const data = await response.json();
 
         if (data.success) {
@@ -57,11 +58,11 @@ export default function InvoicesPage() {
   );
 
   const statusColors: Record<string, string> = {
-    'draft': 'bg-gray-100 text-gray-800',
-    'sent': 'bg-blue-100 text-blue-800',
+    draft: 'bg-gray-100 text-gray-800',
+    sent: 'bg-blue-100 text-blue-800',
     'pending-payment': 'bg-yellow-100 text-yellow-800',
-    'paid': 'bg-green-100 text-green-800',
-    'cancelled': 'bg-red-100 text-red-800',
+    paid: 'bg-green-100 text-green-800',
+    cancelled: 'bg-red-100 text-red-800',
   };
 
   const formatCurrency = (amount: number) => {
@@ -117,12 +118,24 @@ export default function InvoicesPage() {
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Invoice Number</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Buyer</th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">Amount</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">Action</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                Invoice Number
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                Buyer
+              </th>
+              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
+                Amount
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                Status
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                Date
+              </th>
+              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
+                Action
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -140,16 +153,26 @@ export default function InvoicesPage() {
               </tr>
             ) : (
               filteredInvoices.map((invoice) => (
-                <tr key={invoice.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                <tr
+                  key={invoice.id}
+                  className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-4 py-3 text-sm font-mono font-semibold text-blue-600">
                     {invoice.invoiceNumber}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{invoice.buyerName}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">
+                    {invoice.buyerName}
+                  </td>
                   <td className="px-4 py-3 text-sm text-right font-semibold text-gray-900">
                     {formatCurrency(invoice.totalAmount)}
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <Badge className={statusColors[invoice.status] || 'bg-gray-100 text-gray-800'}>
+                    <Badge
+                      className={
+                        statusColors[invoice.status] ||
+                        'bg-gray-100 text-gray-800'
+                      }
+                    >
                       {invoice.status.replace('-', ' ')}
                     </Badge>
                   </td>
@@ -160,7 +183,9 @@ export default function InvoicesPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => router.push(`/admin/invoice/${invoice.id}`)}
+                      onClick={() =>
+                        router.push(`/admin/invoice/${invoice.id}`)
+                      }
                       className="text-blue-600 hover:text-blue-800"
                     >
                       View

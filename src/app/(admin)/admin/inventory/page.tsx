@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { authFetch } from '@/lib/api/auth-client';
 import {
   AlertTriangle,
   TrendingDown,
@@ -48,7 +49,7 @@ export default function InventoryReportPage() {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(
+      const response = await authFetch(
         `/api/admin/inventory?page=${page}&limit=${limit}`
       );
 
@@ -65,15 +66,14 @@ export default function InventoryReportPage() {
       }
     } catch (err) {
       console.error('Error fetching inventory:', err);
-      setError(
-        err instanceof Error ? err.message : 'An error occurred'
-      );
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setIsLoading(false);
     }
   }, [page, limit]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchInventoryData();
   }, [fetchInventoryData]);
 
@@ -89,10 +89,9 @@ export default function InventoryReportPage() {
       item.needsRestocking ? 'Needs Restocking' : 'Healthy',
     ]);
 
-    const csv = [
-      headers.join(','),
-      ...rows.map((row) => row.join(',')),
-    ].join('\n');
+    const csv = [headers.join(','), ...rows.map((row) => row.join(','))].join(
+      '\n'
+    );
 
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -160,7 +159,9 @@ export default function InventoryReportPage() {
               disabled={isLoading}
               className="gap-2"
             >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+              />
               Refresh
             </Button>
             <Button
@@ -224,9 +225,7 @@ export default function InventoryReportPage() {
                   <div className="text-3xl font-bold text-red-600">
                     {data.health.outOfStockItems.length}
                   </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    Out of Stock
-                  </div>
+                  <div className="text-sm text-gray-600 mt-1">Out of Stock</div>
                 </div>
               </CardContent>
             </Card>
@@ -249,9 +248,7 @@ export default function InventoryReportPage() {
         {/* Inventory Table */}
         <Card>
           <CardHeader>
-            <CardTitle>
-              All Products ({data?.report.total || 0})
-            </CardTitle>
+            <CardTitle>All Products ({data?.report.total || 0})</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -353,9 +350,7 @@ export default function InventoryReportPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() =>
-                          setPage(Math.min(totalPages, page + 1))
-                        }
+                        onClick={() => setPage(Math.min(totalPages, page + 1))}
                         disabled={page === totalPages}
                       >
                         Next

@@ -6,6 +6,7 @@ import { VerificationGallery } from '@/components/admin/VerificationGallery';
 import { ReconciliationActions } from '@/components/admin/ReconciliationActions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { authFetch } from '@/lib/api/auth-client';
 import {
   ArrowLeft,
   Download,
@@ -78,7 +79,9 @@ export default function LedgerPage() {
           params.append('search', searchQuery);
         }
 
-        const response = await fetch(`/api/admin/ledger?${params.toString()}`);
+        const response = await authFetch(
+          `/api/admin/ledger?${params.toString()}`
+        );
         const data = await response.json();
 
         if (data.success) {
@@ -104,7 +107,9 @@ export default function LedgerPage() {
     const fetchPaymentDetail = async () => {
       setIsLoadingDetail(true);
       try {
-        const response = await fetch(`/api/admin/ledger/${selectedPaymentId}`);
+        const response = await authFetch(
+          `/api/admin/ledger/${selectedPaymentId}`
+        );
         const data = await response.json();
 
         if (data.success) {
@@ -124,7 +129,7 @@ export default function LedgerPage() {
 
   const handleReject = async (paymentId: string, reason: string) => {
     try {
-      const response = await fetch('/api/payments/reconcile', {
+      const response = await authFetch('/api/payments/reconcile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -152,7 +157,7 @@ export default function LedgerPage() {
 
   const handleMarkReceived = async (paymentId: string) => {
     try {
-      const response = await fetch('/api/payments/reconcile', {
+      const response = await authFetch('/api/payments/reconcile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -179,7 +184,7 @@ export default function LedgerPage() {
 
   const handleMarkReconciled = async (paymentId: string) => {
     try {
-      const response = await fetch('/api/payments/reconcile', {
+      const response = await authFetch('/api/payments/reconcile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { InventoryHealthWidget } from '@/components/admin/InventoryHealthWidget';
 import { Button } from '@/components/ui/button';
+import { authFetch } from '@/lib/api/auth-client';
 import {
   DollarSign,
   Clock,
@@ -122,7 +123,10 @@ export default function AdminDashboard() {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await fetch('/api/admin/dashboard');
+      const token = localStorage.getItem('auth-token');
+      const response = await authFetch('/api/admin/dashboard', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (!response.ok) throw new Error('Failed to fetch dashboard data');
       const result = await response.json();
       if (result.success) {
@@ -137,8 +141,8 @@ export default function AdminDashboard() {
     }
   }, []);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchDashboardData();
   }, [fetchDashboardData]);
 

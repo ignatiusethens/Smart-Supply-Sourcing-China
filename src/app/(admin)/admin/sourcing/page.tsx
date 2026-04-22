@@ -1,4 +1,5 @@
 'use client';
+import { authFetch } from '@/lib/api/auth-client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -32,7 +33,9 @@ export default function SourcingRequestsPage() {
           params.append('status', statusFilter);
         }
 
-        const response = await fetch(`/api/sourcing/requests?${params.toString()}`);
+        const response = await authFetch(
+          `/api/sourcing/requests?${params.toString()}`
+        );
         const data = await response.json();
 
         if (data.success) {
@@ -52,16 +55,18 @@ export default function SourcingRequestsPage() {
 
   const filteredRequests = requests.filter(
     (request) =>
-      request.itemDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      request.itemDescription
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
       request.buyerName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const statusColors: Record<string, string> = {
-    'submitted': 'bg-blue-100 text-blue-800',
+    submitted: 'bg-blue-100 text-blue-800',
     'under-review': 'bg-yellow-100 text-yellow-800',
-    'quoted': 'bg-purple-100 text-purple-800',
-    'accepted': 'bg-green-100 text-green-800',
-    'rejected': 'bg-red-100 text-red-800',
+    quoted: 'bg-purple-100 text-purple-800',
+    accepted: 'bg-green-100 text-green-800',
+    rejected: 'bg-red-100 text-red-800',
   };
 
   const formatDate = (dateString: string) => {
@@ -77,7 +82,9 @@ export default function SourcingRequestsPage() {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Sourcing Requests</h1>
-        <p className="text-gray-600 mt-2">Manage custom sourcing requests from buyers</p>
+        <p className="text-gray-600 mt-2">
+          Manage custom sourcing requests from buyers
+        </p>
       </div>
 
       {/* Filters */}
@@ -110,12 +117,24 @@ export default function SourcingRequestsPage() {
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Item Description</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Quantity</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Buyer</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">Action</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                Item Description
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                Quantity
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                Buyer
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                Status
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                Date
+              </th>
+              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
+                Action
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -133,14 +152,26 @@ export default function SourcingRequestsPage() {
               </tr>
             ) : (
               filteredRequests.map((request) => (
-                <tr key={request.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                <tr
+                  key={request.id}
+                  className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">
                     {request.itemDescription}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{request.quantity} units</td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{request.buyerName}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">
+                    {request.quantity} units
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-700">
+                    {request.buyerName}
+                  </td>
                   <td className="px-4 py-3 text-sm">
-                    <Badge className={statusColors[request.status] || 'bg-gray-100 text-gray-800'}>
+                    <Badge
+                      className={
+                        statusColors[request.status] ||
+                        'bg-gray-100 text-gray-800'
+                      }
+                    >
                       {request.status.replace('-', ' ')}
                     </Badge>
                   </td>
@@ -151,7 +182,9 @@ export default function SourcingRequestsPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => router.push(`/admin/sourcing/${request.id}`)}
+                      onClick={() =>
+                        router.push(`/admin/sourcing/${request.id}`)
+                      }
                       className="text-blue-600 hover:text-blue-800"
                     >
                       View

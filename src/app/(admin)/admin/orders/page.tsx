@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { authFetch } from '@/lib/api/auth-client';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Search } from 'lucide-react';
@@ -27,7 +28,7 @@ export default function OrdersPage() {
     const fetchOrders = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch('/api/orders');
+        const response = await authFetch('/api/orders');
         const data = await response.json();
 
         if (data.success) {
@@ -54,21 +55,21 @@ export default function OrdersPage() {
   const statusColors: Record<string, string> = {
     'pending-payment': 'bg-yellow-100 text-yellow-800',
     'payment-received': 'bg-blue-100 text-blue-800',
-    'processing': 'bg-purple-100 text-purple-800',
-    'shipped': 'bg-indigo-100 text-indigo-800',
-    'completed': 'bg-green-100 text-green-800',
-    'cancelled': 'bg-red-100 text-red-800',
+    processing: 'bg-purple-100 text-purple-800',
+    shipped: 'bg-indigo-100 text-indigo-800',
+    completed: 'bg-green-100 text-green-800',
+    cancelled: 'bg-red-100 text-red-800',
   };
 
   const paymentStatusColors: Record<string, string> = {
-    'pending': 'bg-gray-100 text-gray-800',
-    'processing': 'bg-purple-100 text-purple-800',
-    'completed': 'bg-green-100 text-green-800',
-    'failed': 'bg-red-100 text-red-800',
+    pending: 'bg-gray-100 text-gray-800',
+    processing: 'bg-purple-100 text-purple-800',
+    completed: 'bg-green-100 text-green-800',
+    failed: 'bg-red-100 text-red-800',
     'pending-reconciliation': 'bg-yellow-100 text-yellow-800',
-    'received': 'bg-blue-100 text-blue-800',
-    'reconciled': 'bg-green-100 text-green-800',
-    'rejected': 'bg-red-100 text-red-800',
+    received: 'bg-blue-100 text-blue-800',
+    reconciled: 'bg-green-100 text-green-800',
+    rejected: 'bg-red-100 text-red-800',
   };
 
   const formatCurrency = (amount: number) => {
@@ -112,13 +113,27 @@ export default function OrdersPage() {
         <table className="w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Reference Code</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Buyer</th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">Amount</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Payment Status</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Order Status</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
-              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">Action</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                Reference Code
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                Buyer
+              </th>
+              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
+                Amount
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                Payment Status
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                Order Status
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
+                Date
+              </th>
+              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
+                Action
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -136,21 +151,36 @@ export default function OrdersPage() {
               </tr>
             ) : (
               filteredOrders.map((order) => (
-                <tr key={order.id} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
+                <tr
+                  key={order.id}
+                  className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-4 py-3 text-sm font-mono font-semibold text-blue-600">
                     {order.referenceCode}
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">{order.buyerName}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700">
+                    {order.buyerName}
+                  </td>
                   <td className="px-4 py-3 text-sm text-right font-semibold text-gray-900">
                     {formatCurrency(order.totalAmount)}
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <Badge className={paymentStatusColors[order.paymentStatus] || 'bg-gray-100 text-gray-800'}>
+                    <Badge
+                      className={
+                        paymentStatusColors[order.paymentStatus] ||
+                        'bg-gray-100 text-gray-800'
+                      }
+                    >
                       {order.paymentStatus.replace('-', ' ')}
                     </Badge>
                   </td>
                   <td className="px-4 py-3 text-sm">
-                    <Badge className={statusColors[order.orderStatus] || 'bg-gray-100 text-gray-800'}>
+                    <Badge
+                      className={
+                        statusColors[order.orderStatus] ||
+                        'bg-gray-100 text-gray-800'
+                      }
+                    >
                       {order.orderStatus.replace('-', ' ')}
                     </Badge>
                   </td>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { authFetch } from '@/lib/api/auth-client';
 import { Invoice } from '@/types';
 import { InvoiceDetail } from '@/components/admin/InvoiceDetail';
 
@@ -91,7 +92,10 @@ export default function InvoiceDetailPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ action: 'add-logistics-notes', logisticsNotes: notes }),
+        body: JSON.stringify({
+          action: 'add-logistics-notes',
+          logisticsNotes: notes,
+        }),
       });
 
       const data = await response.json();
@@ -115,7 +119,10 @@ export default function InvoiceDetailPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ action: 'add-admin-comments', adminComments: comments }),
+        body: JSON.stringify({
+          action: 'add-admin-comments',
+          adminComments: comments,
+        }),
       });
 
       const data = await response.json();

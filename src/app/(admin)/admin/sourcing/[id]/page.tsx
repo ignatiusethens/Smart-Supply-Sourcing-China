@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { SourcingRequest } from '@/types';
+import { authFetch } from '@/lib/api/auth-client';
 import { SourcingRequestDetail } from '@/components/admin/SourcingRequestDetail';
 import { ProFormaInvoiceGenerator } from '@/components/admin/ProFormaInvoiceGenerator';
 
 export default function SourcingRequestDetailPage() {
-  const router = useRouter();
   const params = useParams();
   const requestId = params.id as string;
 
@@ -66,10 +66,12 @@ export default function SourcingRequestDetailPage() {
     }
   };
 
-  const handleGenerateInvoice = async (lineItemsData: any) => {
+  const handleGenerateInvoice = async (
+    lineItemsData: Record<string, unknown>
+  ) => {
     setIsGeneratingInvoice(true);
     try {
-      const response = await fetch('/api/invoices/generate', {
+      const response = await authFetch('/api/invoices/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,7 +92,9 @@ export default function SourcingRequestDetailPage() {
         alert('Invoice generated successfully!');
         setShowInvoiceGenerator(false);
         // Refresh the request to show updated status
-        const refreshResponse = await fetch(`/api/sourcing/requests/${requestId}`);
+        const refreshResponse = await fetch(
+          `/api/sourcing/requests/${requestId}`
+        );
         const refreshData = await refreshResponse.json();
         if (refreshData.success) {
           setRequest(refreshData.data);

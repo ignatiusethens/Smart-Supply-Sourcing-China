@@ -27,6 +27,23 @@ export function removeAuthToken(): void {
 }
 
 /**
+ * Fetch wrapper that automatically includes the auth token
+ */
+export function authFetch(
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const token = getAuthToken();
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+}
+
+/**
  * Create headers with authentication token
  */
 export function createAuthHeaders(): HeadersInit {
@@ -107,7 +124,11 @@ export async function logoutUser(): Promise<{ success: boolean }> {
 /**
  * Get current authenticated user
  */
-export async function getCurrentUser(): Promise<{ success: boolean; user?: User; error?: string }> {
+export async function getCurrentUser(): Promise<{
+  success: boolean;
+  user?: User;
+  error?: string;
+}> {
   const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
     method: 'GET',
     headers: createAuthHeaders(),
@@ -119,7 +140,9 @@ export async function getCurrentUser(): Promise<{ success: boolean; user?: User;
 /**
  * Request password reset
  */
-export async function requestPasswordReset(email: string): Promise<{ success: boolean; message?: string; error?: string }> {
+export async function requestPasswordReset(
+  email: string
+): Promise<{ success: boolean; message?: string; error?: string }> {
   const response = await fetch(`${API_BASE_URL}/api/auth/password-reset`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
