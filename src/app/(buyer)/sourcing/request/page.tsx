@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { BuyerLayout } from '@/components/layout/BuyerLayout';
 import { SourcingRequestForm } from '@/components/buyer/SourcingRequestForm';
 import { SourcingRequest } from '@/types';
+import { useAuthStore } from '@/lib/stores/authStore';
 import {
   CheckCircle,
   FileText,
@@ -15,12 +16,12 @@ import {
 
 export default function SourcingRequestPage() {
   const router = useRouter();
+  const { user } = useAuthStore();
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [submittedRequest, setSubmittedRequest] =
     useState<SourcingRequest | null>(null);
 
-  // TODO: Get actual buyer ID from auth context
-  const buyerId = 'test-buyer-id';
+  const buyerId = user?.id || '';
 
   const handleSuccess = (request: SourcingRequest) => {
     setSubmittedRequest(request);

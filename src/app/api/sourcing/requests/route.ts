@@ -78,8 +78,8 @@ export async function POST(request: NextRequest) {
     const quantity = parseInt(quantityRaw) || 1;
     const targetPrice = targetPriceRaw ? parseFloat(targetPriceRaw) : undefined;
 
-    // Use authenticated user's ID if buyerId not provided
-    const resolvedBuyerId = buyerId || auth.user.id;
+    // Always use the authenticated user's ID from the JWT token
+    const resolvedBuyerId = auth.user.id;
 
     const sourcingRequest = await createSourcingRequest(
       resolvedBuyerId,
