@@ -2,11 +2,16 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { User, UserRole } from '@/types';
 import { SESSION_TIMEOUT, SESSION_WARNING_TIME } from '@/lib/utils/constants';
-import { getAuthToken, setAuthToken, removeAuthToken } from '@/lib/api/auth-client';
+import {
+  getAuthToken,
+  setAuthToken,
+  removeAuthToken,
+} from '@/lib/api/auth-client';
 
 interface AuthState {
   // State
   user: User | null;
+  token: string | null;
   isAuthenticated: boolean;
   sessionStartTime: number | null;
   lastActivityTime: number | null;
@@ -34,6 +39,7 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       user: null,
+      token: null,
       isAuthenticated: false,
       sessionStartTime: null,
       lastActivityTime: null,
@@ -57,6 +63,7 @@ export const useAuthStore = create<AuthState>()(
         setAuthToken(token);
         set({
           user,
+          token,
           isAuthenticated: true,
           sessionStartTime: now,
           lastActivityTime: now,
@@ -69,6 +76,7 @@ export const useAuthStore = create<AuthState>()(
         removeAuthToken();
         set({
           user: null,
+          token: null,
           isAuthenticated: false,
           sessionStartTime: null,
           lastActivityTime: null,
@@ -125,7 +133,11 @@ export const useAuthStore = create<AuthState>()(
 
       isSessionActive: () => {
         const state = get();
-        if (!state.isAuthenticated || !state.lastActivityTime || state.sessionExpired) {
+        if (
+          !state.isAuthenticated ||
+          !state.lastActivityTime ||
+          state.sessionExpired
+        ) {
           return false;
         }
 
@@ -145,6 +157,7 @@ export const useAuthStore = create<AuthState>()(
       name: 'auth-storage',
       partialize: (state) => ({
         user: state.user,
+        token: state.token,
         isAuthenticated: state.isAuthenticated,
         sessionStartTime: state.sessionStartTime,
         lastActivityTime: state.lastActivityTime,

@@ -4,10 +4,24 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 /**
  * Get the stored JWT token from localStorage
+ * Checks both the direct auth-token key and the Zustand persisted storage
  */
 export function getAuthToken(): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('auth-token');
+  // Primary: direct token storage
+  const direct = localStorage.getItem('auth-token');
+  if (direct) return direct;
+  // Fallback: check Zustand persisted auth storage
+  try {
+    const persisted = localStorage.getItem('auth-storage');
+    if (persisted) {
+      const parsed = JSON.parse(persisted);
+      return parsed?.state?.token || null;
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return null;
 }
 
 /**
