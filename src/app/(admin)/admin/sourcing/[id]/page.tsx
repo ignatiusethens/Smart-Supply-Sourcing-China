@@ -92,7 +92,7 @@ export default function SourcingRequestDetailPage() {
         alert('Invoice generated successfully!');
         setShowInvoiceGenerator(false);
         // Refresh the request to show updated status
-        const refreshResponse = await fetch(
+        const refreshResponse = await authFetch(
           `/api/sourcing/requests/${requestId}`
         );
         const refreshData = await refreshResponse.json();

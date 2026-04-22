@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/stores/authStore';
+import { authFetch } from '@/lib/api/auth-client';
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -298,11 +299,10 @@ export default function DashboardPage() {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const uid = localStorage.getItem('userId') || '';
 
         // Fetch dashboard summary
-        const summaryResponse = await fetch(
-          `/api/orders/dashboard/summary?userId=${uid}`
+        const summaryResponse = await authFetch(
+          `/api/orders/dashboard/summary`
         );
         if (!summaryResponse.ok) {
           throw new Error('Failed to fetch dashboard summary');
@@ -314,8 +314,8 @@ export default function DashboardPage() {
         }
 
         // Fetch payment history
-        const paymentsResponse = await fetch(
-          `/api/orders/dashboard/payments?userId=${uid}&page=1&limit=10`
+        const paymentsResponse = await authFetch(
+          `/api/orders/dashboard/payments?page=1&limit=10`
         );
         if (!paymentsResponse.ok) {
           throw new Error('Failed to fetch payment history');

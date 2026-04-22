@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { formatCurrency, formatDate } from '@/lib/utils/formatting';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
+import { authFetch } from '@/lib/api/auth-client';
 
 interface InvoiceItem {
   id: string;
@@ -35,25 +36,25 @@ interface InvoiceListProps {
 }
 
 const statusColors: Record<string, string> = {
-  'pending': 'bg-yellow-100 text-yellow-800',
-  'processing': 'bg-blue-100 text-blue-800',
-  'completed': 'bg-green-100 text-green-800',
-  'failed': 'bg-red-100 text-red-800',
+  pending: 'bg-yellow-100 text-yellow-800',
+  processing: 'bg-blue-100 text-blue-800',
+  completed: 'bg-green-100 text-green-800',
+  failed: 'bg-red-100 text-red-800',
   'pending-reconciliation': 'bg-orange-100 text-orange-800',
-  'received': 'bg-blue-100 text-blue-800',
-  'reconciled': 'bg-green-100 text-green-800',
-  'rejected': 'bg-red-100 text-red-800',
+  received: 'bg-blue-100 text-blue-800',
+  reconciled: 'bg-green-100 text-green-800',
+  rejected: 'bg-red-100 text-red-800',
 };
 
 const statusLabels: Record<string, string> = {
-  'pending': 'Pending',
-  'processing': 'Processing',
-  'completed': 'Completed',
-  'failed': 'Failed',
+  pending: 'Pending',
+  processing: 'Processing',
+  completed: 'Completed',
+  failed: 'Failed',
   'pending-reconciliation': 'Pending Reconciliation',
-  'received': 'Received',
-  'reconciled': 'Reconciled',
-  'rejected': 'Rejected',
+  received: 'Received',
+  reconciled: 'Reconciled',
+  rejected: 'Rejected',
 };
 
 export function InvoiceList({ userId }: InvoiceListProps) {
@@ -67,8 +68,8 @@ export function InvoiceList({ userId }: InvoiceListProps) {
     const fetchInvoices = async () => {
       try {
         setLoading(true);
-        const response = await fetch(
-          `/api/orders/invoices?userId=${userId}&page=${page}&limit=10`
+        const response = await authFetch(
+          `/api/orders/invoices?page=${page}&limit=10`
         );
         if (!response.ok) {
           throw new Error('Failed to fetch invoices');
@@ -92,7 +93,7 @@ export function InvoiceList({ userId }: InvoiceListProps) {
   if (loading) {
     return (
       <div className="space-y-4">
-        {[1, 2, 3].map(i => (
+        {[1, 2, 3].map((i) => (
           <div key={i} className="h-20 bg-gray-200 rounded-lg animate-pulse" />
         ))}
       </div>
@@ -117,7 +118,7 @@ export function InvoiceList({ userId }: InvoiceListProps) {
 
   return (
     <div className="space-y-4">
-      {invoices.map(invoice => (
+      {invoices.map((invoice) => (
         <div
           key={invoice.id}
           className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-shadow"
@@ -129,7 +130,12 @@ export function InvoiceList({ userId }: InvoiceListProps) {
                 <h3 className="text-lg font-semibold text-gray-900">
                   Invoice #{invoice.referenceCode}
                 </h3>
-                <Badge className={statusColors[invoice.paymentStatus] || 'bg-gray-100 text-gray-800'}>
+                <Badge
+                  className={
+                    statusColors[invoice.paymentStatus] ||
+                    'bg-gray-100 text-gray-800'
+                  }
+                >
                   {statusLabels[invoice.paymentStatus] || invoice.paymentStatus}
                 </Badge>
               </div>
@@ -150,7 +156,7 @@ export function InvoiceList({ userId }: InvoiceListProps) {
 
               {/* Actions */}
               <Link href={`/orders/invoices/${invoice.id}`}>
-                <button 
+                <button
                   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 min-h-[44px] min-w-[44px]"
                   aria-label={`View and download invoice ${invoice.referenceCode} for ${formatCurrency(invoice.totalAmount)}`}
                 >
@@ -164,7 +170,10 @@ export function InvoiceList({ userId }: InvoiceListProps) {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <nav className="flex justify-center gap-2 mt-6" aria-label="Invoice pagination">
+        <nav
+          className="flex justify-center gap-2 mt-6"
+          aria-label="Invoice pagination"
+        >
           <button
             onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page === 1}
@@ -173,8 +182,12 @@ export function InvoiceList({ userId }: InvoiceListProps) {
           >
             Previous
           </button>
-          <div className="flex items-center gap-2" role="group" aria-label="Page numbers">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+          <div
+            className="flex items-center gap-2"
+            role="group"
+            aria-label="Page numbers"
+          >
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
               <button
                 key={p}
                 onClick={() => setPage(p)}

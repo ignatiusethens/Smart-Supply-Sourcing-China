@@ -62,7 +62,6 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(userId ? { 'x-user-id': userId } : {}),
         },
         body: JSON.stringify(orderData),
       });

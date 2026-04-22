@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { formatCurrency, formatDate } from '@/lib/utils/formatting';
 import { Badge } from '@/components/ui/badge';
+import { authFetch } from '@/lib/api/auth-client';
 import { PaymentStatus } from '@/types';
 
 interface TransactionItem {
@@ -29,25 +30,25 @@ interface TransactionFilterProps {
 }
 
 const statusColors: Record<PaymentStatus, string> = {
-  'pending': 'bg-yellow-100 text-yellow-800',
-  'processing': 'bg-blue-100 text-blue-800',
-  'completed': 'bg-green-100 text-green-800',
-  'failed': 'bg-red-100 text-red-800',
+  pending: 'bg-yellow-100 text-yellow-800',
+  processing: 'bg-blue-100 text-blue-800',
+  completed: 'bg-green-100 text-green-800',
+  failed: 'bg-red-100 text-red-800',
   'pending-reconciliation': 'bg-orange-100 text-orange-800',
-  'received': 'bg-blue-100 text-blue-800',
-  'reconciled': 'bg-green-100 text-green-800',
-  'rejected': 'bg-red-100 text-red-800',
+  received: 'bg-blue-100 text-blue-800',
+  reconciled: 'bg-green-100 text-green-800',
+  rejected: 'bg-red-100 text-red-800',
 };
 
 const statusLabels: Record<PaymentStatus, string> = {
-  'pending': 'Pending',
-  'processing': 'Processing',
-  'completed': 'Completed',
-  'failed': 'Failed',
+  pending: 'Pending',
+  processing: 'Processing',
+  completed: 'Completed',
+  failed: 'Failed',
   'pending-reconciliation': 'Pending Reconciliation',
-  'received': 'Received',
-  'reconciled': 'Reconciled',
-  'rejected': 'Rejected',
+  received: 'Received',
+  reconciled: 'Reconciled',
+  rejected: 'Rejected',
 };
 
 const statusOptions: { value: PaymentStatus | 'all'; label: string }[] = [
@@ -63,7 +64,9 @@ const statusOptions: { value: PaymentStatus | 'all'; label: string }[] = [
 
 export function TransactionFilter({ userId }: TransactionFilterProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [selectedStatus, setSelectedStatus] = useState<PaymentStatus | 'all'>('all');
+  const [selectedStatus, setSelectedStatus] = useState<PaymentStatus | 'all'>(
+    'all'
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,9 +74,10 @@ export function TransactionFilter({ userId }: TransactionFilterProps) {
     const fetchTransactions = async () => {
       try {
         setLoading(true);
-        const statusParam = selectedStatus === 'all' ? '' : `&status=${selectedStatus}`;
-        const response = await fetch(
-          `/api/orders/dashboard/transactions?userId=${userId}${statusParam}`
+        const statusParam =
+          selectedStatus === 'all' ? '' : `&status=${selectedStatus}`;
+        const response = await authFetch(
+          `/api/orders/dashboard/transactions?${statusParam}`
         );
         if (!response.ok) {
           throw new Error('Failed to fetch transactions');
@@ -96,7 +100,7 @@ export function TransactionFilter({ userId }: TransactionFilterProps) {
   if (loading) {
     return (
       <div className="space-y-4">
-        {[1, 2, 3].map(i => (
+        {[1, 2, 3].map((i) => (
           <div key={i} className="h-20 bg-gray-200 rounded-lg animate-pulse" />
         ))}
       </div>
@@ -115,7 +119,7 @@ export function TransactionFilter({ userId }: TransactionFilterProps) {
     <div className="space-y-6">
       {/* Status Filter */}
       <div className="flex flex-wrap gap-2">
-        {statusOptions.map(option => (
+        {statusOptions.map((option) => (
           <button
             key={option.value}
             onClick={() => setSelectedStatus(option.value)}
@@ -133,7 +137,7 @@ export function TransactionFilter({ userId }: TransactionFilterProps) {
       {/* Transactions List */}
       {transactions.length > 0 ? (
         <div className="space-y-4">
-          {transactions.map(transaction => (
+          {transactions.map((transaction) => (
             <div
               key={transaction.id}
               className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-shadow"
@@ -150,10 +154,14 @@ export function TransactionFilter({ userId }: TransactionFilterProps) {
                     </Badge>
                   </div>
                   <p className="text-sm text-gray-600">
-                    {formatDate(transaction.createdAt)} • {transaction.method === 'mpesa' ? 'M-Pesa' : 'Bank Transfer'}
+                    {formatDate(transaction.createdAt)} •{' '}
+                    {transaction.method === 'mpesa'
+                      ? 'M-Pesa'
+                      : 'Bank Transfer'}
                   </p>
                   <div className="mt-2 text-sm text-gray-600">
-                    {transaction.items.length} item{transaction.items.length !== 1 ? 's' : ''}
+                    {transaction.items.length} item
+                    {transaction.items.length !== 1 ? 's' : ''}
                   </div>
                 </div>
 
@@ -175,7 +183,9 @@ export function TransactionFilter({ userId }: TransactionFilterProps) {
                   <div className="space-y-1">
                     {transaction.items.slice(0, 2).map((item, index) => (
                       <div key={index} className="flex justify-between text-sm">
-                        <span className="text-gray-700">{item.productName}</span>
+                        <span className="text-gray-700">
+                          {item.productName}
+                        </span>
                         <span className="text-gray-600">x{item.quantity}</span>
                       </div>
                     ))}
