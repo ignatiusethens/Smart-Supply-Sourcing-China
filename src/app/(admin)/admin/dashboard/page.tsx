@@ -123,10 +123,7 @@ export default function AdminDashboard() {
     try {
       setIsLoading(true);
       setError(null);
-      const token = localStorage.getItem('auth-token');
-      const response = await authFetch('/api/admin/dashboard', {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+      const response = await authFetch('/api/admin/dashboard');
       if (!response.ok) throw new Error('Failed to fetch dashboard data');
       const result = await response.json();
       if (result.success) {

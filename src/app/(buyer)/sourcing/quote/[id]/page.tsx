@@ -6,6 +6,7 @@ import { BuyerLayout } from '@/components/layout/BuyerLayout';
 import { QuoteReviewCard } from '@/components/buyer/QuoteReviewCard';
 import { Quote, PaymentMethod } from '@/types';
 import { Card } from '@/components/ui/card';
+import { authFetch } from '@/lib/api/auth-client';
 
 export default function QuoteDetailPage() {
   const router = useRouter();
@@ -20,7 +21,7 @@ export default function QuoteDetailPage() {
   useEffect(() => {
     const fetchQuote = async () => {
       try {
-        const response = await fetch(`/api/quotes/${quoteId}`);
+        const response = await authFetch(`/api/quotes/${quoteId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch quote');
         }
@@ -43,7 +44,7 @@ export default function QuoteDetailPage() {
 
     setIsAccepting(true);
     try {
-      const response = await fetch(`/api/quotes/${quoteId}/accept`, {
+      const response = await authFetch(`/api/quotes/${quoteId}/accept`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +60,9 @@ export default function QuoteDetailPage() {
       const result = await response.json();
 
       // Redirect to payment page with order ID
-      router.push(`/checkout?orderId=${result.data.orderId}&referenceCode=${result.data.referenceCode}`);
+      router.push(
+        `/checkout?orderId=${result.data.orderId}&referenceCode=${result.data.referenceCode}`
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to accept quote');
     } finally {

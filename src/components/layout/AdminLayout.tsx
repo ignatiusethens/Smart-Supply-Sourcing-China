@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -10,6 +10,8 @@ import {
   Package,
   LogOut,
 } from 'lucide-react';
+import { authFetch } from '@/lib/api/auth-client';
+import { useAuthStore } from '@/lib/stores/authStore';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -25,10 +27,17 @@ const navItems = [
 export function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const { isAuthenticated, user } = useAuthStore();
+
+  useEffect(() => {
+    if (!isAuthenticated || user?.role !== 'admin') {
+      router.push('/login');
+    }
+  }, [isAuthenticated, user, router]);
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await authFetch('/api/auth/logout', { method: 'POST' });
       router.push('/login');
     } catch {
       router.push('/login');

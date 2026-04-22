@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { FileUploader } from '@/components/buyer/FileUploader';
 import { formatCurrency } from '@/lib/utils/formatting';
 import { Order, Payment } from '@/types';
+import { authFetch } from '@/lib/api/auth-client';
 import {
   Loader2,
   CheckCircle,
@@ -64,7 +65,7 @@ function BankTransferPaymentContent() {
       }
 
       try {
-        const orderResponse = await fetch(`/api/orders/${orderId}`);
+        const orderResponse = await authFetch(`/api/orders/${orderId}`);
         if (!orderResponse.ok) {
           throw new Error('Failed to fetch order');
         }
@@ -121,7 +122,7 @@ function BankTransferPaymentContent() {
         formData.append('files', file);
       });
 
-      const response = await fetch('/api/payments/proof', {
+      const response = await authFetch('/api/payments/proof', {
         method: 'POST',
         body: formData,
       });

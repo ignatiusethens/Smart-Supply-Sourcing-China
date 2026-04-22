@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserOrders, createOrder, getAllOrders } from '@/lib/database/queries/orders';
+import {
+  getUserOrders,
+  createOrder,
+  getAllOrders,
+} from '@/lib/database/queries/orders';
 import { createOrderSchema } from '@/lib/validation/schemas';
 import { ApiResponse, PaginatedResponse } from '@/types/api';
 import { Order } from '@/types';
+import { requireAuth } from '@/lib/auth/middleware';
 
 // Get orders for current user or all orders (admin)
 export async function GET(request: NextRequest) {
@@ -10,8 +15,12 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const userId = searchParams.get('userId');
     const isAdmin = searchParams.get('admin') === 'true';
-    const page = searchParams.get('page') ? Number(searchParams.get('page')) : 1;
-    const limit = searchParams.get('limit') ? Number(searchParams.get('limit')) : 20;
+    const page = searchParams.get('page')
+      ? Number(searchParams.get('page'))
+      : 1;
+    const limit = searchParams.get('limit')
+      ? Number(searchParams.get('limit'))
+      : 20;
 
     let orders: Order[];
     let total: number;
@@ -71,15 +80,11 @@ export async function GET(request: NextRequest) {
 
 // Create new order
 export async function POST(request: NextRequest) {
+  const auth = await requireAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
-    const userId = request.headers.get('x-user-id');
-    if (!userId) {
-      const response: ApiResponse = {
-        success: false,
-        error: 'Unauthorized - user ID required',
-      };
-      return NextResponse.json(response, { status: 401 });
-    }
+    const userId = request.headers.get('x-user-id') || auth.user.id;
 
     const body = await request.json();
 

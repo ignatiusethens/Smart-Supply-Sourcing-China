@@ -6,6 +6,7 @@ import { OrderTimeline } from '@/components/buyer/OrderTimeline';
 import { PaymentInstructions } from '@/components/buyer/PaymentInstructions';
 import { formatCurrency, formatDate } from '@/lib/utils/formatting';
 import Link from 'next/link';
+import { authFetch } from '@/lib/api/auth-client';
 
 interface OrderDetailPageProps {
   params: Promise<{ id: string }>;
@@ -18,7 +19,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
   const [paramId, setParamId] = useState<string>('');
 
   useEffect(() => {
-    params.then(p => setParamId(p.id));
+    params.then((p) => setParamId(p.id));
   }, [params]);
 
   useEffect(() => {
@@ -27,7 +28,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
     const fetchOrder = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/orders/${paramId}`);
+        const response = await authFetch(`/api/orders/${paramId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch order');
         }
@@ -51,7 +52,7 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
       <div className="min-h-screen bg-gray-50 py-12 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="animate-pulse space-y-4">
-            {[1, 2, 3, 4].map(i => (
+            {[1, 2, 3, 4].map((i) => (
               <div key={i} className="h-32 bg-gray-200 rounded-lg" />
             ))}
           </div>
@@ -130,17 +131,22 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
           <div className="lg:col-span-2 space-y-8">
             {/* Order Items */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Order Items
+              </h2>
               <div className="space-y-4">
-                {order.items.map(item => (
+                {order.items.map((item) => (
                   <div
                     key={item.id}
                     className="flex justify-between items-start pb-4 border-b border-gray-200 last:border-b-0"
                   >
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{item.productName}</h3>
+                      <h3 className="font-semibold text-gray-900">
+                        {item.productName}
+                      </h3>
                       <p className="text-sm text-gray-600 mt-1">
-                        Quantity: {item.quantity} × {formatCurrency(item.unitPrice)}
+                        Quantity: {item.quantity} ×{' '}
+                        {formatCurrency(item.unitPrice)}
                       </p>
                       {item.isPreOrder && (
                         <span className="inline-block mt-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded">
@@ -186,29 +192,42 @@ export default function OrderDetailPage({ params }: OrderDetailPageProps) {
 
             {/* Shipping Information */}
             <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Shipping Information</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Shipping Information
+              </h2>
               <div className="space-y-3">
                 <div>
                   <p className="text-sm text-gray-600">Contact Name</p>
-                  <p className="font-semibold text-gray-900">{order.contactName}</p>
+                  <p className="font-semibold text-gray-900">
+                    {order.contactName}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Contact Phone</p>
-                  <p className="font-semibold text-gray-900">{order.contactPhone}</p>
+                  <p className="font-semibold text-gray-900">
+                    {order.contactPhone}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Shipping Address</p>
-                  <p className="font-semibold text-gray-900">{order.shippingAddress}</p>
+                  <p className="font-semibold text-gray-900">
+                    {order.shippingAddress}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">City</p>
-                  <p className="font-semibold text-gray-900">{order.shippingCity}</p>
+                  <p className="font-semibold text-gray-900">
+                    {order.shippingCity}
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Order Timeline */}
-            <OrderTimeline events={order.timeline} currentStatus={order.orderStatus} />
+            <OrderTimeline
+              events={order.timeline}
+              currentStatus={order.orderStatus}
+            />
           </div>
 
           {/* Right Column - Payment Instructions */}

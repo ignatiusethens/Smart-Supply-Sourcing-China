@@ -1,75 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getQuoteById, updateQuoteStatus } from '@/lib/database/queries/quotes';
+import { getPool } from '@/lib/database/connection';
+import { requireAuth } from '@/lib/auth/middleware';
 
-// GET - Get a specific quote
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAuth(request);
+  if (!auth.success) return auth.response;
   try {
     const { id } = await params;
-    const quote = await getQuoteById(id);
-
-    if (!quote) {
+    const pool = getPool();
+    const result = await pool.query(
+      `SELECT q.*, json_agg(json_build_object('id', qli.id, 'description', qli.description, 'quantity', qli.quantity, 'unitPrice', qli.unit_price, 'subtotal', qli.subtotal)) as line_items
+       FROM quotes q LEFT JOIN quote_line_items qli ON q.id = qli.quote_id
+       WHERE q.id = $1 GROUP BY q.id`,
+      [id]
+    );
+    if (result.rows.length === 0) {
       return NextResponse.json(
-        { error: 'Quote not found' },
+        { success: false, error: 'Quote not found' },
         { status: 404 }
       );
     }
-
-    // Check if quote is expired
-    if (quote.status === 'pending' && new Date(quote.validUntil) < new Date()) {
-      await updateQuoteStatus(id, 'expired');
-      quote.status = 'expired';
-    }
-
+    const row = result.rows[0];
     return NextResponse.json({
       success: true,
-      data: quote,
+      data: {
+        id: row.id,
+        sourcingRequestId: row.sourcing_request_id,
+        buyerId: row.buyer_id,
+        totalAmount: parseFloat(row.total_amount),
+        validUntil: row.valid_until,
+        status: row.status,
+        lineItems: row.line_items || [],
+        createdAt: row.created_at,
+      },
     });
   } catch (error) {
     console.error('Error fetching quote:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch quote' },
-      { status: 500 }
-    );
-  }
-}
-
-// PUT - Update quote status
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    const body = await request.json();
-    const { status } = body;
-
-    if (!status) {
-      return NextResponse.json(
-        { error: 'Status is required' },
-        { status: 400 }
-      );
-    }
-
-    const updatedQuote = await updateQuoteStatus(id, status);
-
-    if (!updatedQuote) {
-      return NextResponse.json(
-        { error: 'Quote not found' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: updatedQuote,
-    });
-  } catch (error) {
-    console.error('Error updating quote:', error);
-    return NextResponse.json(
-      { error: 'Failed to update quote' },
+      { success: false, error: 'Failed to fetch quote' },
       { status: 500 }
     );
   }

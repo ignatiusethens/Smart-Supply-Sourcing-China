@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { formatCurrency, formatDate } from '@/lib/utils/formatting';
 import Link from 'next/link';
+import { authFetch } from '@/lib/api/auth-client';
 
 interface InvoiceItem {
   id: string;
@@ -51,7 +52,7 @@ export function InvoiceDownload({ invoiceId }: InvoiceDownloadProps) {
     const fetchInvoice = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/orders/invoices/${invoiceId}`);
+        const response = await authFetch(`/api/orders/invoices/${invoiceId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch invoice');
         }
@@ -77,7 +78,10 @@ export function InvoiceDownload({ invoiceId }: InvoiceDownloadProps) {
     const printWindow = window.open('', '', 'height=600,width=800');
     if (!printWindow) return;
 
-    const subtotal = invoice.items.reduce((sum, item) => sum + item.subtotal, 0);
+    const subtotal = invoice.items.reduce(
+      (sum, item) => sum + item.subtotal,
+      0
+    );
     const tax = subtotal * 0.16; // 16% VAT
     const total = subtotal + tax;
 
@@ -220,7 +224,7 @@ export function InvoiceDownload({ invoiceId }: InvoiceDownloadProps) {
               <tbody>
                 ${invoice.items
                   .map(
-                    item => `
+                    (item) => `
                   <tr>
                     <td>${item.productName}</td>
                     <td class="text-right">${item.quantity}</td>
@@ -290,7 +294,9 @@ export function InvoiceDownload({ invoiceId }: InvoiceDownloadProps) {
       <div className="flex justify-between items-start mb-8 pb-6 border-b border-gray-200">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Invoice</h1>
-          <p className="text-gray-600 mt-1">Reference: {invoice.referenceCode}</p>
+          <p className="text-gray-600 mt-1">
+            Reference: {invoice.referenceCode}
+          </p>
         </div>
         <button
           onClick={handleDownloadPDF}
@@ -313,7 +319,9 @@ export function InvoiceDownload({ invoiceId }: InvoiceDownloadProps) {
           <p className="text-sm text-gray-600 mt-1">{invoice.contactName}</p>
           <p className="text-sm text-gray-600">{invoice.shippingAddress}</p>
           <p className="text-sm text-gray-600">{invoice.shippingCity}</p>
-          <p className="text-sm text-gray-600 mt-2">Phone: {invoice.contactPhone}</p>
+          <p className="text-sm text-gray-600 mt-2">
+            Phone: {invoice.contactPhone}
+          </p>
           <p className="text-sm text-gray-600">Email: {invoice.buyer.email}</p>
         </div>
 
@@ -325,7 +333,9 @@ export function InvoiceDownload({ invoiceId }: InvoiceDownloadProps) {
           <div className="space-y-2 text-sm">
             <div>
               <p className="text-gray-600">Invoice Date</p>
-              <p className="font-semibold text-gray-900">{formatDate(invoice.createdAt)}</p>
+              <p className="font-semibold text-gray-900">
+                {formatDate(invoice.createdAt)}
+              </p>
             </div>
             <div>
               <p className="text-gray-600">Payment Method</p>
@@ -386,7 +396,9 @@ export function InvoiceDownload({ invoiceId }: InvoiceDownloadProps) {
                 }`}
               >
                 <td className="px-4 py-3 text-gray-900">{item.productName}</td>
-                <td className="px-4 py-3 text-right text-gray-900">{item.quantity}</td>
+                <td className="px-4 py-3 text-right text-gray-900">
+                  {item.quantity}
+                </td>
                 <td className="px-4 py-3 text-right text-gray-900">
                   {formatCurrency(item.unitPrice)}
                 </td>

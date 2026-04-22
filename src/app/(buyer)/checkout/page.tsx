@@ -8,6 +8,8 @@ import {
   CheckoutFormData,
 } from '@/components/buyer/CheckoutForm';
 import { useCartStore } from '@/lib/stores/cartStore';
+import { useAuthStore } from '@/lib/stores/authStore';
+import { authFetch } from '@/lib/api/auth-client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
@@ -16,8 +18,16 @@ import { ChevronRight } from 'lucide-react';
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, clearCart } = useCartStore();
+  const { isAuthenticated, user } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Auth guard
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, router]);
 
   // Redirect to cart if empty
   React.useEffect(() => {
@@ -31,8 +41,8 @@ export default function CheckoutPage() {
     setError(null);
 
     try {
-      // Get user ID from session/auth (for now using a placeholder)
-      const userId = localStorage.getItem('userId') || 'demo-user';
+      // Get user ID from auth store
+      const userId = user?.id;
 
       // Prepare order data
       const orderData = {
@@ -48,11 +58,11 @@ export default function CheckoutPage() {
       };
 
       // Create order via API
-      const response = await fetch('/api/orders', {
+      const response = await authFetch('/api/orders', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': userId,
+          ...(userId ? { 'x-user-id': userId } : {}),
         },
         body: JSON.stringify(orderData),
       });

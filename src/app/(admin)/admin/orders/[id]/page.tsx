@@ -27,7 +27,7 @@ export default function OrderDetailPage() {
     const fetchOrderDetail = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/orders/${orderId}`);
+        const response = await authFetch(`/api/orders/${orderId}`);
         const data = await response.json();
 
         if (data.success) {
@@ -64,7 +64,7 @@ export default function OrderDetailPage() {
 
       if (data.success) {
         // Refresh order detail
-        const orderResponse = await fetch(`/api/orders/${orderId}`);
+        const orderResponse = await authFetch(`/api/orders/${orderId}`);
         const orderData = await orderResponse.json();
         if (orderData.success) {
           setOrderDetail(orderData.data);
@@ -95,7 +95,7 @@ export default function OrderDetailPage() {
 
       if (data.success) {
         // Refresh order detail
-        const orderResponse = await fetch(`/api/orders/${orderId}`);
+        const orderResponse = await authFetch(`/api/orders/${orderId}`);
         const orderData = await orderResponse.json();
         if (orderData.success) {
           setOrderDetail(orderData.data);
@@ -126,7 +126,7 @@ export default function OrderDetailPage() {
 
       if (data.success) {
         // Refresh order detail
-        const orderResponse = await fetch(`/api/orders/${orderId}`);
+        const orderResponse = await authFetch(`/api/orders/${orderId}`);
         const orderData = await orderResponse.json();
         if (orderData.success) {
           setOrderDetail(orderData.data);

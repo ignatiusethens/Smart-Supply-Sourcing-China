@@ -5,6 +5,8 @@ import { Order, OrderStatus } from '@/types';
 import { formatCurrency, formatDate } from '@/lib/utils/formatting';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { authFetch } from '@/lib/api/auth-client';
+import { useAuthStore } from '@/lib/stores/authStore';
 import {
   Clock,
   CheckCircle2,
@@ -357,14 +359,23 @@ export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
+
+  // Auth guard
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, router]);
 
   // ── Fetch orders ────────────────────────────────────────────────────────────
   useEffect(() => {
+    if (!isAuthenticated) return;
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        const userId = localStorage.getItem('userId') || '';
-        const response = await fetch(`/api/orders?userId=${userId}`);
+        const response = await authFetch(`/api/orders`);
         if (!response.ok) throw new Error('Failed to fetch orders');
 
         const data = await response.json();
@@ -380,7 +391,7 @@ export default function OrdersPage() {
     };
 
     fetchOrders();
-  }, []);
+  }, [isAuthenticated]);
 
   // ── Filter logic ────────────────────────────────────────────────────────────
   const filteredOrders = useMemo(() => {

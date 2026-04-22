@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/lib/stores/authStore';
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -278,6 +279,15 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<DashboardTab>('invoices');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
+
+  // Auth guard
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, router]);
 
   // Calculate total paid MTD (sum of paid payments)
   const totalPaidMTD = payments

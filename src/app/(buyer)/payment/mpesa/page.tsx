@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { formatCurrency } from '@/lib/utils/formatting';
 import { validatePhoneNumber } from '@/lib/validation/schemas';
 import { Order } from '@/types';
+import { authFetch } from '@/lib/api/auth-client';
 import {
   Loader2,
   CheckCircle,
@@ -52,7 +53,7 @@ function MpesaPaymentContent() {
       }
 
       try {
-        const response = await fetch(`/api/orders/${orderId}`);
+        const response = await authFetch(`/api/orders/${orderId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch order');
         }
@@ -100,7 +101,7 @@ function MpesaPaymentContent() {
     setError(null);
 
     try {
-      const response = await fetch('/api/payments/mpesa', {
+      const response = await authFetch('/api/payments/mpesa', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { authFetch } from '@/lib/api/auth-client';
 import { Invoice } from '@/types';
+
 import { InvoiceDetail } from '@/components/admin/InvoiceDetail';
 
 export default function InvoiceDetailPage() {
@@ -17,7 +18,7 @@ export default function InvoiceDetailPage() {
     const fetchInvoice = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/invoices/${invoiceId}`);
+        const response = await authFetch(`/api/invoices/${invoiceId}`);
         const data = await response.json();
 
         if (data.success) {
@@ -39,7 +40,7 @@ export default function InvoiceDetailPage() {
 
   const handleSend = async (id: string) => {
     try {
-      const response = await fetch(`/api/invoices/${id}`, {
+      const response = await authFetch(`/api/invoices/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +64,7 @@ export default function InvoiceDetailPage() {
 
   const handleMarkAsPaid = async (id: string) => {
     try {
-      const response = await fetch(`/api/invoices/${id}`, {
+      const response = await authFetch(`/api/invoices/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -87,7 +88,7 @@ export default function InvoiceDetailPage() {
 
   const handleAddLogisticsNotes = async (id: string, notes: string) => {
     try {
-      const response = await fetch(`/api/invoices/${id}`, {
+      const response = await authFetch(`/api/invoices/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -114,7 +115,7 @@ export default function InvoiceDetailPage() {
 
   const handleAddAdminComments = async (id: string, comments: string) => {
     try {
-      const response = await fetch(`/api/invoices/${id}`, {
+      const response = await authFetch(`/api/invoices/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

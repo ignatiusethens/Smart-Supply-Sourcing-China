@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSourcingRequestWithQuotes, updateSourcingRequestStatus } from '@/lib/database/queries/sourcing';
+import {
+  getSourcingRequestWithQuotes,
+  updateSourcingRequestStatus,
+} from '@/lib/database/queries/sourcing';
+import { requireAdmin } from '@/lib/auth/middleware';
 
 export async function GET(
   request: NextRequest,
@@ -39,6 +43,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin(request);
+  if (!auth.success) return auth.response;
+
   try {
     const { id } = await params;
     const body = await request.json();

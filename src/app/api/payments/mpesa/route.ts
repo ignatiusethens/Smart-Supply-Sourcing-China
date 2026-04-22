@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getOrderById, updateOrderStatus, updatePaymentStatus } from '@/lib/database/queries/orders';
-import { createPayment, updatePaymentStatus as updatePaymentStatusQuery } from '@/lib/database/queries/payments';
+import {
+  getOrderById,
+  updateOrderStatus,
+  updatePaymentStatus,
+} from '@/lib/database/queries/orders';
+import {
+  createPayment,
+  updatePaymentStatus as updatePaymentStatusQuery,
+} from '@/lib/database/queries/payments';
 import { validatePhoneNumber } from '@/lib/validation/schemas';
+import { requireAuth } from '@/lib/auth/middleware';
 
 interface MpesaPaymentRequest {
   orderId: string;
@@ -26,7 +34,12 @@ interface MpesaPaymentResponse {
  * POST /api/payments/mpesa
  * Initiate M-Pesa STK Push payment
  */
-export async function POST(request: NextRequest): Promise<NextResponse<MpesaPaymentResponse>> {
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse<MpesaPaymentResponse>> {
+  const auth = await requireAuth(request);
+  if (!auth.success) return auth.response as NextResponse<MpesaPaymentResponse>;
+
   try {
     const body: MpesaPaymentRequest = await request.json();
     const { orderId, phoneNumber } = body;
@@ -66,7 +79,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<MpesaPaym
     }
 
     // Check if order is already paid
-    if (order.paymentStatus === 'completed' || order.paymentStatus === 'reconciled') {
+    if (
+      order.paymentStatus === 'completed' ||
+      order.paymentStatus === 'reconciled'
+    ) {
       return NextResponse.json(
         {
           success: false,
@@ -88,7 +104,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<MpesaPaym
     }
 
     // Check M-Pesa limit
-    const MPESA_LIMIT = parseInt(process.env.NEXT_PUBLIC_MPESA_LIMIT || '300000');
+    const MPESA_LIMIT = parseInt(
+      process.env.NEXT_PUBLIC_MPESA_LIMIT || '300000'
+    );
     if (order.totalAmount > MPESA_LIMIT) {
       return NextResponse.json(
         {
@@ -103,7 +121,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<MpesaPaym
     const payment = await createPayment(orderId, order.totalAmount, 'mpesa');
 
     // Update order status to processing
-    await updateOrderStatus(orderId, 'pending-payment', undefined, 'M-Pesa payment initiated');
+    await updateOrderStatus(
+      orderId,
+      'pending-payment',
+      undefined,
+      'M-Pesa payment initiated'
+    );
     await updatePaymentStatusQuery(payment.id, 'processing');
 
     // In production, this would call the Safaricom Daraja API
@@ -119,7 +142,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<MpesaPaym
     return NextResponse.json(
       {
         success: true,
-        message: 'M-Pesa STK Push initiated. Please check your phone for the payment prompt.',
+        message:
+          'M-Pesa STK Push initiated. Please check your phone for the payment prompt.',
         data: {
           paymentId: payment.id,
           orderId: order.id,
@@ -136,7 +160,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<MpesaPaym
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to initiate M-Pesa payment',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to initiate M-Pesa payment',
       },
       { status: 500 }
     );
@@ -180,7 +207,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to get payment status',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get payment status',
       },
       { status: 500 }
     );

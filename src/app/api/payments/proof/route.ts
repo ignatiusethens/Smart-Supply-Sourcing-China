@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getOrderById, updatePaymentStatus as updateOrderPaymentStatus } from '@/lib/database/queries/orders';
-import { getPaymentByOrderId, addPaymentProof, updatePaymentStatus } from '@/lib/database/queries/payments';
+import {
+  getOrderById,
+  updatePaymentStatus as updateOrderPaymentStatus,
+} from '@/lib/database/queries/orders';
+import {
+  getPaymentByOrderId,
+  addPaymentProof,
+  updatePaymentStatus,
+} from '@/lib/database/queries/payments';
 import { uploadToCloudinary } from '@/lib/cloudinary/upload';
+import { requireAuth } from '@/lib/auth/middleware';
 
 interface PaymentProofResponse {
   success: boolean;
@@ -22,7 +30,12 @@ interface PaymentProofResponse {
  * POST /api/payments/proof
  * Upload payment proof files to Cloudinary and store in database
  */
-export async function POST(request: NextRequest): Promise<NextResponse<PaymentProofResponse>> {
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse<PaymentProofResponse>> {
+  const auth = await requireAuth(request);
+  if (!auth.success) return auth.response as NextResponse<PaymentProofResponse>;
+
   try {
     const formData = await request.formData();
     const orderId = formData.get('orderId') as string;
@@ -62,7 +75,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<PaymentPr
     }
 
     // Get or create payment
-    let payment = await getPaymentByOrderId(orderId);
+    const payment = await getPaymentByOrderId(orderId);
     if (!payment) {
       return NextResponse.json(
         {
@@ -105,7 +118,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<PaymentPr
     for (const file of files) {
       try {
         // Upload to Cloudinary
-        const cloudinaryResult = await uploadToCloudinary(file, 'payment-proofs');
+        const cloudinaryResult = await uploadToCloudinary(
+          file,
+          'payment-proofs'
+        );
 
         // Store in database
         const proof = await addPaymentProof(
@@ -157,7 +173,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<PaymentPr
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to upload payment proof',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to upload payment proof',
       },
       { status: 500 }
     );
@@ -200,7 +219,10 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to delete payment proof',
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to delete payment proof',
       },
       { status: 500 }
     );
