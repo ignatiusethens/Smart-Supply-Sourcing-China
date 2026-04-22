@@ -173,20 +173,23 @@ export function SourcingRequestForm({
             {/* ── Item Specifications ── */}
             <section aria-labelledby="item-specs-heading">
               <div className="flex items-center justify-between mb-4">
-                <h2
-                  id="item-specs-heading"
-                  className="text-base font-semibold text-slate-800 uppercase tracking-wide"
-                >
-                  Item Specifications
-                </h2>
+                <div className="flex items-center gap-3">
+                  <div className="w-1 h-5 rounded-full bg-blue-600" />
+                  <h2
+                    id="item-specs-heading"
+                    className="text-base font-semibold text-slate-800 uppercase tracking-wide"
+                  >
+                    Item Specifications
+                  </h2>
+                </div>
                 <button
                   type="button"
                   onClick={addItem}
-                  className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                  className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200"
                   aria-label="Add another item"
                 >
                   <Plus className="w-4 h-4" aria-hidden="true" />
-                  Add Another Item
+                  Add Item
                 </button>
               </div>
 
@@ -194,7 +197,7 @@ export function SourcingRequestForm({
                 {items.map((item, index) => (
                   <div
                     key={item.id}
-                    className="border border-slate-200 rounded-lg p-4 space-y-3 bg-slate-50"
+                    className="border-l-4 border-l-blue-500 border border-slate-200 rounded-lg p-4 space-y-3 bg-slate-50"
                   >
                     {items.length > 1 && (
                       <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
@@ -332,12 +335,15 @@ export function SourcingRequestForm({
 
             {/* ── Logistics & Delivery ── */}
             <section aria-labelledby="logistics-heading">
-              <h2
-                id="logistics-heading"
-                className="text-base font-semibold text-slate-800 uppercase tracking-wide mb-4"
-              >
-                Logistics &amp; Delivery
-              </h2>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-1 h-5 rounded-full bg-orange-500" />
+                <h2
+                  id="logistics-heading"
+                  className="text-base font-semibold text-slate-800 uppercase tracking-wide"
+                >
+                  Logistics &amp; Delivery
+                </h2>
+              </div>
 
               <div className="space-y-4">
                 <div>
@@ -445,12 +451,15 @@ export function SourcingRequestForm({
 
             {/* ── Compliance & Quality ── */}
             <section aria-labelledby="compliance-heading">
-              <h2
-                id="compliance-heading"
-                className="text-base font-semibold text-slate-800 uppercase tracking-wide mb-4"
-              >
-                Compliance &amp; Quality
-              </h2>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-1 h-5 rounded-full bg-green-500" />
+                <h2
+                  id="compliance-heading"
+                  className="text-base font-semibold text-slate-800 uppercase tracking-wide"
+                >
+                  Compliance &amp; Quality
+                </h2>
+              </div>
 
               <div className="space-y-3">
                 <div>
@@ -483,10 +492,12 @@ export function SourcingRequestForm({
             className="bg-slate-900 text-white p-6 md:p-8 flex flex-col gap-6"
             aria-label="Request Summary"
           >
-            <h2 className="text-lg font-bold text-white">Request Summary</h2>
+            <h2 className="text-lg font-bold text-white border-b border-slate-700 pb-4">
+              Request Summary
+            </h2>
 
             {/* Summary details */}
-            <div className="space-y-3 text-sm">
+            <div className="space-y-3 text-sm bg-slate-800 rounded-lg p-4">
               <div className="flex justify-between items-center">
                 <span className="text-slate-400">Items for Sourcing</span>
                 <span className="font-semibold text-white">
@@ -499,11 +510,13 @@ export function SourcingRequestForm({
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-slate-400">Sourcing Fee</span>
-                <span className="font-semibold text-white">50.00</span>
+                <span className="font-semibold text-green-400">KES 50.00</span>
               </div>
               <div className="border-t border-slate-700 pt-3 flex justify-between items-center">
                 <span className="text-slate-400">Estimated Total</span>
-                <span className="font-bold text-blue-400 text-base">TBD</span>
+                <span className="font-bold text-blue-400 text-base">
+                  TBD after quote
+                </span>
               </div>
             </div>
 
