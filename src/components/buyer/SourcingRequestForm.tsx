@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FileUploader } from './FileUploader';
 import { SourcingRequest } from '@/types';
+import { authFetch } from '@/lib/api/auth-client';
 import { Plus, Plane, Ship } from 'lucide-react';
 
 interface SourcingRequestFormProps {
@@ -124,7 +125,7 @@ export function SourcingRequestForm({
         typeof window !== 'undefined'
           ? localStorage.getItem('auth-token')
           : null;
-      const response = await fetch('/api/sourcing/requests', {
+      const response = await authFetch('/api/sourcing/requests', {
         method: 'POST',
         body: submitFormData,
         headers: token ? { Authorization: `Bearer ${token}` } : {},

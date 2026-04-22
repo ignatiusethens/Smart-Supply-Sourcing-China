@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { BuyerLayout } from '@/components/layout/BuyerLayout';
 import { SourcingRequestForm } from '@/components/buyer/SourcingRequestForm';
@@ -16,10 +16,17 @@ import {
 
 export default function SourcingRequestPage() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [submittedRequest, setSubmittedRequest] =
     useState<SourcingRequest | null>(null);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, router]);
 
   const buyerId = user?.id || '';
 
