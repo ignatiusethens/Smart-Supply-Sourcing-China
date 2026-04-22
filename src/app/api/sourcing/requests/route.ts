@@ -4,6 +4,7 @@ import {
   createSourcingRequest,
 } from '@/lib/database/queries/sourcing';
 import { requireAuth } from '@/lib/auth/middleware';
+import { sendSourcingRequestNotification } from '@/lib/email/sendEmail';
 
 export async function GET(request: NextRequest) {
   try {
@@ -94,6 +95,17 @@ export async function POST(request: NextRequest) {
       },
       []
     );
+
+    // Send email notification to admin (non-blocking)
+    void sendSourcingRequestNotification({
+      buyerName: auth.user.name,
+      buyerEmail: auth.user.email,
+      itemDescription,
+      quantity,
+      deliveryLocation: deliveryLocation || '',
+      timeline: timeline || '',
+      requestId: sourcingRequest.id,
+    });
 
     return NextResponse.json(
       { success: true, data: sourcingRequest },
