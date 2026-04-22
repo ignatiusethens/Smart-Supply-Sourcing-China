@@ -44,8 +44,7 @@ export function LandingPage({
 
           {/* Headline */}
           <h1 className="mb-6 max-w-3xl text-4xl font-extrabold leading-tight text-white sm:text-5xl lg:text-6xl">
-            Sourcing Industrial Goods,{' '}
-            <span className="text-blue-500">Simplified.</span>
+            Sourcing Goods, <span className="text-blue-500">Simplified.</span>
           </h1>
 
           {/* Subtitle */}
