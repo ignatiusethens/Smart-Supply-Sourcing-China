@@ -87,30 +87,40 @@ export function LandingPage({
                 icon: '📦',
                 title: 'B2B Sourcing',
                 description: 'Custom RFQs & Quotes',
+                color: 'bg-blue-50 border-blue-100',
+                iconBg: 'bg-blue-100',
               },
               {
                 icon: '📄',
                 title: 'Pro-forma Invoices',
                 description: 'Download Bank Details',
+                color: 'bg-purple-50 border-purple-100',
+                iconBg: 'bg-purple-100',
               },
               {
                 icon: '🚚',
                 title: 'Global Logistics',
                 description: 'Track Cargo Status',
+                color: 'bg-orange-50 border-orange-100',
+                iconBg: 'bg-orange-100',
               },
               {
                 icon: '🛡️',
                 title: 'Verified Vendors',
                 description: 'Certified Quality Control',
+                color: 'bg-green-50 border-green-100',
+                iconBg: 'bg-green-100',
               },
             ].map((feature) => (
               <div
                 key={feature.title}
-                className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+                className={`flex items-center gap-3 rounded-lg border p-4 shadow-sm ${feature.color}`}
               >
-                <span className="text-xl shrink-0" aria-hidden="true">
-                  {feature.icon}
-                </span>
+                <div
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xl ${feature.iconBg}`}
+                >
+                  <span aria-hidden="true">{feature.icon}</span>
+                </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-800">
                     {feature.title}
@@ -162,7 +172,7 @@ export function LandingPage({
                   <Link
                     key={quote.id}
                     href={`/sourcing/quote/${quote.id}`}
-                    className="block overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5"
+                    className="block overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md hover:border-blue-300 hover:-translate-y-0.5 border-l-4 border-l-blue-500"
                   >
                     <div className="p-6">
                       <div className="mb-4 flex items-start justify-between">
@@ -191,7 +201,7 @@ export function LandingPage({
                             }
                           )}
                         </p>
-                        <p className="text-2xl font-bold text-gray-900">
+                        <p className="text-2xl font-bold text-blue-600">
                           KES {quote.totalAmount.toLocaleString()}
                         </p>
                       </div>
@@ -220,6 +230,12 @@ export function LandingPage({
           {/* Section header */}
           <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="h-1 w-8 rounded-full bg-blue-600" />
+                <span className="text-xs font-semibold uppercase tracking-widest text-blue-600">
+                  Live Stock
+                </span>
+              </div>
               <h2 className="text-2xl font-bold text-gray-900">
                 Featured Inventory
               </h2>
@@ -275,7 +291,7 @@ export function LandingPage({
                   </div>
 
                   {/* Product info */}
-                  <div className="p-4">
+                  <div className="p-4 border-t-2 border-blue-500">
                     <div className="mb-3">
                       <h3 className="font-semibold leading-snug text-gray-900 group-hover:text-blue-600 line-clamp-2">
                         {product.name}
@@ -285,7 +301,7 @@ export function LandingPage({
                     <div className="flex items-end justify-between">
                       <div>
                         <p className="text-xs text-gray-500">Price from</p>
-                        <p className="text-lg font-bold text-gray-900">
+                        <p className="text-lg font-bold text-blue-600">
                           KES {product.price.toLocaleString()}
                         </p>
                       </div>
@@ -423,13 +439,13 @@ export function LandingPage({
                 <span className="text-lg font-bold">Smart Supply Sourcing</span>
               </div>
               <p className="text-sm text-gray-400 mb-4">
-                Leading B2B industrial equipment sourcing platform connecting
-                Kenyan businesses with global suppliers.
+                Leading B2B equipment sourcing platform connecting Kenyan
+                businesses with global suppliers.
               </p>
               <div className="text-sm text-gray-400">
                 <p>Nairobi, Kenya</p>
                 <p>+254 700 000 000</p>
-                <p>info@smartsupply.co.ke</p>
+                <p>smartsupplysourcing@gmail.com</p>
               </div>
             </div>
 
@@ -559,7 +575,8 @@ export function LandingPage({
 
           <div className="mt-8 pt-8 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center">
             <p className="text-sm text-gray-400">
-              © 2024 Smart Supply Sourcing. All rights reserved.
+              © {new Date().getFullYear()} Smart Supply Sourcing. All rights
+              reserved.
             </p>
             <div className="flex space-x-6 mt-4 sm:mt-0">
               <Link
