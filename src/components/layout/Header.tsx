@@ -29,11 +29,6 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
       label: 'Inventory',
       description: 'Browse product inventory',
     },
-    {
-      href: '/cart',
-      label: 'Check Out',
-      description: 'Go to checkout',
-    },
   ];
 
   const adminLinks = [
@@ -278,12 +273,12 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
         onKeyDown={handleKeyDown}
       >
         <div className="container mx-auto py-4 space-y-1">
+          po
           <div className="sr-only" aria-live="polite">
             {mobileMenuOpen
               ? 'Mobile navigation menu opened. Press Escape to close.'
               : ''}
           </div>
-
           {/* Mobile search */}
           {userRole === 'buyer' && (
             <div className="relative mb-3">
@@ -299,7 +294,6 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
               />
             </div>
           )}
-
           {links.map((link) => (
             <Link
               key={link.href}
