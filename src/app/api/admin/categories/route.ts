@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/middleware';
 import { getPool } from '@/lib/database/connection';
 
-// GET /api/admin/categories — list all categories
+// GET /api/admin/categories — list all categories (public, no auth needed)
 export async function GET() {
   try {
     const db = getPool();
@@ -43,7 +43,7 @@ export async function GET() {
 // POST /api/admin/categories — create a new category
 export async function POST(request: NextRequest) {
   const auth = await requireAdmin(request);
-  if (auth) return auth;
+  if (!auth.success) return auth.response;
 
   try {
     const { label } = await request.json();
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ success: true, data: result.rows[0] });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to create category' },
       { status: 500 }

@@ -8,7 +8,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = await requireAdmin(request);
-  if (auth) return auth;
+  if (!auth.success) return auth.response;
 
   try {
     const { id } = await params;
@@ -48,13 +48,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = await requireAdmin(request);
-  if (auth) return auth;
+  if (!auth.success) return auth.response;
 
   try {
     const { id } = await params;
     const db = getPool();
 
-    // Null out products that used this category
     const cat = await db.query(
       'SELECT slug FROM product_categories WHERE id = $1',
       [id]
