@@ -8,6 +8,8 @@ import { requireAdmin } from '@/lib/auth/middleware';
 import { sendQuoteNotificationToBuyer } from '@/lib/email/sendEmail';
 import { getPool } from '@/lib/database/connection';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   const auth = await requireAdmin(request);
   if (!auth.success) return auth.response;
