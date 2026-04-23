@@ -430,7 +430,7 @@ export async function getSourcingRequestWithQuotes(
       buyerId: q.buyer_id as string,
       totalAmount: parseFloat(q.total_amount),
       validUntil: q.valid_until as string,
-      status: q.status as string,
+      status: q.status as 'pending' | 'accepted' | 'rejected' | 'expired',
       orderId: q.order_id as string,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       lineItems: ((q.line_items as any[]) || []).map((li: any) => ({
