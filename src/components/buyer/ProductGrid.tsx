@@ -4,7 +4,10 @@ import React, { useRef, useEffect } from 'react';
 import { Product } from '@/types';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { useCartStore } from '@/lib/stores/cartStore';
-import { useAnnouncer, useKeyboardNavigation } from '@/lib/hooks/useAccessibility';
+import {
+  useAnnouncer,
+  useKeyboardNavigation,
+} from '@/lib/hooks/useAccessibility';
 
 interface ProductGridProps {
   products: Product[];
@@ -24,24 +27,18 @@ export function ProductGrid({
   const gridRef = useRef<HTMLDivElement>(null);
 
   const handleAddToCart = (productId: string, quantity: number) => {
-    const product = products.find(p => p.id === productId);
+    const product = products.find((p) => p.id === productId);
     if (product) {
       addItem(product, quantity);
-      announce(
-        `Added ${quantity} ${product.name} to cart`,
-        'polite'
-      );
+      announce(`Added ${quantity} ${product.name} to cart`, 'polite');
     }
   };
 
   const handleRequestQuote = (productId: string) => {
-    const product = products.find(p => p.id === productId);
+    const product = products.find((p) => p.id === productId);
     if (product && onRequestQuote) {
       onRequestQuote(productId);
-      announce(
-        `Quote requested for ${product.name}`,
-        'polite'
-      );
+      announce(`Quote requested for ${product.name}`, 'polite');
     }
   };
 
@@ -56,7 +53,7 @@ export function ProductGrid({
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
       const currentCard = target.closest('[data-product-card]') as HTMLElement;
-      
+
       if (!currentCard) return;
 
       const currentIndex = productCards.indexOf(currentCard);
@@ -69,24 +66,35 @@ export function ProductGrid({
           break;
         case 'ArrowLeft':
           e.preventDefault();
-          nextIndex = (currentIndex - 1 + productCards.length) % productCards.length;
+          nextIndex =
+            (currentIndex - 1 + productCards.length) % productCards.length;
           break;
         case 'ArrowDown':
           if (variant === 'grid') {
             e.preventDefault();
             // Calculate columns based on screen size
-            const cols = window.innerWidth >= 1920 ? 4 : 
-                        window.innerWidth >= 1024 ? 3 : 
-                        window.innerWidth >= 768 ? 2 : 1;
+            const cols =
+              window.innerWidth >= 1920
+                ? 4
+                : window.innerWidth >= 1024
+                  ? 3
+                  : window.innerWidth >= 768
+                    ? 2
+                    : 1;
             nextIndex = Math.min(currentIndex + cols, productCards.length - 1);
           }
           break;
         case 'ArrowUp':
           if (variant === 'grid') {
             e.preventDefault();
-            const cols = window.innerWidth >= 1920 ? 4 : 
-                        window.innerWidth >= 1024 ? 3 : 
-                        window.innerWidth >= 768 ? 2 : 1;
+            const cols =
+              window.innerWidth >= 1920
+                ? 4
+                : window.innerWidth >= 1024
+                  ? 3
+                  : window.innerWidth >= 768
+                    ? 2
+                    : 1;
             nextIndex = Math.max(currentIndex - cols, 0);
           }
           break;
@@ -102,7 +110,9 @@ export function ProductGrid({
 
       if (nextIndex !== currentIndex) {
         const nextCard = productCards[nextIndex];
-        const focusableElement = nextCard.querySelector('button, a, [tabindex="0"]') as HTMLElement;
+        const focusableElement = nextCard.querySelector(
+          'button, a, [tabindex="0"]'
+        ) as HTMLElement;
         if (focusableElement) {
           focusableElement.focus();
         }
@@ -110,7 +120,7 @@ export function ProductGrid({
     };
 
     gridRef.current.addEventListener('keydown', handleKeyDown);
-    
+
     return () => {
       if (gridRef.current) {
         gridRef.current.removeEventListener('keydown', handleKeyDown);
@@ -123,13 +133,14 @@ export function ProductGrid({
   // Tablet (768px): 2 columns
   // Desktop (1024px): 3 columns
   // Large Desktop (1920px): 4 columns
-  const gridClasses = variant === 'grid'
-    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 desktop:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6'
-    : 'space-y-3 sm:space-y-4 md:space-y-5';
+  const gridClasses =
+    variant === 'grid'
+      ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 desktop:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6'
+      : 'space-y-3 sm:space-y-4 md:space-y-5';
 
   if (isLoading) {
     return (
-      <div 
+      <div
         className={gridClasses}
         role="status"
         aria-label="Loading products"
@@ -138,7 +149,7 @@ export function ProductGrid({
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
-            className="bg-slate-200 dark:bg-slate-800 rounded-lg h-64 sm:h-72 md:h-80 animate-pulse"
+            className="bg-gray-100 rounded-2xl h-72 animate-pulse"
             aria-hidden="true"
           />
         ))}
@@ -149,12 +160,12 @@ export function ProductGrid({
 
   if (products.length === 0) {
     return (
-      <div 
+      <div
         className="text-center py-12 px-4 sm:py-16 md:py-20"
         role="status"
         aria-live="polite"
       >
-        <p className="text-slate-600 dark:text-slate-400 text-base sm:text-lg md:text-xl">
+        <p className="text-gray-500 text-base sm:text-lg">
           No products found. Try adjusting your filters.
         </p>
       </div>
@@ -170,15 +181,13 @@ export function ProductGrid({
       aria-describedby="product-grid-instructions"
     >
       <div id="product-grid-instructions" className="sr-only">
-        Use arrow keys to navigate between products. Press Enter or Space to interact with buttons.
-        {variant === 'grid' && ' Use up and down arrows to navigate between rows.'}
+        Use arrow keys to navigate between products. Press Enter or Space to
+        interact with buttons.
+        {variant === 'grid' &&
+          ' Use up and down arrows to navigate between rows.'}
       </div>
       {products.map((product, index) => (
-        <div
-          key={product.id}
-          data-product-card
-          data-product-index={index}
-        >
+        <div key={product.id} data-product-card data-product-index={index}>
           <ProductCard
             product={product}
             variant={variant}

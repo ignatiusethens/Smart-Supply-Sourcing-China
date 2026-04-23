@@ -2,11 +2,11 @@
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Product } from '@/types';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils/formatting';
 import { cn } from '@/lib/utils/cn';
+import { ShoppingCart, FileText } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -28,32 +28,27 @@ function getAvailabilityBadge(availability: string) {
     case 'in-stock':
       return {
         label: 'In Stock',
-        className: 'bg-success-50 text-success-700 border border-success-500',
+        className: 'bg-green-50 text-green-700 border border-green-200',
       };
     case 'pre-order':
       return {
         label: 'Pre-Order',
-        className: 'bg-warning-50 text-warning-700 border border-warning-500',
+        className: 'bg-amber-50 text-amber-700 border border-amber-200',
       };
     case 'out-of-stock':
       return {
         label: 'Out of Stock',
-        className: 'bg-error-50 text-error-700 border border-error-500',
+        className: 'bg-red-50 text-red-600 border border-red-200',
       };
     default:
-      return {
-        label: availability,
-        className: 'bg-primary-100 text-primary-700',
-      };
+      return { label: availability, className: 'bg-gray-100 text-gray-600' };
   }
 }
 
-// Whether the product supports M-Pesa (in-stock items)
 function supportsMpesa(availability: string) {
   return availability === 'in-stock';
 }
 
-// Whether the product supports Bank transfer (pre-order or in-stock)
 function supportsBank(availability: string) {
   return availability === 'in-stock' || availability === 'pre-order';
 }
@@ -65,239 +60,210 @@ export function ProductCard({
   variant = 'grid',
 }: ProductCardProps) {
   const [quantity] = React.useState(1);
-
   const isOutOfStock = product.availability === 'out-of-stock';
   const categoryLabel = CATEGORY_LABELS[product.category] ?? product.category;
   const availBadge = getAvailabilityBadge(product.availability);
 
   if (variant === 'list') {
     return (
-      <Card className="flex flex-col sm:flex-row overflow-hidden hover:shadow-md transition-shadow focus-within:ring-2 focus-within:ring-blue-500">
-        <div className="relative w-full sm:w-32 h-48 sm:h-32 flex-shrink-0">
+      <div className="flex flex-col sm:flex-row overflow-hidden bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 focus-within:ring-2 focus-within:ring-[#1a6b50]">
+        {/* Image */}
+        <div className="relative w-full sm:w-36 h-44 sm:h-auto flex-shrink-0 bg-gray-100 rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none overflow-hidden">
           {product.imageUrls[0] ? (
             <Image
               src={product.imageUrls[0]}
-              alt={`${product.name} - ${categoryLabel} product image`}
+              alt={`${product.name} - ${categoryLabel}`}
               fill
               className="object-cover"
+              unoptimized
             />
           ) : (
-            <div
-              className="w-full h-full bg-primary-100 flex items-center justify-center"
-              role="img"
-              aria-label={`No image available for ${product.name}`}
-            >
-              <span className="text-primary-400 text-sm" aria-hidden="true">
-                No image
-              </span>
+            <div className="w-full h-full flex items-center justify-center">
+              <span className="text-4xl opacity-20">📦</span>
             </div>
           )}
         </div>
-        <div className="flex-1 flex flex-col">
-          <CardContent className="flex-1 pt-4 sm:pt-3 pb-2">
-            <div className="flex items-start justify-between gap-2 mb-1">
-              <span className="text-xs font-semibold uppercase tracking-wider text-primary-500">
-                {categoryLabel}
-              </span>
-              <span
-                className={cn(
-                  'text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap',
-                  availBadge.className
-                )}
-                aria-label={`Product availability: ${availBadge.label}`}
-              >
-                {availBadge.label}
-              </span>
-            </div>
-            <h3 className="font-semibold text-base text-primary-800 mb-1">
-              {product.name}
-            </h3>
-            <p className="text-xs text-primary-500 line-clamp-2">
-              {product.description}
-            </p>
-          </CardContent>
-          <CardFooter className="border-t border-primary-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-3">
+
+        {/* Content */}
+        <div className="flex-1 flex flex-col p-5">
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#1a6b50]">
+              {categoryLabel}
+            </span>
+            <span
+              className={cn(
+                'text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap',
+                availBadge.className
+              )}
+            >
+              {availBadge.label}
+            </span>
+          </div>
+          <h3 className="font-bold text-sm text-gray-900 mb-1 line-clamp-2 leading-snug">
+            {product.name}
+          </h3>
+          <p className="text-xs text-gray-400 line-clamp-2 mb-3 leading-relaxed">
+            {product.description}
+          </p>
+
+          <div className="mt-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-gray-100">
             <div>
-              <p className="text-xs text-primary-500 mb-0.5">Unit Price</p>
-              <p className="font-bold text-xl text-primary-800">
+              <p className="text-[10px] text-gray-400 mb-0.5">Unit Price</p>
+              <p className="font-black text-lg text-[#1a6b50]">
                 {formatCurrency(product.price)}
               </p>
               <div className="flex items-center gap-2 mt-1">
                 {supportsMpesa(product.availability) && (
-                  <span
-                    className="text-xs text-primary-500"
-                    title="M-Pesa eligible"
-                    aria-label="M-Pesa payment available"
-                  >
-                    📱 M-Pesa
-                  </span>
+                  <span className="text-[10px] text-gray-400">📱 M-Pesa</span>
                 )}
                 {supportsBank(product.availability) && (
-                  <span
-                    className="text-xs text-primary-500"
-                    title="Bank transfer eligible"
-                    aria-label="Bank transfer available"
-                  >
-                    🏦 Bank
-                  </span>
+                  <span className="text-[10px] text-gray-400">🏦 Bank</span>
                 )}
               </div>
             </div>
-            <div className="w-full sm:w-auto flex gap-2">
+            <div className="flex gap-2">
               {!isOutOfStock && onAddToCart && (
-                <Button
-                  size="sm"
+                <button
                   onClick={() => onAddToCart(product.id, quantity)}
-                  className="flex-1 sm:flex-none bg-info-600 hover:bg-info-700 text-white focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-info-500"
-                  aria-label={`Buy ${product.name}`}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-[#1a6b50] hover:bg-[#155a42] text-white text-xs font-bold rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a6b50]"
+                  aria-label={`Add ${product.name} to cart`}
                 >
-                  Buy
-                </Button>
+                  <ShoppingCart className="w-3.5 h-3.5" aria-hidden="true" />
+                  Add to Cart
+                </button>
               )}
               {onRequestQuote && (
-                <Button
-                  size="sm"
-                  variant="outline"
+                <button
                   onClick={() => onRequestQuote(product.id)}
-                  className="flex-1 sm:flex-none border-primary-300 text-primary-700 hover:bg-primary-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-info-500"
+                  className="flex items-center gap-1.5 px-4 py-2 border border-gray-200 text-gray-600 text-xs font-semibold rounded-lg hover:border-[#1a6b50] hover:text-[#1a6b50] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a6b50]"
                   aria-label={`Request quote for ${product.name}`}
                 >
-                  Quote
-                </Button>
+                  <FileText className="w-3.5 h-3.5" aria-hidden="true" />
+                  Request Quote
+                </button>
               )}
             </div>
-          </CardFooter>
+          </div>
         </div>
-      </Card>
+      </div>
     );
   }
 
-  // Grid variant — matches PDF mockup page 2
+  // Grid variant
   return (
-    <Card
+    <div
       className={cn(
-        'flex flex-col overflow-hidden bg-white border border-primary-200 rounded-lg',
-        'shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200',
-        'focus-within:ring-2 focus-within:ring-info-500'
+        'flex flex-col overflow-hidden bg-white border border-gray-100 rounded-2xl',
+        'shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200',
+        'focus-within:ring-2 focus-within:ring-[#1a6b50]'
       )}
     >
-      {/* Product image */}
-      <div className="relative w-full h-40 bg-primary-100">
+      {/* Image */}
+      <div className="relative w-full h-44 bg-gray-100 overflow-hidden">
         {/* Payment badges */}
-        <div className="absolute left-2 top-2 z-10 flex flex-col gap-1">
+        <div className="absolute left-2.5 top-2.5 z-10 flex flex-col gap-1">
           {supportsMpesa(product.availability) && (
-            <span className="inline-flex items-center gap-1 rounded-md bg-success-600 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-white shadow">
+            <span className="inline-flex items-center rounded-md bg-green-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
               M-PESA INSTANT
             </span>
           )}
-          {supportsBank(product.availability) && (
-            <span className="inline-flex items-center gap-1 rounded-md bg-info-600 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-white shadow">
-              BANK 1-3 DAYS
-            </span>
-          )}
+          {supportsBank(product.availability) &&
+            !supportsMpesa(product.availability) && (
+              <span className="inline-flex items-center rounded-md bg-blue-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
+                BANK 1-3 DAYS
+              </span>
+            )}
         </div>
+
         {product.imageUrls[0] ? (
           <Image
             src={product.imageUrls[0]}
-            alt={`${product.name} - ${categoryLabel} product image`}
+            alt={`${product.name} - ${categoryLabel}`}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-500 hover:scale-105"
+            unoptimized
           />
         ) : (
-          <div
-            className="w-full h-full flex items-center justify-center"
-            role="img"
-            aria-label={`No image available for ${product.name}`}
-          >
-            <span className="text-primary-400 text-sm" aria-hidden="true">
-              No image available
-            </span>
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+            <span className="text-5xl opacity-20">📦</span>
           </div>
         )}
       </div>
 
-      <CardContent className="flex-1 pt-3 pb-2 px-4">
-        {/* Category label + availability badge */}
+      {/* Content */}
+      <div className="flex-1 flex flex-col px-4 pt-4 pb-3">
+        {/* Category + availability */}
         <div className="flex items-center justify-between gap-2 mb-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-primary-500">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#1a6b50]">
             {categoryLabel}
           </span>
           <span
             className={cn(
-              'text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap',
+              'text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap',
               availBadge.className
             )}
-            aria-label={`Product availability: ${availBadge.label}`}
           >
             {availBadge.label}
           </span>
         </div>
 
-        {/* Product name */}
-        <h3 className="font-bold text-sm text-primary-800 mb-3 line-clamp-2 leading-snug">
+        {/* Name */}
+        <h3 className="font-bold text-sm text-gray-900 mb-3 line-clamp-2 leading-snug flex-1">
           {product.name}
         </h3>
 
-        {/* Unit price */}
+        {/* Price */}
         <div className="mb-3">
-          <p className="text-xs text-primary-500 mb-0.5">Unit Price</p>
-          <p className="font-bold text-xl text-primary-800">
+          <p className="text-[10px] text-gray-400 mb-0.5">Unit Price</p>
+          <p className="font-black text-xl text-[#1a6b50]">
             {formatCurrency(product.price)}
           </p>
           {product.depositAmount && (
-            <p className="text-xs text-primary-400 mt-0.5">
+            <p className="text-[10px] text-gray-400 mt-0.5">
               Deposit: {formatCurrency(product.depositAmount)}
             </p>
           )}
         </div>
 
-        {/* Payment method indicators */}
-        <div className="flex items-center gap-3">
+        {/* Payment indicators */}
+        <div className="flex items-center gap-3 mb-3">
           {supportsMpesa(product.availability) && (
-            <span
-              className="flex items-center gap-1 text-xs text-primary-500"
-              title="M-Pesa eligible"
-              aria-label="M-Pesa payment available"
-            >
-              <span aria-hidden="true">📱</span>
-              <span>M-Pesa</span>
+            <span className="flex items-center gap-1 text-[10px] text-gray-400">
+              <span aria-hidden="true">📱</span> M-Pesa
             </span>
           )}
           {supportsBank(product.availability) && (
-            <span
-              className="flex items-center gap-1 text-xs text-primary-500"
-              title="Bank transfer eligible"
-              aria-label="Bank transfer available"
-            >
-              <span aria-hidden="true">🏦</span>
-              <span>Bank</span>
+            <span className="flex items-center gap-1 text-[10px] text-gray-400">
+              <span aria-hidden="true">🏦</span> Bank
             </span>
           )}
         </div>
-      </CardContent>
+      </div>
 
-      <CardFooter className="border-t border-primary-200 flex flex-col gap-2 pt-3 pb-3 px-4">
+      {/* Actions */}
+      <div className="px-4 pb-4 flex flex-col gap-2 border-t border-gray-100 pt-3">
         {!isOutOfStock && onAddToCart && (
-          <Button
-            className="w-full bg-info-600 hover:bg-info-700 text-white font-semibold focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-info-500"
+          <button
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#1a6b50] hover:bg-[#155a42] text-white text-xs font-bold rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a6b50] focus-visible:ring-offset-2"
             disabled={isOutOfStock}
             onClick={() => onAddToCart(product.id, quantity)}
-            aria-label={`Buy ${product.name}`}
+            aria-label={`Add ${product.name} to cart`}
           >
-            Buy
-          </Button>
+            <ShoppingCart className="w-3.5 h-3.5" aria-hidden="true" />
+            Add to Cart
+          </button>
         )}
         {onRequestQuote && (
-          <Button
-            className="w-full border-primary-300 text-primary-700 hover:bg-primary-50 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-info-500"
-            variant="outline"
+          <button
+            className="w-full flex items-center justify-center gap-2 py-2.5 border border-gray-200 text-gray-600 text-xs font-semibold rounded-xl hover:border-[#1a6b50] hover:text-[#1a6b50] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a6b50] focus-visible:ring-offset-2"
             onClick={() => onRequestQuote(product.id)}
             aria-label={`Request quote for ${product.name}`}
           >
-            Quote
-          </Button>
+            <FileText className="w-3.5 h-3.5" aria-hidden="true" />
+            Request Quote
+          </button>
         )}
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }
