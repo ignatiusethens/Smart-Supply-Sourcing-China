@@ -48,19 +48,25 @@ type DashboardTab = 'overview' | 'orders' | 'invoices' | 'settings';
 
 // ─── Sidebar nav ──────────────────────────────────────────────────────────────
 
-function SidebarNav() {
+function SidebarNav({
+  activeTab,
+  setActiveTab,
+}: {
+  activeTab: DashboardTab;
+  setActiveTab: (tab: DashboardTab) => void;
+}) {
   const router = useRouter();
 
-  const navItems = [
-    {
-      label: 'Overview',
-      href: '/dashboard',
-      icon: LayoutDashboard,
-      active: false,
-    },
-    { label: 'My Orders', href: '/orders', icon: ShoppingBag, active: false },
-    { label: 'Invoices', href: '/dashboard', icon: FileText, active: true },
-    { label: 'Settings', href: '/dashboard', icon: Settings, active: false },
+  const navItems: {
+    label: string;
+    tab?: DashboardTab;
+    href?: string;
+    icon: React.ElementType;
+  }[] = [
+    { label: 'Overview', tab: 'overview', icon: LayoutDashboard },
+    { label: 'My Orders', href: '/orders', icon: ShoppingBag },
+    { label: 'Invoices', tab: 'invoices', icon: FileText },
+    { label: 'Settings', tab: 'settings', icon: Settings },
   ];
 
   const { logout } = useAuthStore();
@@ -91,24 +97,40 @@ function SidebarNav() {
 
       {/* Nav items */}
       <nav className="flex-1 px-3 py-4 space-y-1">
-        {navItems.map((item) => (
-          <Link key={item.label} href={item.href}>
-            <div
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                item.active
+        {navItems.map((item) => {
+          const isActive = item.tab ? activeTab === item.tab : false;
+          if (item.href) {
+            return (
+              <Link key={item.label} href={item.href}>
+                <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-primary-600 hover:bg-primary-50 hover:text-primary-800">
+                  <item.icon
+                    className="w-4 h-4 flex-shrink-0 text-primary-400"
+                    aria-hidden="true"
+                  />
+                  {item.label}
+                </div>
+              </Link>
+            );
+          }
+          return (
+            <button
+              key={item.label}
+              onClick={() => item.tab && setActiveTab(item.tab)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                isActive
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
                   : 'text-primary-600 hover:bg-primary-50 hover:text-primary-800'
               }`}
-              aria-current={item.active ? 'page' : undefined}
+              aria-current={isActive ? 'page' : undefined}
             >
               <item.icon
-                className={`w-4 h-4 flex-shrink-0 ${item.active ? 'text-blue-600' : 'text-primary-400'}`}
+                className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-blue-600' : 'text-primary-400'}`}
                 aria-hidden="true"
               />
               {item.label}
-            </div>
-          </Link>
-        ))}
+            </button>
+          );
+        })}
       </nav>
 
       {/* Logout */}
@@ -368,7 +390,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex min-h-screen bg-primary-50">
-        <SidebarNav />
+        <SidebarNav activeTab={activeTab} setActiveTab={setActiveTab} />
         <main className="flex-1 p-8">
           <div className="animate-pulse space-y-4">
             {[1, 2, 3].map((i) => (
@@ -384,7 +406,7 @@ export default function DashboardPage() {
   return (
     <div className="flex min-h-screen bg-primary-50">
       {/* Left sidebar */}
-      <SidebarNav />
+      <SidebarNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Main content */}
       <main
