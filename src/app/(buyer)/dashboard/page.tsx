@@ -63,8 +63,10 @@ function SidebarNav() {
     { label: 'Settings', href: '/dashboard', icon: Settings, active: false },
   ];
 
+  const { logout } = useAuthStore();
+
   const handleLogout = () => {
-    localStorage.clear();
+    logout();
     router.push('/');
   };
 

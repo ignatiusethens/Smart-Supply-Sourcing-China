@@ -27,7 +27,7 @@ const navItems = [
 export function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, logout } = useAuthStore();
 
   useEffect(() => {
     if (!isAuthenticated || user?.role !== 'admin') {
@@ -36,12 +36,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   }, [isAuthenticated, user, router]);
 
   const handleLogout = async () => {
+    logout();
     try {
       await authFetch('/api/auth/logout', { method: 'POST' });
-      router.push('/login');
     } catch {
-      router.push('/login');
+      // ignore
     }
+    router.push('/login');
   };
 
   return (
