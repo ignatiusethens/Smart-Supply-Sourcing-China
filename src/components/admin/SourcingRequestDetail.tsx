@@ -331,21 +331,45 @@ export function SourcingRequestDetail({
             </div>
           </div>
 
-          {/* Attached Images */}
-          {request.attachments && request.attachments.length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4">
-                Attached Documents ({request.attachments.length})
-              </h2>
+          {/* Attached Images / Files */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4">
+              Reference Media &amp; Attachments
+              {request.attachments?.length > 0 && (
+                <span className="ml-2 text-xs font-normal text-gray-400 normal-case">
+                  ({request.attachments.length} file
+                  {request.attachments.length !== 1 ? 's' : ''})
+                </span>
+              )}
+            </h2>
+
+            {!request.attachments || request.attachments.length === 0 ? (
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-gray-50 border border-dashed border-gray-200">
+                <ImageIcon className="w-5 h-5 text-gray-300 shrink-0" />
+                <p className="text-sm text-gray-400">
+                  No reference files were uploaded with this request.
+                </p>
+              </div>
+            ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {request.attachments.map((att) =>
-                  att.fileType.startsWith('image') ? (
-                    <a
+                {request.attachments.map((att) => {
+                  const isImage =
+                    att.fileType?.startsWith('image') ||
+                    att.cloudinaryUrl?.match(/\.(jpg|jpeg|png|gif|webp)/i);
+                  // Build a direct download URL via Cloudinary fl_attachment
+                  const downloadUrl = att.cloudinaryUrl?.includes(
+                    'cloudinary.com'
+                  )
+                    ? att.cloudinaryUrl.replace(
+                        '/upload/',
+                        '/upload/fl_attachment/'
+                      )
+                    : att.cloudinaryUrl;
+
+                  return isImage ? (
+                    <div
                       key={att.id}
-                      href={att.cloudinaryUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 transition-colors"
+                      className="group relative aspect-square rounded-xl overflow-hidden border border-gray-200 hover:border-[#1a6b50] transition-colors bg-gray-100"
                     >
                       <Image
                         src={att.cloudinaryUrl}
@@ -354,22 +378,37 @@ export function SourcingRequestDetail({
                         className="object-cover"
                         unoptimized
                       />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                        <Download className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      {/* Hover overlay with view + download */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                        <a
+                          href={att.cloudinaryUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-9 h-9 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+                          title="View full size"
+                        >
+                          <Eye className="w-4 h-4 text-gray-700" />
+                        </a>
+                        <a
+                          href={downloadUrl}
+                          download={att.fileName}
+                          className="w-9 h-9 bg-[#1a6b50] rounded-full flex items-center justify-center hover:bg-[#155a42] transition-colors"
+                          title="Download"
+                        >
+                          <Download className="w-4 h-4 text-white" />
+                        </a>
                       </div>
-                      <p className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs px-2 py-1 truncate">
+                      <p className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs px-2 py-1 truncate">
                         {att.fileName}
                       </p>
-                    </a>
+                    </div>
                   ) : (
-                    <a
+                    <div
                       key={att.id}
-                      href={att.cloudinaryUrl}
-                      download={att.fileName}
-                      className="flex items-center gap-2 p-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                      className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:border-[#1a6b50] hover:bg-[#f0faf6] transition-colors"
                     >
-                      <FileText className="w-5 h-5 text-gray-500 shrink-0" />
-                      <div className="min-w-0">
+                      <FileText className="w-5 h-5 text-gray-400 shrink-0" />
+                      <div className="min-w-0 flex-1">
                         <p className="text-xs font-semibold text-gray-800 truncate">
                           {att.fileName}
                         </p>
@@ -377,12 +416,20 @@ export function SourcingRequestDetail({
                           {(att.fileSize / 1024).toFixed(1)} KB
                         </p>
                       </div>
-                    </a>
-                  )
-                )}
+                      <a
+                        href={downloadUrl}
+                        download={att.fileName}
+                        className="p-1.5 text-[#1a6b50] hover:bg-[#e8f4f0] rounded-lg transition-colors shrink-0"
+                        title="Download"
+                      >
+                        <Download className="w-4 h-4" />
+                      </a>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Admin Internal Notes */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
