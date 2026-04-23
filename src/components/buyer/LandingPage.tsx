@@ -27,7 +27,7 @@ export function LandingPage({
             <div>
               {/* Brand label */}
               <h1 className="mb-3 text-2xl font-bold text-[#2a7a5e] tracking-wide">
-                SmartSupplySourcingChina.com
+                Smart Supply Sourcing China
               </h1>
 
               {/* Headline */}
@@ -542,10 +542,10 @@ export function LandingPage({
                 />
                 <div>
                   <p className="text-sm font-black text-gray-900 leading-tight">
-                    Smart Supply Sourcing
+                    Smart Supply Sourcing China
                   </p>
                   <p className="text-xs text-[#1a6b50] font-semibold leading-tight">
-                    China.com
+                    China
                   </p>
                 </div>
               </div>
@@ -635,7 +635,7 @@ export function LandingPage({
 
           <div className="mt-10 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-400">
-              © {new Date().getFullYear()} SmartSupplySourcingChina.com · All
+              © {new Date().getFullYear()} Smart Supply Sourcing China · All
               rights reserved.
             </p>
             <p className="text-xs text-gray-400">
