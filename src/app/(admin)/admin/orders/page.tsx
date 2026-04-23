@@ -11,7 +11,8 @@ import { Search } from 'lucide-react';
 interface OrderRecord {
   id: string;
   referenceCode: string;
-  buyerName: string;
+  buyer?: { name: string; email: string };
+  buyerId: string;
   totalAmount: number;
   paymentStatus: string;
   orderStatus: string;
@@ -28,11 +29,11 @@ export default function OrdersPage() {
     const fetchOrders = async () => {
       setIsLoading(true);
       try {
-        const response = await authFetch('/api/orders');
+        const response = await authFetch('/api/orders?admin=true');
         const data = await response.json();
 
         if (data.success) {
-          setOrders(data.data || []);
+          setOrders(data.data?.data || data.data || []);
         } else {
           console.error('Failed to fetch orders:', data.error);
         }
@@ -49,7 +50,9 @@ export default function OrdersPage() {
   const filteredOrders = orders.filter(
     (order) =>
       order.referenceCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.buyerName.toLowerCase().includes(searchQuery.toLowerCase())
+      (order.buyer?.name || '')
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
   );
 
   const statusColors: Record<string, string> = {
@@ -159,7 +162,7 @@ export default function OrdersPage() {
                     {order.referenceCode}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-700">
-                    {order.buyerName}
+                    {order.buyer?.name || 'Unknown'}
                   </td>
                   <td className="px-4 py-3 text-sm text-right font-semibold text-gray-900">
                     {formatCurrency(order.totalAmount)}
