@@ -49,17 +49,29 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  // Require authentication — also check token in form data as fallback
-  // (some proxies strip Authorization headers from multipart requests)
-  let auth = await requireAuth(request);
+  // Read formData first (body can only be read once)
+  let formData: FormData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return NextResponse.json(
+      { success: false, error: 'Invalid form data' },
+      { status: 400 }
+    );
+  }
 
-  if (!auth.success) {
-    // Try reading token from form data as fallback
-    try {
-      const clonedRequest = request.clone();
-      const formData = await clonedRequest.formData();
-      const tokenFromForm = formData.get('_token') as string | null;
-      if (tokenFromForm) {
+  // Authenticate: try Authorization header first, then _token form field
+  let authenticatedUser = null;
+
+  // Try header-based auth
+  const headerAuth = await requireAuth(request);
+  if (headerAuth.success) {
+    authenticatedUser = headerAuth.user;
+  } else {
+    // Fallback: read token from form field
+    const tokenFromForm = formData.get('_token') as string | null;
+    if (tokenFromForm) {
+      try {
         const { verifyToken } = await import('@/lib/auth/jwt');
         const { getPool } = await import('@/lib/database/connection');
         const payload = verifyToken(tokenFromForm);
@@ -71,34 +83,32 @@ export async function POST(request: NextRequest) {
           );
           if (result.rows.length > 0) {
             const dbUser = result.rows[0];
-            auth = {
-              success: true,
-              user: {
-                id: dbUser.id,
-                email: dbUser.email,
-                name: dbUser.name,
-                phone: dbUser.phone,
-                companyName: dbUser.company_name,
-                role: dbUser.role,
-                createdAt: dbUser.created_at,
-                updatedAt: dbUser.updated_at,
-              },
+            authenticatedUser = {
+              id: dbUser.id,
+              email: dbUser.email,
+              name: dbUser.name,
+              phone: dbUser.phone,
+              companyName: dbUser.company_name,
+              role: dbUser.role,
+              createdAt: dbUser.created_at,
+              updatedAt: dbUser.updated_at,
             };
           }
         }
+      } catch {
+        // ignore
       }
-    } catch {
-      // ignore fallback errors
     }
   }
 
-  if (!auth.success) {
-    return auth.response;
+  if (!authenticatedUser) {
+    return NextResponse.json(
+      { success: false, error: 'Authentication required' },
+      { status: 401 }
+    );
   }
 
   try {
-    const formData = await request.formData();
-
     const buyerId = formData.get('buyerId') as string;
     const itemDescription = formData.get('itemDescription') as string;
     const specifications = formData.get('specifications') as string;
@@ -119,9 +129,7 @@ export async function POST(request: NextRequest) {
 
     const quantity = parseInt(quantityRaw) || 1;
     const targetPrice = targetPriceRaw ? parseFloat(targetPriceRaw) : undefined;
-
-    // Always use the authenticated user's ID from the JWT token
-    const resolvedBuyerId = auth.user.id;
+    const resolvedBuyerId = authenticatedUser.id;
 
     const sourcingRequest = await createSourcingRequest(
       resolvedBuyerId,
@@ -139,8 +147,8 @@ export async function POST(request: NextRequest) {
 
     // Send email notification to admin (non-blocking)
     void sendSourcingRequestNotification({
-      buyerName: auth.user.name,
-      buyerEmail: auth.user.email,
+      buyerName: authenticatedUser.name,
+      buyerEmail: authenticatedUser.email,
       itemDescription,
       quantity,
       deliveryLocation: deliveryLocation || '',

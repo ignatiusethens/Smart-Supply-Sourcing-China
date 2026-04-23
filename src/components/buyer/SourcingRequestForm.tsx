@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { FileUploader } from './FileUploader';
 import { SourcingRequest } from '@/types';
 import { authFetch } from '@/lib/api/auth-client';
+import { useAuthStore } from '@/lib/stores/authStore';
 import { Plus, Plane, Ship } from 'lucide-react';
 
 interface SourcingRequestFormProps {
@@ -27,6 +28,7 @@ export function SourcingRequestForm({
   onSuccess,
   onError,
 }: SourcingRequestFormProps) {
+  const { token: storeToken } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [shippingMethod, setShippingMethod] = useState<'air' | 'sea'>('air');
@@ -121,11 +123,14 @@ export function SourcingRequestForm({
         submitFormData.append('attachments', file);
       });
 
-      // Append token as form field fallback (some proxies strip Authorization headers)
+      // Get token from Zustand store (most reliable) with localStorage fallback
       const token =
-        typeof window !== 'undefined'
+        storeToken ||
+        (typeof window !== 'undefined'
           ? localStorage.getItem('auth-token')
-          : null;
+          : null);
+
+      // Append token as form field so it reaches the API even if header is stripped
       if (token) {
         submitFormData.append('_token', token);
       }
@@ -133,6 +138,7 @@ export function SourcingRequestForm({
       const response = await authFetch('/api/sourcing/requests', {
         method: 'POST',
         body: submitFormData,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
       if (!response.ok) {
