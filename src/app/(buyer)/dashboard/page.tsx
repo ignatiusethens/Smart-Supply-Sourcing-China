@@ -9,7 +9,6 @@ import {
   LayoutDashboard,
   ShoppingBag,
   FileText,
-  Settings,
   LogOut,
   Search,
   Filter,
@@ -20,6 +19,7 @@ import {
   CheckCircle2,
   Plus,
   Info,
+  Package,
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils/formatting';
 import { DashboardSummary } from '@/components/buyer/DashboardSummary';
@@ -44,9 +44,9 @@ interface PaymentRecord {
   createdAt: string;
 }
 
-type DashboardTab = 'overview' | 'orders' | 'invoices' | 'settings';
+type DashboardTab = 'overview' | 'orders' | 'invoices';
 
-// ─── Sidebar nav ──────────────────────────────────────────────────────────────
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 function SidebarNav({
   activeTab,
@@ -56,20 +56,17 @@ function SidebarNav({
   setActiveTab: (tab: DashboardTab) => void;
 }) {
   const router = useRouter();
+  const { logout, user } = useAuthStore();
 
   const navItems: {
     label: string;
-    tab?: DashboardTab;
-    href?: string;
+    tab: DashboardTab;
     icon: React.ElementType;
   }[] = [
     { label: 'Overview', tab: 'overview', icon: LayoutDashboard },
-    { label: 'My Orders', href: '/orders', icon: ShoppingBag },
+    { label: 'My Orders', tab: 'orders', icon: ShoppingBag },
     { label: 'Invoices', tab: 'invoices', icon: FileText },
-    { label: 'Settings', tab: 'settings', icon: Settings },
   ];
-
-  const { logout } = useAuthStore();
 
   const handleLogout = () => {
     logout();
@@ -78,53 +75,48 @@ function SidebarNav({
 
   return (
     <aside
-      className="w-52 flex-shrink-0 bg-white border-r border-primary-200 flex flex-col min-h-screen"
+      className="w-52 flex-shrink-0 bg-white border-r border-gray-100 flex flex-col min-h-screen"
       aria-label="Buyer navigation"
     >
-      {/* Logo / brand */}
-      <div className="px-5 py-5 border-b border-primary-100">
+      {/* Brand */}
+      <div className="px-5 py-5 border-b border-gray-100">
         <Link href="/" className="flex items-center gap-2">
           <img
             src="/logo.png"
-            alt="Smart Supply Sourcing"
+            alt="Smart Supply Sourcing China"
             className="w-7 h-7 rounded-full object-cover"
           />
-          <span className="text-sm font-bold text-primary-800">
-            Smart Supply
-          </span>
+          <span className="text-sm font-bold text-gray-800">Smart Supply</span>
         </Link>
       </div>
 
-      {/* Nav items */}
+      {/* User greeting */}
+      {user?.name && (
+        <div className="px-5 py-3 border-b border-gray-100 bg-[#f0faf6]">
+          <p className="text-xs text-gray-500">Signed in as</p>
+          <p className="text-sm font-bold text-[#1a6b50] truncate">
+            {user.name}
+          </p>
+        </div>
+      )}
+
+      {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.map((item) => {
-          const isActive = item.tab ? activeTab === item.tab : false;
-          if (item.href) {
-            return (
-              <Link key={item.label} href={item.href}>
-                <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-primary-600 hover:bg-primary-50 hover:text-primary-800">
-                  <item.icon
-                    className="w-4 h-4 flex-shrink-0 text-primary-400"
-                    aria-hidden="true"
-                  />
-                  {item.label}
-                </div>
-              </Link>
-            );
-          }
+          const isActive = activeTab === item.tab;
           return (
             <button
-              key={item.label}
-              onClick={() => item.tab && setActiveTab(item.tab)}
+              key={item.tab}
+              onClick={() => setActiveTab(item.tab)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                  : 'text-primary-600 hover:bg-primary-50 hover:text-primary-800'
+                  ? 'bg-[#e8f4f0] text-[#1a6b50] border border-[#b2d8cc]'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`}
               aria-current={isActive ? 'page' : undefined}
             >
               <item.icon
-                className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-blue-600' : 'text-primary-400'}`}
+                className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-[#1a6b50]' : 'text-gray-400'}`}
                 aria-hidden="true"
               />
               {item.label}
@@ -134,13 +126,13 @@ function SidebarNav({
       </nav>
 
       {/* Logout */}
-      <div className="px-3 py-4 border-t border-primary-100">
+      <div className="px-3 py-4 border-t border-gray-100">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-primary-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-700 transition-colors"
         >
           <LogOut
-            className="w-4 h-4 flex-shrink-0 text-primary-400"
+            className="w-4 h-4 flex-shrink-0 text-gray-400"
             aria-hidden="true"
           />
           Logout
@@ -150,65 +142,25 @@ function SidebarNav({
   );
 }
 
-// ─── KPI Card ─────────────────────────────────────────────────────────────────
-
-function KPICard({
-  title,
-  amount,
-  icon: Icon,
-  bgColor,
-  iconBg,
-}: {
-  title: string;
-  amount: number;
-  icon: React.ElementType;
-  bgColor: string;
-  iconBg?: string;
-}) {
-  return (
-    <div
-      className={`${bgColor} border border-primary-200 rounded-xl p-6 shadow-sm`}
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-xs font-semibold text-primary-500 uppercase tracking-wide mb-2">
-            {title}
-          </p>
-          <p className="text-3xl font-bold text-primary-900">
-            {formatCurrency(amount)}
-          </p>
-        </div>
-        <div
-          className={`w-12 h-12 rounded-lg ${iconBg ?? 'bg-white/50'} flex items-center justify-center flex-shrink-0`}
-        >
-          <Icon className="w-6 h-6 text-blue-600" aria-hidden="true" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Status badge ─────────────────────────────────────────────────────────────
 
 function PaymentStatusBadge({ status }: { status: string }) {
   const config: Record<string, { label: string; className: string }> = {
     'awaiting-bank-transfer': {
       label: 'Awaiting Bank Transfer',
-      className: 'bg-blue-100 text-blue-800 border border-blue-300',
+      className: 'bg-blue-50 text-blue-700 border border-blue-200',
     },
     'pending-reconciliation': {
       label: 'Pending Reconciliation',
-      className: 'bg-amber-100 text-amber-800 border border-amber-300',
+      className: 'bg-amber-50 text-amber-700 border border-amber-200',
     },
     paid: {
       label: 'Paid',
-      className: 'bg-green-100 text-green-800 border border-green-300',
+      className: 'bg-green-50 text-green-700 border border-green-200',
     },
   };
-
   const { label, className } =
     config[status] ?? config['awaiting-bank-transfer'];
-
   return (
     <span
       className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${className}`}
@@ -218,26 +170,24 @@ function PaymentStatusBadge({ status }: { status: string }) {
   );
 }
 
-// ─── Payment table row ────────────────────────────────────────────────────────
+// ─── Payment row ──────────────────────────────────────────────────────────────
 
 function PaymentRow({ payment }: { payment: PaymentRecord }) {
   return (
-    <tr className="border-b border-primary-100 hover:bg-primary-50 transition-colors">
+    <tr className="border-b border-gray-100 hover:bg-[#f0faf6] transition-colors">
       <td className="px-4 py-4">
-        <p className="text-sm font-bold text-primary-800 font-mono">
+        <p className="text-sm font-bold text-gray-800 font-mono">
           {payment.invoiceId}
         </p>
       </td>
       <td className="px-4 py-4">
-        <p className="text-sm font-medium text-primary-800">
-          {payment.orderId}
-        </p>
-        <p className="text-xs text-primary-500 mt-0.5">
+        <p className="text-sm font-medium text-gray-800">{payment.orderId}</p>
+        <p className="text-xs text-gray-400 mt-0.5">
           Issued: {formatDate(payment.issuedDate)}
         </p>
       </td>
       <td className="px-4 py-4">
-        <p className="text-sm font-bold text-primary-900">
+        <p className="text-sm font-bold text-[#1a6b50]">
           {formatCurrency(payment.amount)}
         </p>
       </td>
@@ -248,14 +198,14 @@ function PaymentRow({ payment }: { payment: PaymentRecord }) {
               <div className="w-6 h-6 rounded bg-green-100 flex items-center justify-center">
                 <span className="text-xs font-bold text-green-700">M</span>
               </div>
-              <span className="text-sm text-primary-700">M-Pesa</span>
+              <span className="text-sm text-gray-700">M-Pesa</span>
             </>
           ) : (
             <>
               <div className="w-6 h-6 rounded bg-blue-100 flex items-center justify-center">
                 <span className="text-xs font-bold text-blue-700">B</span>
               </div>
-              <span className="text-sm text-primary-700">Bank Transfer</span>
+              <span className="text-sm text-gray-700">Bank Transfer</span>
             </>
           )}
         </div>
@@ -266,24 +216,19 @@ function PaymentRow({ payment }: { payment: PaymentRecord }) {
       <td className="px-4 py-4">
         <div className="flex items-center gap-2">
           {payment.status === 'awaiting-bank-transfer' && (
-            <button className="px-3 py-1.5 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors flex items-center gap-1.5">
+            <button className="px-3 py-1.5 text-xs font-semibold text-white bg-[#1a6b50] hover:bg-[#155a42] rounded-lg transition-colors flex items-center gap-1.5">
               <Upload className="w-3 h-3" aria-hidden="true" />
               Upload Proof
             </button>
           )}
-          {payment.status === 'pending-reconciliation' && (
-            <button className="px-3 py-1.5 text-xs font-semibold text-blue-700 hover:text-blue-800 transition-colors">
-              Instructions
-            </button>
-          )}
           <button
-            className="p-1.5 text-primary-500 hover:text-primary-700 transition-colors"
+            className="p-1.5 text-gray-400 hover:text-gray-700 transition-colors"
             aria-label="Download invoice"
           >
             <Download className="w-4 h-4" aria-hidden="true" />
           </button>
           <button
-            className="p-1.5 text-primary-500 hover:text-primary-700 transition-colors"
+            className="p-1.5 text-gray-400 hover:text-gray-700 transition-colors"
             aria-label="More actions"
           >
             <MoreVertical className="w-4 h-4" aria-hidden="true" />
@@ -303,20 +248,16 @@ export default function DashboardPage() {
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<DashboardTab>('invoices');
+  const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
 
-  // Auth guard
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/login');
-    }
+    if (!isAuthenticated) router.push('/login');
   }, [isAuthenticated, router]);
 
-  // Calculate total paid MTD (sum of paid payments)
   const totalPaidMTD = payments
     .filter((p) => p.status === 'paid')
     .reduce((sum, p) => sum + p.amount, 0);
@@ -325,31 +266,17 @@ export default function DashboardPage() {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-
-        // Fetch dashboard summary
-        const summaryResponse = await authFetch(
-          `/api/orders/dashboard/summary`
+        const summaryRes = await authFetch('/api/orders/dashboard/summary');
+        if (summaryRes.ok) {
+          const summaryData = await summaryRes.json();
+          if (summaryData.success) setDashboardData(summaryData.data);
+        }
+        const paymentsRes = await authFetch(
+          '/api/orders/dashboard/payments?page=1&limit=10'
         );
-        if (!summaryResponse.ok) {
-          throw new Error('Failed to fetch dashboard summary');
-        }
-
-        const summaryData = await summaryResponse.json();
-        if (summaryData.success && summaryData.data) {
-          setDashboardData(summaryData.data);
-        }
-
-        // Fetch payment history
-        const paymentsResponse = await authFetch(
-          `/api/orders/dashboard/payments?page=1&limit=10`
-        );
-        if (!paymentsResponse.ok) {
-          throw new Error('Failed to fetch payment history');
-        }
-
-        const paymentsData = await paymentsResponse.json();
-        if (paymentsData.success && paymentsData.data) {
-          setPayments(paymentsData.data.data || []);
+        if (paymentsRes.ok) {
+          const paymentsData = await paymentsRes.json();
+          if (paymentsData.success) setPayments(paymentsData.data.data || []);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
@@ -357,19 +284,9 @@ export default function DashboardPage() {
         setLoading(false);
       }
     };
-
     fetchDashboardData();
   }, []);
 
-  // Tab config
-  const tabs: { key: DashboardTab; label: string }[] = [
-    { key: 'overview', label: 'Overview' },
-    { key: 'orders', label: 'Orders' },
-    { key: 'invoices', label: 'Invoices' },
-    { key: 'settings', label: 'Settings' },
-  ];
-
-  // Filtered payments by search query
   const filteredPayments = searchQuery.trim()
     ? payments.filter(
         (p) =>
@@ -378,61 +295,50 @@ export default function DashboardPage() {
       )
     : payments;
 
-  // Pagination
   const itemsPerPage = 5;
   const totalItems = filteredPayments.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentPayments = filteredPayments.slice(startIndex, endIndex);
+  const currentPayments = filteredPayments.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
-  // Loading skeleton
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-primary-50">
-        <SidebarNav activeTab={activeTab} setActiveTab={setActiveTab} />
-        <main className="flex-1 p-8">
-          <div className="animate-pulse space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-48 bg-primary-200 rounded-xl" />
-            ))}
-          </div>
+      <div className="flex min-h-screen bg-[#f0faf6]">
+        <div className="w-52 bg-white border-r border-gray-100 min-h-screen" />
+        <main className="flex-1 p-8 animate-pulse space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-32 bg-gray-200 rounded-2xl" />
+          ))}
         </main>
       </div>
     );
   }
 
-  // Main render
   return (
-    <div className="flex min-h-screen bg-primary-50">
-      {/* Left sidebar */}
+    <div className="flex min-h-screen bg-[#f0faf6]">
       <SidebarNav activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      {/* Main content */}
-      <main
-        className="flex-1 px-8 py-8 overflow-y-auto"
-        id="main-content"
-        tabIndex={-1}
-      >
-        {/* Page header + action buttons */}
-        <div className="flex flex-wrap items-start justify-between gap-4 mb-2">
+      <main className="flex-1 px-8 py-8 overflow-y-auto" id="main-content">
+        {/* Header */}
+        <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-primary-900">
+            <h1 className="text-2xl font-black text-gray-900">
               Account Dashboard
             </h1>
-            <p className="text-sm text-primary-500 mt-1">
-              Manage your sourcing orders, payments, and account preferences.
+            <p className="text-sm text-gray-500 mt-1">
+              Track your sourcing requests, payments, and invoices.
             </p>
           </div>
-
-          {/* Action buttons */}
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-primary-700 border border-primary-300 rounded-lg bg-white hover:bg-primary-50 transition-colors">
+            <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors">
               <Download className="w-4 h-4" aria-hidden="true" />
               Export Ledger
             </button>
             <Link href="/sourcing/request">
-              <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+              <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-[#1a6b50] hover:bg-[#155a42] rounded-xl transition-colors">
                 <Plus className="w-4 h-4" aria-hidden="true" />
                 New Sourcing Request
               </button>
@@ -440,165 +346,248 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-800">{error}</p>
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+            <p className="text-red-700 text-sm">{error}</p>
           </div>
         )}
 
-        {/* Tab bar */}
-        <div
-          className="flex gap-0 border-b border-primary-200 mb-6 mt-6"
-          role="tablist"
-          aria-label="Dashboard tabs"
-        >
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              role="tab"
-              aria-selected={activeTab === tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`px-5 py-3 text-sm font-semibold transition-colors border-b-2 -mb-px ${
-                activeTab === tab.key
-                  ? 'border-blue-600 text-blue-700'
-                  : 'border-transparent text-primary-500 hover:text-primary-800 hover:border-primary-300'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* ── Overview tab ─────────────────────────────────────────────────── */}
-        {activeTab === 'overview' &&
-          (dashboardData ? (
-            <DashboardSummary
-              outstandingBalance={dashboardData.outstandingBalance}
-              pendingReconciliation={dashboardData.pendingReconciliation}
-              totalOrders={dashboardData.totalOrders}
-              completedOrders={dashboardData.completedOrders}
-            />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                {
-                  label: 'Outstanding Balance',
-                  value: 'KES 0',
-                  icon: '💳',
-                  color: 'bg-blue-50 border-blue-100',
-                },
-                {
-                  label: 'Pending Reconciliation',
-                  value: '0',
-                  icon: '⏳',
-                  color: 'bg-orange-50 border-orange-100',
-                },
-                {
-                  label: 'Total Orders',
-                  value: '0',
-                  icon: '📦',
-                  color: 'bg-purple-50 border-purple-100',
-                },
-                {
-                  label: 'Completed Orders',
-                  value: '0',
-                  icon: '✅',
-                  color: 'bg-green-50 border-green-100',
-                },
-              ].map((card) => (
-                <div
-                  key={card.label}
-                  className={`rounded-xl border p-6 ${card.color}`}
-                >
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="text-2xl">{card.icon}</span>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                      {card.label}
+        {/* ── Overview ── */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            {dashboardData ? (
+              <DashboardSummary
+                outstandingBalance={dashboardData.outstandingBalance}
+                pendingReconciliation={dashboardData.pendingReconciliation}
+                totalOrders={dashboardData.totalOrders}
+                completedOrders={dashboardData.completedOrders}
+              />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {[
+                  {
+                    label: 'Outstanding Balance',
+                    value: 'KES 0',
+                    icon: '💳',
+                    bg: 'bg-blue-50 border-blue-100',
+                  },
+                  {
+                    label: 'Pending Reconciliation',
+                    value: '0',
+                    icon: '⏳',
+                    bg: 'bg-amber-50 border-amber-100',
+                  },
+                  {
+                    label: 'Total Orders',
+                    value: '0',
+                    icon: '📦',
+                    bg: 'bg-[#e8f4f0] border-[#b2d8cc]',
+                  },
+                  {
+                    label: 'Completed Orders',
+                    value: '0',
+                    icon: '✅',
+                    bg: 'bg-green-50 border-green-100',
+                  },
+                ].map((card) => (
+                  <div
+                    key={card.label}
+                    className={`rounded-2xl border p-6 ${card.bg}`}
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-2xl">{card.icon}</span>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        {card.label}
+                      </p>
+                    </div>
+                    <p className="text-2xl font-black text-gray-900">
+                      {card.value}
                     </p>
                   </div>
-                  <p className="text-2xl font-black text-gray-900">
-                    {card.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ))}
-
-        {/* ── Orders tab ───────────────────────────────────────────────────── */}
-        {activeTab === 'orders' && (
-          <div className="bg-white border border-primary-200 rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-bold text-primary-900 mb-4">
-              Recent Orders
-            </h2>
-            <p className="text-sm text-primary-500">
-              View your full order history on the{' '}
-              <Link
-                href="/orders"
-                className="text-blue-600 hover:underline font-medium"
-              >
-                Orders page
-              </Link>
-              .
-            </p>
-          </div>
-        )}
-
-        {/* ── Invoices tab (default) ────────────────────────────────────────── */}
-        {activeTab === 'invoices' && (
-          <>
-            {/* KPI Cards */}
-            {dashboardData && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <KPICard
-                  title="Outstanding Balance"
-                  amount={dashboardData.outstandingBalance}
-                  icon={FileText}
-                  bgColor="bg-blue-50"
-                  iconBg="bg-white"
-                />
-                <KPICard
-                  title="Pending Reconciliation"
-                  amount={dashboardData.pendingReconciliation}
-                  icon={Clock}
-                  bgColor="bg-white"
-                  iconBg="bg-primary-50"
-                />
-                <KPICard
-                  title="Total Paid (MTD)"
-                  amount={totalPaidMTD}
-                  icon={CheckCircle2}
-                  bgColor="bg-white"
-                  iconBg="bg-primary-50"
-                />
+                ))}
               </div>
             )}
 
-            {/* Payment History Section */}
-            <div className="bg-white border border-primary-200 rounded-xl shadow-sm overflow-hidden">
-              {/* Section header */}
-              <div className="px-6 py-4 border-b border-primary-100">
+            {/* Quick links */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Link
+                href="/sourcing/request"
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all group"
+              >
+                <div className="w-10 h-10 bg-[#e8f4f0] rounded-xl flex items-center justify-center mb-3">
+                  <Plus className="w-5 h-5 text-[#1a6b50]" />
+                </div>
+                <p className="font-bold text-gray-900 text-sm mb-1">
+                  New Sourcing Request
+                </p>
+                <p className="text-xs text-gray-500">
+                  Submit a new procurement request to our team.
+                </p>
+              </Link>
+              <Link
+                href="/catalog"
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all group"
+              >
+                <div className="w-10 h-10 bg-[#e8f4f0] rounded-xl flex items-center justify-center mb-3">
+                  <Package className="w-5 h-5 text-[#1a6b50]" />
+                </div>
+                <p className="font-bold text-gray-900 text-sm mb-1">
+                  Browse Catalog
+                </p>
+                <p className="text-xs text-gray-500">
+                  Shop in-stock products with instant M-Pesa payment.
+                </p>
+              </Link>
+              <button
+                onClick={() => setActiveTab('invoices')}
+                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:-translate-y-0.5 transition-all text-left"
+              >
+                <div className="w-10 h-10 bg-[#e8f4f0] rounded-xl flex items-center justify-center mb-3">
+                  <FileText className="w-5 h-5 text-[#1a6b50]" />
+                </div>
+                <p className="font-bold text-gray-900 text-sm mb-1">
+                  Payment History
+                </p>
+                <p className="text-xs text-gray-500">
+                  View and download your invoices and receipts.
+                </p>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Orders ── */}
+        {activeTab === 'orders' && (
+          <div className="space-y-5">
+            {/* Explainer */}
+            <div className="bg-[#e8f4f0] border border-[#b2d8cc] rounded-2xl p-5 flex items-start gap-3">
+              <Info className="w-5 h-5 text-[#1a6b50] flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-bold text-[#1a6b50] mb-1">
+                  How orders work
+                </p>
+                <p className="text-sm text-[#1a6b50] leading-relaxed">
+                  An <span className="font-semibold">order</span> is created
+                  once you complete payment — either via M-Pesa or bank
+                  transfer. Submitting a sourcing request is the first step, but
+                  it only becomes an order after payment is confirmed and
+                  reconciled by our team.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              <div className="px-6 py-5 border-b border-gray-100">
+                <h2 className="text-base font-bold text-gray-900">My Orders</h2>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Paid and confirmed orders appear here.
+                </p>
+              </div>
+              {dashboardData && dashboardData.totalOrders > 0 ? (
+                <div className="p-6">
+                  <Link
+                    href="/orders"
+                    className="text-sm font-semibold text-[#1a6b50] hover:underline"
+                  >
+                    View full order history →
+                  </Link>
+                </div>
+              ) : (
+                <div className="px-6 py-16 text-center">
+                  <div className="w-14 h-14 bg-[#e8f4f0] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <ShoppingBag className="w-7 h-7 text-[#1a6b50]" />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-700 mb-1">
+                    No orders yet
+                  </p>
+                  <p className="text-xs text-gray-400 mb-5 max-w-xs mx-auto">
+                    Once you pay for a sourcing quote or catalog item, your
+                    order will appear here.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Link
+                      href="/sourcing/request"
+                      className="inline-flex items-center gap-2 bg-[#1a6b50] hover:bg-[#155a42] text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-colors"
+                    >
+                      Submit Sourcing Request
+                    </Link>
+                    <Link
+                      href="/catalog"
+                      className="inline-flex items-center gap-2 border border-[#1a6b50] text-[#1a6b50] hover:bg-[#e8f4f0] text-sm font-bold px-5 py-2.5 rounded-xl transition-colors"
+                    >
+                      Browse Catalog
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── Invoices ── */}
+        {activeTab === 'invoices' && (
+          <div className="space-y-6">
+            {/* KPI cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div className="bg-[#e8f4f0] border border-[#b2d8cc] rounded-2xl p-6">
+                <div className="flex items-start justify-between mb-3">
+                  <p className="text-xs font-bold text-[#1a6b50] uppercase tracking-wide">
+                    Outstanding Balance
+                  </p>
+                  <div className="w-9 h-9 bg-white rounded-xl flex items-center justify-center">
+                    <FileText className="w-4 h-4 text-[#1a6b50]" />
+                  </div>
+                </div>
+                <p className="text-3xl font-black text-gray-900">
+                  {formatCurrency(dashboardData?.outstandingBalance ?? 0)}
+                </p>
+              </div>
+              <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                <div className="flex items-start justify-between mb-3">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                    Pending Reconciliation
+                  </p>
+                  <div className="w-9 h-9 bg-amber-50 rounded-xl flex items-center justify-center">
+                    <Clock className="w-4 h-4 text-amber-600" />
+                  </div>
+                </div>
+                <p className="text-3xl font-black text-gray-900">
+                  {formatCurrency(dashboardData?.pendingReconciliation ?? 0)}
+                </p>
+              </div>
+              <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                <div className="flex items-start justify-between mb-3">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                    Total Paid (MTD)
+                  </p>
+                  <div className="w-9 h-9 bg-green-50 rounded-xl flex items-center justify-center">
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                  </div>
+                </div>
+                <p className="text-3xl font-black text-gray-900">
+                  {formatCurrency(totalPaidMTD)}
+                </p>
+              </div>
+            </div>
+
+            {/* Payment history table */}
+            <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+              <div className="px-6 py-5 border-b border-gray-100">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-lg font-bold text-primary-900">
+                    <h2 className="text-base font-bold text-gray-900">
                       Payment History
                     </h2>
                     <div className="flex items-center gap-1.5 mt-1">
-                      <Info
-                        className="w-3.5 h-3.5 text-primary-400 flex-shrink-0"
-                        aria-hidden="true"
-                      />
-                      <p className="text-xs text-primary-500">
-                        Bank transfers take 1-3 business days to clear
+                      <Info className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                      <p className="text-xs text-gray-400">
+                        Bank transfers take 1–3 business days to clear
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <div className="relative">
-                      <Search
-                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400"
-                        aria-hidden="true"
-                      />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                       <input
                         type="search"
                         placeholder="Filter by Order ID..."
@@ -607,54 +596,46 @@ export default function DashboardPage() {
                           setSearchQuery(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="pl-9 pr-4 py-2 text-sm border border-primary-300 rounded-lg bg-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 text-primary-800 placeholder:text-primary-400"
-                        aria-label="Filter payments by Order ID"
+                        className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:border-[#1a6b50] focus:ring-2 focus:ring-[#1a6b50]/20 placeholder:text-gray-400"
                       />
                     </div>
                     <button
-                      className="p-2 text-primary-500 hover:text-primary-700 border border-primary-300 rounded-lg hover:bg-primary-50 transition-colors"
-                      aria-label="Advanced filter"
+                      className="p-2 text-gray-400 hover:text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                      aria-label="Filter"
                     >
-                      <Filter className="w-4 h-4" aria-hidden="true" />
+                      <Filter className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* Payment table */}
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-primary-50 border-b border-primary-200">
+                  <thead className="bg-gray-50 border-b border-gray-100">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-primary-600 uppercase tracking-wide">
-                        Invoice ID
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-primary-600 uppercase tracking-wide">
-                        Order Details
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-primary-600 uppercase tracking-wide">
-                        Amount
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-primary-600 uppercase tracking-wide">
-                        Payment Method
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-primary-600 uppercase tracking-wide">
-                        Status
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-bold text-primary-600 uppercase tracking-wide">
-                        Actions
-                      </th>
+                      {[
+                        'Invoice ID',
+                        'Order Details',
+                        'Amount',
+                        'Payment Method',
+                        'Status',
+                        'Actions',
+                      ].map((h) => (
+                        <th
+                          key={h}
+                          className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wide"
+                        >
+                          {h}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
                     {currentPayments.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="px-4 py-12 text-center">
-                          <FileText
-                            className="w-12 h-12 text-primary-300 mx-auto mb-4"
-                            aria-hidden="true"
-                          />
-                          <p className="text-sm text-primary-500">
+                        <td colSpan={6} className="px-4 py-16 text-center">
+                          <FileText className="w-10 h-10 text-gray-200 mx-auto mb-3" />
+                          <p className="text-sm text-gray-400">
                             No payment records found
                           </p>
                         </td>
@@ -668,39 +649,31 @@ export default function DashboardPage() {
                 </table>
               </div>
 
-              {/* Pagination */}
               {totalItems > 0 && (
-                <div className="px-6 py-4 border-t border-primary-100 flex items-center justify-between">
-                  <p className="text-sm text-primary-600">
-                    Showing {Math.min(startIndex + 1, totalItems)}-
-                    {Math.min(endIndex, totalItems)} of {totalItems} invoices
+                <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+                  <p className="text-xs text-gray-500">
+                    Showing {Math.min(startIndex + 1, totalItems)}–
+                    {Math.min(startIndex + itemsPerPage, totalItems)} of{' '}
+                    {totalItems}
                   </p>
-                  <nav
-                    className="flex items-center gap-2"
-                    aria-label="Payment history pagination"
-                  >
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
-                      className="px-3 py-1.5 text-sm font-medium text-primary-700 border border-primary-300 rounded-md hover:bg-primary-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-3 py-1.5 text-xs font-semibold text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       Previous
                     </button>
                     {Array.from(
                       { length: Math.min(3, totalPages) },
                       (_, i) => i + 1
-                    ).map((page) => (
+                    ).map((p) => (
                       <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        aria-current={currentPage === page ? 'page' : undefined}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                          currentPage === page
-                            ? 'bg-blue-600 text-white'
-                            : 'text-primary-700 border border-primary-300 hover:bg-primary-50'
-                        }`}
+                        key={p}
+                        onClick={() => setCurrentPage(p)}
+                        className={`w-8 h-8 text-xs font-semibold rounded-lg ${currentPage === p ? 'bg-[#1a6b50] text-white' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
                       >
-                        {page}
+                        {p}
                       </button>
                     ))}
                     <button
@@ -708,119 +681,13 @@ export default function DashboardPage() {
                         setCurrentPage((p) => Math.min(totalPages, p + 1))
                       }
                       disabled={currentPage === totalPages}
-                      className="px-3 py-1.5 text-sm font-medium text-primary-700 border border-primary-300 rounded-md hover:bg-primary-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-3 py-1.5 text-xs font-semibold text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       Next
                     </button>
-                  </nav>
+                  </div>
                 </div>
               )}
-            </div>
-          </>
-        )}
-
-        {/* ── Settings tab ─────────────────────────────────────────────────── */}
-        {activeTab === 'settings' && (
-          <div className="space-y-6">
-            <div className="bg-white border border-primary-200 rounded-xl shadow-sm p-6">
-              <h2 className="text-lg font-bold text-primary-900 mb-1">
-                Account Settings
-              </h2>
-              <p className="text-sm text-primary-500 mb-6">
-                Manage your profile and preferences.
-              </p>
-              <div className="space-y-4 max-w-lg">
-                <div>
-                  <label className="block text-xs font-semibold text-primary-500 uppercase tracking-wide mb-1">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-3 py-2.5 text-sm border border-primary-300 rounded-lg bg-primary-50 text-primary-700"
-                    placeholder="Your name"
-                    readOnly
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-primary-500 uppercase tracking-wide mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    className="w-full px-3 py-2.5 text-sm border border-primary-300 rounded-lg bg-primary-50 text-primary-700"
-                    placeholder="your@email.com"
-                    readOnly
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-primary-500 uppercase tracking-wide mb-1">
-                    Company Name
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-3 py-2.5 text-sm border border-primary-300 rounded-lg bg-primary-50 text-primary-700"
-                    placeholder="Your company"
-                    readOnly
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-primary-500 uppercase tracking-wide mb-1">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    className="w-full px-3 py-2.5 text-sm border border-primary-300 rounded-lg bg-primary-50 text-primary-700"
-                    placeholder="+254 700 000 000"
-                    readOnly
-                  />
-                </div>
-                <p className="text-xs text-primary-400">
-                  To update your profile details, contact{' '}
-                  <span className="text-blue-600">
-                    smartsupplysourcing@gmail.com
-                  </span>
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white border border-primary-200 rounded-xl shadow-sm p-6">
-              <h2 className="text-base font-bold text-primary-900 mb-1">
-                Notifications
-              </h2>
-              <p className="text-sm text-primary-500 mb-4">
-                Choose what updates you receive.
-              </p>
-              <div className="space-y-3">
-                {[
-                  {
-                    label: 'Quote ready notifications',
-                    desc: 'Get notified when a quote is ready for review',
-                  },
-                  {
-                    label: 'Payment confirmations',
-                    desc: 'Receive confirmation when payments are processed',
-                  },
-                  {
-                    label: 'Order status updates',
-                    desc: 'Track your order from processing to delivery',
-                  },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center justify-between py-2 border-b border-primary-100 last:border-0"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-primary-800">
-                        {item.label}
-                      </p>
-                      <p className="text-xs text-primary-400">{item.desc}</p>
-                    </div>
-                    <div className="w-10 h-6 bg-blue-600 rounded-full flex items-center justify-end px-1">
-                      <div className="w-4 h-4 bg-white rounded-full" />
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         )}
