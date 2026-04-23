@@ -1,6 +1,11 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization — avoids crash during build when env var is missing
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key || key === 're_your_api_key_here') return null;
+  return new Resend(key);
+}
 
 const ADMIN_EMAIL = 'smartsupplysourcing@gmail.com';
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
@@ -26,7 +31,7 @@ export async function sendSourcingRequestNotification({
   requestId: string;
 }) {
   try {
-    await resend.emails.send({
+    await getResend()?.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
       subject: `New Sourcing Request from ${buyerName}`,
@@ -99,7 +104,7 @@ export async function sendQuoteNotificationToBuyer({
 
   // ── Email to buyer ──────────────────────────────────────────────────────────
   try {
-    await resend.emails.send({
+    await getResend()?.emails.send({
       from: FROM_EMAIL,
       to: buyerEmail,
       subject: `Your Quote is Ready — ${invoiceNumber}`,
@@ -169,7 +174,7 @@ export async function sendQuoteNotificationToBuyer({
 
     // Also email the WhatsApp link to admin so they can send it
     try {
-      await resend.emails.send({
+      await getResend()?.emails.send({
         from: FROM_EMAIL,
         to: ADMIN_EMAIL,
         subject: `Send WhatsApp to ${buyerName} — Quote ${invoiceNumber} Ready`,
