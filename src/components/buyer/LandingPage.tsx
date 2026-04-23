@@ -413,8 +413,7 @@ export function LandingPage({
                       </p>
                       <button
                         className="bg-orange-500 text-white p-2 rounded-lg hover:bg-orange-600 transition-colors"
-                        aria-label={`Add ${product.name} to cart`}
-                        onClick={(e) => e.preventDefault()}
+                        aria-label={`View ${product.name}`}
                       >
                         <svg
                           className="h-4 w-4"
