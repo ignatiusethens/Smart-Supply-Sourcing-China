@@ -31,6 +31,7 @@ interface Product {
   stockLevel: number;
   description: string;
   imageUrls: string[];
+  featured?: boolean;
 }
 
 interface ProductForm {
@@ -41,6 +42,7 @@ interface ProductForm {
   stockLevel: string;
   description: string;
   imageUrls: string[];
+  featured: boolean;
 }
 
 const EMPTY_FORM: ProductForm = {
@@ -51,6 +53,7 @@ const EMPTY_FORM: ProductForm = {
   stockLevel: '',
   description: '',
   imageUrls: [],
+  featured: false,
 };
 
 // ── Image carousel ────────────────────────────────────────────────────────────
@@ -205,6 +208,7 @@ export default function AdminCatalogPage() {
         stockLevel: parseInt(form.stockLevel),
         description: form.description,
         imageUrls: form.imageUrls,
+        featured: form.featured,
       };
 
       const res = await authFetch(
@@ -246,6 +250,7 @@ export default function AdminCatalogPage() {
       stockLevel: String(product.stockLevel),
       description: product.description,
       imageUrls: product.imageUrls || [],
+      featured: product.featured || false,
     });
     setEditingId(product.id);
     setShowForm(true);
@@ -424,6 +429,35 @@ export default function AdminCatalogPage() {
                     className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   />
                 </div>
+
+                {/* Featured toggle */}
+                <div className="flex items-center justify-between rounded-xl border border-[#b2d8cc] bg-[#f0faf6] px-4 py-3">
+                  <div>
+                    <p className="text-sm font-bold text-gray-800">
+                      Feature on Landing Page
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Show this product in the homepage Featured Inventory
+                      section
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm((p) => ({ ...p, featured: !p.featured }))
+                    }
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#1a6b50] focus:ring-offset-2 ${
+                      form.featured ? 'bg-[#1a6b50]' : 'bg-gray-200'
+                    }`}
+                    aria-label="Toggle featured on landing page"
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                        form.featured ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
               </div>
 
               {/* Right column — photos */}
@@ -558,21 +592,28 @@ export default function AdminCatalogPage() {
                   <h3 className="text-sm font-bold text-gray-900 line-clamp-2 leading-snug">
                     {product.name}
                   </h3>
-                  <span
-                    className={`shrink-0 text-xs font-bold px-2 py-0.5 rounded-full ${
-                      product.availability === 'in-stock'
-                        ? 'bg-green-100 text-green-700'
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span
+                      className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                        product.availability === 'in-stock'
+                          ? 'bg-green-100 text-green-700'
+                          : product.availability === 'pre-order'
+                            ? 'bg-orange-100 text-orange-700'
+                            : 'bg-red-100 text-red-700'
+                      }`}
+                    >
+                      {product.availability === 'in-stock'
+                        ? 'In Stock'
                         : product.availability === 'pre-order'
-                          ? 'bg-orange-100 text-orange-700'
-                          : 'bg-red-100 text-red-700'
-                    }`}
-                  >
-                    {product.availability === 'in-stock'
-                      ? 'In Stock'
-                      : product.availability === 'pre-order'
-                        ? 'Pre-Order'
-                        : 'Out'}
-                  </span>
+                          ? 'Pre-Order'
+                          : 'Out'}
+                    </span>
+                    {product.featured && (
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#e8f4f0] text-[#1a6b50] border border-[#b2d8cc]">
+                        ★ Featured
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <p className="text-xs text-gray-400 mb-2 capitalize">

@@ -63,6 +63,16 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
       label: 'Sourcing',
       description: 'Manage sourcing requests',
     },
+    {
+      href: '/admin/catalog',
+      label: 'Catalog',
+      description: 'Manage product catalog',
+    },
+    {
+      href: '/admin/media',
+      label: 'Media',
+      description: 'Manage site photos',
+    },
   ];
 
   const links = userRole === 'admin' ? adminLinks : buyerLinks;
@@ -157,18 +167,18 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
           </nav>
         )}
 
-        {/* Search bar — center (buyer only, desktop) */}
-        {userRole === 'buyer' && (
+        {/* Search bar — only shown when authenticated */}
+        {userRole === 'buyer' && isAuthenticated && (
           <div className="hidden md:flex flex-1 max-w-md mx-4">
             <div className="relative w-full">
               <Search
-                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary-400 pointer-events-none"
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none"
                 aria-hidden="true"
               />
               <input
                 type="search"
                 placeholder="Search products, orders, or quotes..."
-                className="w-full pl-9 pr-4 py-2 text-sm border border-primary-200 rounded-lg bg-primary-50 text-primary-800 placeholder-primary-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-colors duration-200"
+                className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1a6b50] focus:border-[#1a6b50] focus:bg-white transition-colors duration-200"
                 aria-label="Search products, orders, or quotes"
               />
             </div>
@@ -185,13 +195,13 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
                   <Link
                     href="/cart"
                     aria-label={`Shopping cart with ${cartItems} item${cartItems === 1 ? '' : 's'}`}
-                    className="relative inline-flex items-center justify-center h-10 w-10 rounded-md text-primary-600 hover:text-primary-900 hover:bg-primary-50 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                    className="relative inline-flex items-center justify-center h-10 w-10 rounded-md text-gray-600 hover:text-[#1a6b50] hover:bg-[#e8f4f0] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a6b50]"
                   >
                     <ShoppingCart className="h-5 w-5" aria-hidden="true" />
                     {cartItems > 0 && (
                       <>
                         <span
-                          className="absolute top-1 right-1 w-4 h-4 bg-accent-500 text-white text-xs rounded-full flex items-center justify-center font-bold leading-none"
+                          className="absolute top-1 right-1 w-4 h-4 bg-orange-500 text-white text-xs rounded-full flex items-center justify-center font-bold leading-none"
                           aria-hidden="true"
                         >
                           {cartItems > 99 ? '99+' : cartItems}
@@ -206,7 +216,7 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
                   {/* Bell / notifications icon */}
                   <button
                     type="button"
-                    className="inline-flex items-center justify-center h-10 w-10 rounded-md text-primary-600 hover:text-primary-900 hover:bg-primary-50 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                    className="inline-flex items-center justify-center h-10 w-10 rounded-md text-gray-600 hover:text-[#1a6b50] hover:bg-[#e8f4f0] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a6b50]"
                     aria-label="Notifications"
                   >
                     <Bell className="h-5 w-5" aria-hidden="true" />
@@ -217,7 +227,7 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
                     href={
                       user?.role === 'admin' ? '/admin/dashboard' : '/dashboard'
                     }
-                    className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                    className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-[#1a6b50] text-white text-sm font-semibold hover:bg-[#155a42] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a6b50]"
                     aria-label="Go to account dashboard"
                   >
                     <User className="h-4 w-4" aria-hidden="true" />
