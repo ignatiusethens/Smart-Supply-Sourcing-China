@@ -3,12 +3,16 @@ import { uploadToCloudinary } from '@/lib/cloudinary/upload';
 import { ApiResponse } from '@/types/api';
 import { CloudinaryUploadResult } from '@/lib/cloudinary/upload';
 import { MAX_FILE_SIZE, ALLOWED_FILE_TYPES } from '@/lib/utils/constants';
+import { requireAuth } from '@/lib/auth/middleware';
 
 export async function POST(request: NextRequest) {
+  const auth = await requireAuth(request);
+  if (!auth.success) return auth.response;
   try {
     const formData = await request.formData();
     const files = formData.getAll('files') as File[];
-    const folder = (formData.get('folder') as string) || 'smart-supply-sourcing';
+    const folder =
+      (formData.get('folder') as string) || 'smart-supply-sourcing';
 
     if (!files || files.length === 0) {
       const response: ApiResponse = {
@@ -40,7 +44,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Upload files to Cloudinary
-    const uploadPromises = files.map(file => 
+    const uploadPromises = files.map((file) =>
       uploadToCloudinary(file, folder)
     );
 

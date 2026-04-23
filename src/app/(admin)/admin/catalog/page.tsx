@@ -160,7 +160,9 @@ export default function AdminCatalogPage() {
 
       if (data.success) {
         const urls = data.data.uploads.map(
-          (u: { secureUrl: string }) => u.secureUrl
+          // Cloudinary returns snake_case secure_url
+          (u: { secure_url?: string; secureUrl?: string }) =>
+            u.secure_url || u.secureUrl || ''
         );
         setForm((prev) => ({
           ...prev,

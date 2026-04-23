@@ -9,31 +9,31 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // Allow both admin and buyer to fetch (buyer needs to see their own request)
   try {
     const { id } = await params;
+
+    if (!id || id === 'undefined') {
+      return NextResponse.json(
+        { success: false, error: 'Invalid sourcing request ID' },
+        { status: 400 }
+      );
+    }
+
     const sourcingRequest = await getSourcingRequestWithQuotes(id);
 
     if (!sourcingRequest) {
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Sourcing request not found',
-        },
+        { success: false, error: 'Sourcing request not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      data: sourcingRequest,
-    });
+    return NextResponse.json({ success: true, data: sourcingRequest });
   } catch (error) {
     console.error('Error fetching sourcing request:', error);
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch sourcing request',
-      },
+      { success: false, error: 'Failed to fetch sourcing request' },
       { status: 500 }
     );
   }
