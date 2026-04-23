@@ -5,6 +5,7 @@ import {
 } from '@/lib/database/queries/sourcing';
 import { requireAuth } from '@/lib/auth/middleware';
 import { sendSourcingRequestNotification } from '@/lib/email/sendEmail';
+import { uploadToCloudinary } from '@/lib/cloudinary/upload';
 
 export async function GET(request: NextRequest) {
   try {
@@ -131,6 +132,37 @@ export async function POST(request: NextRequest) {
     const targetPrice = targetPriceRaw ? parseFloat(targetPriceRaw) : undefined;
     const resolvedBuyerId = authenticatedUser.id;
 
+    // Upload attachments to Cloudinary if any
+    const attachmentFiles = formData.getAll('attachments') as File[];
+    const attachmentUrls: Array<{
+      fileName: string;
+      fileType: string;
+      fileSize: number;
+      cloudinaryUrl: string;
+      cloudinaryPublicId: string;
+    }> = [];
+
+    for (const file of attachmentFiles) {
+      if (file && file.size > 0) {
+        try {
+          const result = await uploadToCloudinary(
+            file,
+            'smart-supply-sourcing/sourcing'
+          );
+          attachmentUrls.push({
+            fileName: file.name,
+            fileType: file.type,
+            fileSize: file.size,
+            cloudinaryUrl: result.secure_url,
+            cloudinaryPublicId: result.public_id,
+          });
+        } catch (uploadError) {
+          console.error('Failed to upload attachment:', uploadError);
+          // Continue without this attachment
+        }
+      }
+    }
+
     const sourcingRequest = await createSourcingRequest(
       resolvedBuyerId,
       {
@@ -142,7 +174,7 @@ export async function POST(request: NextRequest) {
         timeline: timeline || '',
         complianceRequirements: complianceRequirements || '',
       },
-      []
+      attachmentUrls
     );
 
     // Send email notification to admin (non-blocking)
