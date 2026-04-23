@@ -207,15 +207,22 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
                     <Bell className="h-5 w-5" aria-hidden="true" />
                   </button>
 
-                  {/* User avatar */}
+                  {/* User avatar + name */}
                   <Link
                     href={
                       user?.role === 'admin' ? '/admin/dashboard' : '/dashboard'
                     }
-                    className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-[#1a6b50] text-white text-sm font-semibold hover:bg-[#155a42] transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a6b50]"
+                    className="inline-flex items-center gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a6b50] rounded-full"
                     aria-label="Go to account dashboard"
                   >
-                    <User className="h-4 w-4" aria-hidden="true" />
+                    <div className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-[#1a6b50] text-white text-sm font-semibold hover:bg-[#155a42] transition-colors duration-200">
+                      <User className="h-4 w-4" aria-hidden="true" />
+                    </div>
+                    {user?.name && (
+                      <span className="hidden sm:inline text-sm font-semibold text-gray-700 hover:text-[#1a6b50] transition-colors max-w-[120px] truncate">
+                        {user.name.split(' ')[0]}
+                      </span>
+                    )}
                   </Link>
                 </>
               ) : (
