@@ -12,15 +12,17 @@ import {
   Trash2,
   Edit2,
   Package,
+  Tag,
+  Pencil,
+  Check,
 } from 'lucide-react';
 
-const CATEGORIES = [
-  { value: 'pumps-motors', label: 'Pumps & Motors' },
-  { value: 'energy-systems', label: 'Energy Systems' },
-  { value: 'fluid-control', label: 'Fluid Control' },
-  { value: 'electrical', label: 'Electrical' },
-  { value: 'storage', label: 'Storage' },
-];
+interface CategoryItem {
+  id: string;
+  slug: string;
+  label: string;
+  sort_order: number;
+}
 
 interface Product {
   id: string;
@@ -105,7 +107,6 @@ function ImageCarousel({ images, name }: { images: string[]; name: string }) {
     </div>
   );
 }
-
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function AdminCatalogPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -117,6 +118,88 @@ export default function AdminCatalogPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'products' | 'categories'>(
+    'products'
+  );
+
+  // ── Categories state ──
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [newCatLabel, setNewCatLabel] = useState('');
+  const [addingCat, setAddingCat] = useState(false);
+  const [editingCatId, setEditingCatId] = useState<string | null>(null);
+  const [editingCatLabel, setEditingCatLabel] = useState('');
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await authFetch('/api/admin/categories');
+      const data = await res.json();
+      if (data.success) setCategories(data.data);
+    } catch {
+      // use defaults silently
+    }
+  }, []);
+
+  const handleAddCategory = async () => {
+    if (!newCatLabel.trim()) return;
+    setAddingCat(true);
+    try {
+      const res = await authFetch('/api/admin/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ label: newCatLabel.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNewCatLabel('');
+        fetchCategories();
+        setSuccess('Category added');
+        setTimeout(() => setSuccess(''), 2000);
+      } else {
+        setError(data.error || 'Failed to add category');
+      }
+    } catch {
+      setError('Failed to add category');
+    } finally {
+      setAddingCat(false);
+    }
+  };
+
+  const handleRenameCategory = async (id: string) => {
+    if (!editingCatLabel.trim()) return;
+    try {
+      const res = await authFetch(`/api/admin/categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ label: editingCatLabel.trim() }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEditingCatId(null);
+        fetchCategories();
+      } else {
+        setError(data.error || 'Failed to rename');
+      }
+    } catch {
+      setError('Failed to rename category');
+    }
+  };
+
+  const handleDeleteCategory = async (id: string, label: string) => {
+    if (
+      !confirm(
+        `Delete "${label}"? Products in this category will be marked as "uncategorised".`
+      )
+    )
+      return;
+    try {
+      await authFetch(`/api/admin/categories/${id}`, { method: 'DELETE' });
+      fetchCategories();
+      setSuccess('Category deleted');
+      setTimeout(() => setSuccess(''), 2000);
+    } catch {
+      setError('Failed to delete category');
+    }
+  };
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -134,7 +217,8 @@ export default function AdminCatalogPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProducts();
-  }, [fetchProducts]);
+    fetchCategories();
+  }, [fetchProducts, fetchCategories]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -277,17 +361,43 @@ export default function AdminCatalogPage() {
             Add and manage products visible to buyers
           </p>
         </div>
-        <button
-          onClick={() => {
-            setForm(EMPTY_FORM);
-            setEditingId(null);
-            setShowForm(!showForm);
-          }}
-          className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Product
-        </button>
+        {activeTab === 'products' && (
+          <button
+            onClick={() => {
+              setForm({
+                ...EMPTY_FORM,
+                category: categories[0]?.slug || 'uncategorised',
+              });
+              setEditingId(null);
+              setShowForm(!showForm);
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-[#1a6b50] hover:bg-[#155a42] rounded-xl transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Product
+          </button>
+        )}
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-0 border-b border-gray-200 mb-6">
+        {[
+          { key: 'products', label: 'Products', icon: Package },
+          { key: 'categories', label: 'Categories', icon: Tag },
+        ].map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            onClick={() => setActiveTab(key as 'products' | 'categories')}
+            className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 -mb-px transition-colors ${
+              activeTab === key
+                ? 'border-[#1a6b50] text-[#1a6b50]'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <Icon className="w-4 h-4" />
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Alerts */}
@@ -305,345 +415,475 @@ export default function AdminCatalogPage() {
         </div>
       )}
 
-      {/* Add / Edit Form */}
-      {showForm && (
-        <div className="mb-8 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
-            <h2 className="text-base font-bold text-gray-900">
-              {editingId ? 'Edit Product' : 'Add New Product'}
-            </h2>
+      {/* ── Categories tab ── */}
+      {activeTab === 'categories' && (
+        <div className="max-w-xl space-y-4">
+          <p className="text-sm text-gray-500">
+            Categories are used to organise products in the catalog and filter
+            panel. Changes apply immediately to all products.
+          </p>
+
+          {/* Add new */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newCatLabel}
+              onChange={(e) => setNewCatLabel(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
+              placeholder="e.g. Solar Inverters, Hand Tools, Textiles..."
+              className="flex-1 px-3 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a6b50] focus:border-[#1a6b50]"
+            />
             <button
-              onClick={() => {
-                setShowForm(false);
-                setEditingId(null);
-                setForm(EMPTY_FORM);
-              }}
+              onClick={handleAddCategory}
+              disabled={addingCat || !newCatLabel.trim()}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white bg-[#1a6b50] hover:bg-[#155a42] rounded-xl transition-colors disabled:opacity-50"
             >
-              <X className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+              <Plus className="w-4 h-4" />
+              Add
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left column */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
-                    Product Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={form.name}
-                    onChange={(e) =>
-                      setForm((p) => ({ ...p, name: e.target.value }))
-                    }
-                    placeholder="e.g. Centrifugal Pump 5HP"
-                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
-                      Category
-                    </label>
-                    <select
-                      value={form.category}
-                      onChange={(e) =>
-                        setForm((p) => ({ ...p, category: e.target.value }))
-                      }
-                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      {CATEGORIES.map((c) => (
-                        <option key={c.value} value={c.value}>
-                          {c.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
-                      Availability
-                    </label>
-                    <select
-                      value={form.availability}
-                      onChange={(e) =>
-                        setForm((p) => ({ ...p, availability: e.target.value }))
-                      }
-                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="in-stock">In Stock</option>
-                      <option value="pre-order">Pre-Order</option>
-                      <option value="out-of-stock">Out of Stock</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
-                      Price (KES) *
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      min="0"
-                      value={form.price}
-                      onChange={(e) =>
-                        setForm((p) => ({ ...p, price: e.target.value }))
-                      }
-                      placeholder="85000"
-                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
-                      Stock Level *
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      min="0"
-                      value={form.stockLevel}
-                      onChange={(e) =>
-                        setForm((p) => ({ ...p, stockLevel: e.target.value }))
-                      }
-                      placeholder="50"
-                      className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={form.description}
-                    onChange={(e) =>
-                      setForm((p) => ({ ...p, description: e.target.value }))
-                    }
-                    placeholder="Product description..."
-                    className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                  />
-                </div>
-
-                {/* Featured toggle */}
-                <div className="flex items-center justify-between rounded-xl border border-[#b2d8cc] bg-[#f0faf6] px-4 py-3">
-                  <div>
-                    <p className="text-sm font-bold text-gray-800">
-                      Feature on Landing Page
-                    </p>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Show this product in the homepage Featured Inventory
-                      section
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setForm((p) => ({ ...p, featured: !p.featured }))
-                    }
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#1a6b50] focus:ring-offset-2 ${
-                      form.featured ? 'bg-[#1a6b50]' : 'bg-gray-200'
-                    }`}
-                    aria-label="Toggle featured on landing page"
+          {/* Category list */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            {categories.length === 0 ? (
+              <div className="p-8 text-center text-sm text-gray-400">
+                No categories yet
+              </div>
+            ) : (
+              <ul className="divide-y divide-gray-100">
+                {categories.map((cat) => (
+                  <li
+                    key={cat.id}
+                    className="flex items-center gap-3 px-5 py-3.5"
                   >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                        form.featured ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
-                </div>
-              </div>
+                    <Tag className="w-4 h-4 text-[#1a6b50] flex-shrink-0" />
 
-              {/* Right column — photos */}
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
-                  Product Photos ({form.imageUrls.length}/5)
-                </label>
-
-                {/* Upload area */}
-                {form.imageUrls.length < 5 && (
-                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors mb-3">
-                    <Upload className="w-6 h-6 text-gray-400 mb-1" />
-                    <span className="text-sm text-gray-500">
-                      {uploadingImages
-                        ? 'Uploading...'
-                        : 'Click to upload photos'}
-                    </span>
-                    <span className="text-xs text-gray-400 mt-0.5">
-                      JPG, PNG up to 5MB each
-                    </span>
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                      disabled={uploadingImages}
-                    />
-                  </label>
-                )}
-
-                {/* Preview grid */}
-                {form.imageUrls.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2">
-                    {form.imageUrls.map((url, i) => (
-                      <div
-                        key={i}
-                        className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 group"
-                      >
-                        <Image
-                          src={url}
-                          alt={`Photo ${i + 1}`}
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(i)}
-                          className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                        {i === 0 && (
-                          <span className="absolute bottom-1 left-1 text-xs bg-blue-600 text-white px-1.5 py-0.5 rounded font-bold">
-                            Main
-                          </span>
-                        )}
+                    {editingCatId === cat.id ? (
+                      <input
+                        autoFocus
+                        value={editingCatLabel}
+                        onChange={(e) => setEditingCatLabel(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleRenameCategory(cat.id);
+                          if (e.key === 'Escape') setEditingCatId(null);
+                        }}
+                        className="flex-1 px-2 py-1 text-sm border border-[#1a6b50] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a6b50]"
+                      />
+                    ) : (
+                      <div className="flex-1">
+                        <span className="text-sm font-semibold text-gray-800">
+                          {cat.label}
+                        </span>
+                        <span className="ml-2 text-xs text-gray-400 font-mono">
+                          {cat.slug}
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+                    )}
 
-            <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowForm(false);
-                  setEditingId(null);
-                  setForm(EMPTY_FORM);
-                }}
-                className="px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={saving || uploadingImages}
-                className="px-6 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-60"
-              >
-                {saving
-                  ? 'Saving...'
-                  : editingId
-                    ? 'Update Product'
-                    : 'Add to Catalog'}
-              </button>
-            </div>
-          </form>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {editingCatId === cat.id ? (
+                        <>
+                          <button
+                            onClick={() => handleRenameCategory(cat.id)}
+                            className="p-1.5 text-[#1a6b50] hover:bg-[#e8f4f0] rounded-lg transition-colors"
+                            aria-label="Save"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setEditingCatId(null)}
+                            className="p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors"
+                            aria-label="Cancel"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => {
+                              setEditingCatId(cat.id);
+                              setEditingCatLabel(cat.label);
+                            }}
+                            className="p-1.5 text-gray-400 hover:text-[#1a6b50] hover:bg-[#e8f4f0] rounded-lg transition-colors"
+                            aria-label={`Rename ${cat.label}`}
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleDeleteCategory(cat.id, cat.label)
+                            }
+                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            aria-label={`Delete ${cat.label}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Products grid */}
-      {loading ? (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="rounded-xl border border-gray-200 overflow-hidden animate-pulse"
-            >
-              <div className="h-40 bg-gray-200" />
-              <div className="p-4 space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-3/4" />
-                <div className="h-3 bg-gray-200 rounded w-1/2" />
+      {/* ── Products tab ── */}
+      {activeTab === 'products' && (
+        <>
+          {/* Add / Edit Form */}
+          {showForm && (
+            <div className="mb-8 bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+                <h2 className="text-base font-bold text-gray-900">
+                  {editingId ? 'Edit Product' : 'Add New Product'}
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowForm(false);
+                    setEditingId(null);
+                    setForm(EMPTY_FORM);
+                  }}
+                >
+                  <X className="w-5 h-5 text-gray-400 hover:text-gray-600" />
+                </button>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : products.length === 0 ? (
-        <div className="text-center py-20 border-2 border-dashed border-gray-200 rounded-2xl">
-          <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 font-medium">No products yet</p>
-          <p className="text-sm text-gray-400 mt-1">
-            Click &quot;Add Product&quot; to add your first catalog item
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-          {products.map((product) => (
-            <div
-              key={product.id}
-              className="group rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all"
-            >
-              <ImageCarousel
-                images={product.imageUrls || []}
-                name={product.name}
-              />
 
-              <div className="p-4">
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="text-sm font-bold text-gray-900 line-clamp-2 leading-snug">
-                    {product.name}
-                  </h3>
-                  <div className="flex flex-col items-end gap-1 shrink-0">
-                    <span
-                      className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                        product.availability === 'in-stock'
-                          ? 'bg-green-100 text-green-700'
-                          : product.availability === 'pre-order'
-                            ? 'bg-orange-100 text-orange-700'
-                            : 'bg-red-100 text-red-700'
-                      }`}
-                    >
-                      {product.availability === 'in-stock'
-                        ? 'In Stock'
-                        : product.availability === 'pre-order'
-                          ? 'Pre-Order'
-                          : 'Out'}
-                    </span>
-                    {product.featured && (
-                      <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#e8f4f0] text-[#1a6b50] border border-[#b2d8cc]">
-                        ★ Featured
-                      </span>
+              <form onSubmit={handleSubmit} className="p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Left column */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
+                        Product Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={form.name}
+                        onChange={(e) =>
+                          setForm((p) => ({ ...p, name: e.target.value }))
+                        }
+                        placeholder="e.g. Centrifugal Pump 5HP"
+                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
+                          Category
+                        </label>
+                        <select
+                          value={form.category}
+                          onChange={(e) =>
+                            setForm((p) => ({ ...p, category: e.target.value }))
+                          }
+                          className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          {categories.map((c) => (
+                            <option key={c.slug} value={c.slug}>
+                              {c.label}
+                            </option>
+                          ))}
+                          <option value="uncategorised">Uncategorised</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
+                          Availability
+                        </label>
+                        <select
+                          value={form.availability}
+                          onChange={(e) =>
+                            setForm((p) => ({
+                              ...p,
+                              availability: e.target.value,
+                            }))
+                          }
+                          className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="in-stock">In Stock</option>
+                          <option value="pre-order">Pre-Order</option>
+                          <option value="out-of-stock">Out of Stock</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
+                          Price (KES) *
+                        </label>
+                        <input
+                          type="number"
+                          required
+                          min="0"
+                          value={form.price}
+                          onChange={(e) =>
+                            setForm((p) => ({ ...p, price: e.target.value }))
+                          }
+                          placeholder="85000"
+                          className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
+                          Stock Level *
+                        </label>
+                        <input
+                          type="number"
+                          required
+                          min="0"
+                          value={form.stockLevel}
+                          onChange={(e) =>
+                            setForm((p) => ({
+                              ...p,
+                              stockLevel: e.target.value,
+                            }))
+                          }
+                          placeholder="50"
+                          className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
+                        Description
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={form.description}
+                        onChange={(e) =>
+                          setForm((p) => ({
+                            ...p,
+                            description: e.target.value,
+                          }))
+                        }
+                        placeholder="Product description..."
+                        className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                      />
+                    </div>
+
+                    {/* Featured toggle */}
+                    <div className="flex items-center justify-between rounded-xl border border-[#b2d8cc] bg-[#f0faf6] px-4 py-3">
+                      <div>
+                        <p className="text-sm font-bold text-gray-800">
+                          Feature on Landing Page
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          Show this product in the homepage Featured Inventory
+                          section
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm((p) => ({ ...p, featured: !p.featured }))
+                        }
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#1a6b50] focus:ring-offset-2 ${
+                          form.featured ? 'bg-[#1a6b50]' : 'bg-gray-200'
+                        }`}
+                        aria-label="Toggle featured on landing page"
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                            form.featured ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Right column — photos */}
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                      Product Photos ({form.imageUrls.length}/5)
+                    </label>
+
+                    {/* Upload area */}
+                    {form.imageUrls.length < 5 && (
+                      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors mb-3">
+                        <Upload className="w-6 h-6 text-gray-400 mb-1" />
+                        <span className="text-sm text-gray-500">
+                          {uploadingImages
+                            ? 'Uploading...'
+                            : 'Click to upload photos'}
+                        </span>
+                        <span className="text-xs text-gray-400 mt-0.5">
+                          JPG, PNG up to 5MB each
+                        </span>
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleImageUpload}
+                          disabled={uploadingImages}
+                        />
+                      </label>
+                    )}
+
+                    {/* Preview grid */}
+                    {form.imageUrls.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2">
+                        {form.imageUrls.map((url, i) => (
+                          <div
+                            key={i}
+                            className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 group"
+                          >
+                            <Image
+                              src={url}
+                              alt={`Photo ${i + 1}`}
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(i)}
+                              className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                            {i === 0 && (
+                              <span className="absolute bottom-1 left-1 text-xs bg-blue-600 text-white px-1.5 py-0.5 rounded font-bold">
+                                Main
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>
 
-                <p className="text-xs text-gray-400 mb-2 capitalize">
-                  {product.category.replace('-', ' ')}
-                </p>
-                <p className="text-base font-black text-blue-600 mb-3">
-                  KES {product.price.toLocaleString()}
-                </p>
-                <p className="text-xs text-gray-400 mb-3">
-                  Stock: {product.stockLevel} units
-                </p>
-
-                <div className="flex gap-2">
+                <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
                   <button
-                    onClick={() => handleEdit(product)}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    type="button"
+                    onClick={() => {
+                      setShowForm(false);
+                      setEditingId(null);
+                      setForm(EMPTY_FORM);
+                    }}
+                    className="px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                   >
-                    <Edit2 className="w-3 h-3" /> Edit
+                    Cancel
                   </button>
                   <button
-                    onClick={() => handleDelete(product.id)}
-                    className="flex items-center justify-center w-8 h-8 text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+                    type="submit"
+                    disabled={saving || uploadingImages}
+                    className="px-6 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-60"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    {saving
+                      ? 'Saving...'
+                      : editingId
+                        ? 'Update Product'
+                        : 'Add to Catalog'}
                   </button>
                 </div>
-              </div>
+              </form>
             </div>
-          ))}
-        </div>
+          )}
+
+          {/* Products grid */}
+          {loading ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="rounded-xl border border-gray-200 overflow-hidden animate-pulse"
+                >
+                  <div className="h-40 bg-gray-200" />
+                  <div className="p-4 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-20 border-2 border-dashed border-gray-200 rounded-2xl">
+              <Package className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500 font-medium">No products yet</p>
+              <p className="text-sm text-gray-400 mt-1">
+                Click &quot;Add Product&quot; to add your first catalog item
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+              {products.map((product) => (
+                <div
+                  key={product.id}
+                  className="group rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all"
+                >
+                  <ImageCarousel
+                    images={product.imageUrls || []}
+                    name={product.name}
+                  />
+
+                  <div className="p-4">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 className="text-sm font-bold text-gray-900 line-clamp-2 leading-snug">
+                        {product.name}
+                      </h3>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <span
+                          className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                            product.availability === 'in-stock'
+                              ? 'bg-green-100 text-green-700'
+                              : product.availability === 'pre-order'
+                                ? 'bg-orange-100 text-orange-700'
+                                : 'bg-red-100 text-red-700'
+                          }`}
+                        >
+                          {product.availability === 'in-stock'
+                            ? 'In Stock'
+                            : product.availability === 'pre-order'
+                              ? 'Pre-Order'
+                              : 'Out'}
+                        </span>
+                        {product.featured && (
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#e8f4f0] text-[#1a6b50] border border-[#b2d8cc]">
+                            ★ Featured
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-gray-400 mb-2 capitalize">
+                      {product.category.replace('-', ' ')}
+                    </p>
+                    <p className="text-base font-black text-blue-600 mb-3">
+                      KES {product.price.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-gray-400 mb-3">
+                      Stock: {product.stockLevel} units
+                    </p>
+
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEdit(product)}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-xs font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        <Edit2 className="w-3 h-3" /> Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(product.id)}
+                        className="flex items-center justify-center w-8 h-8 text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

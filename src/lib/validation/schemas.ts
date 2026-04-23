@@ -28,13 +28,7 @@ export const loginSchema = z.object({
 });
 
 // Product validation schemas
-export const categorySchema = z.enum([
-  'pumps-motors',
-  'energy-systems',
-  'fluid-control',
-  'electrical',
-  'storage',
-]);
+export const categorySchema = z.string().min(1, 'Category is required');
 
 export const availabilityStatusSchema = z.enum([
   'in-stock',
@@ -67,7 +61,7 @@ export const createProductSchema = z.object({
 export const updateProductSchema = createProductSchema.partial();
 
 export const productFiltersSchema = z.object({
-  categories: z.array(categorySchema).default([]),
+  categories: z.array(z.string()).default([]),
   availability: z.array(availabilityStatusSchema).default([]),
   priceRange: z
     .object({

@@ -16,14 +16,14 @@ export const ALLOWED_FILE_TYPES = [
   'application/pdf',
 ];
 
-// Categories
-export const CATEGORIES = [
+// Categories — default fallback list (overridden by DB via /api/admin/categories)
+export const CATEGORIES: string[] = [
   'pumps-motors',
   'energy-systems',
   'fluid-control',
   'electrical',
   'storage',
-] as const;
+];
 
 // Availability Statuses
 export const AVAILABILITY_STATUSES = [

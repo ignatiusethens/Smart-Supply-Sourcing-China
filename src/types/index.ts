@@ -1,10 +1,29 @@
 // Core Types
-export type Category = 'pumps-motors' | 'energy-systems' | 'fluid-control' | 'electrical' | 'storage';
+export type Category = string; // Dynamic — managed via admin categories panel
 export type AvailabilityStatus = 'in-stock' | 'pre-order' | 'out-of-stock';
 export type PaymentMethod = 'mpesa' | 'bank-transfer';
-export type PaymentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'pending-reconciliation' | 'received' | 'reconciled' | 'rejected';
-export type OrderStatus = 'pending-payment' | 'payment-received' | 'processing' | 'shipped' | 'completed' | 'cancelled';
-export type SourcingRequestStatus = 'submitted' | 'under-review' | 'quoted' | 'accepted' | 'rejected';
+export type PaymentStatus =
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+  | 'pending-reconciliation'
+  | 'received'
+  | 'reconciled'
+  | 'rejected';
+export type OrderStatus =
+  | 'pending-payment'
+  | 'payment-received'
+  | 'processing'
+  | 'shipped'
+  | 'completed'
+  | 'cancelled';
+export type SourcingRequestStatus =
+  | 'submitted'
+  | 'under-review'
+  | 'quoted'
+  | 'accepted'
+  | 'rejected';
 export type QuoteStatus = 'pending' | 'accepted' | 'expired' | 'rejected';
 export type UserRole = 'buyer' | 'admin';
 
