@@ -1,11 +1,17 @@
 import { query, transaction } from '../connection';
-import { SourcingRequest, SourcingAttachment, CreateSourcingRequestRequest } from '@/types';
+import { SourcingRequest, CreateSourcingRequestRequest } from '@/types';
 
 // Create a new sourcing request
 export async function createSourcingRequest(
   buyerId: string,
   data: CreateSourcingRequestRequest,
-  attachmentUrls: Array<{ fileName: string; fileType: string; fileSize: number; cloudinaryUrl: string; cloudinaryPublicId: string }>
+  attachmentUrls: Array<{
+    fileName: string;
+    fileType: string;
+    fileSize: number;
+    cloudinaryUrl: string;
+    cloudinaryPublicId: string;
+  }>
 ): Promise<SourcingRequest> {
   return transaction(async (client) => {
     // Insert sourcing request
@@ -61,7 +67,9 @@ export async function createSourcingRequest(
       itemDescription: sourcingRequest.item_description,
       specifications: sourcingRequest.specifications,
       quantity: sourcingRequest.quantity,
-      targetPrice: sourcingRequest.target_price ? parseFloat(sourcingRequest.target_price) : undefined,
+      targetPrice: sourcingRequest.target_price
+        ? parseFloat(sourcingRequest.target_price)
+        : undefined,
       deliveryLocation: sourcingRequest.delivery_location,
       timeline: sourcingRequest.timeline,
       complianceRequirements: sourcingRequest.compliance_requirements,
@@ -85,7 +93,9 @@ export async function createSourcingRequest(
 }
 
 // Get sourcing request by ID
-export async function getSourcingRequestById(id: string): Promise<SourcingRequest | null> {
+export async function getSourcingRequestById(
+  id: string
+): Promise<SourcingRequest | null> {
   const requestQuery = `
     SELECT 
       sr.*,
@@ -99,7 +109,7 @@ export async function getSourcingRequestById(id: string): Promise<SourcingReques
       ) as buyer,
       COALESCE(
         json_agg(
-          DISTINCT json_build_object(
+          json_build_object(
             'id', sa.id,
             'sourcingRequestId', sa.sourcing_request_id,
             'fileName', sa.file_name,
@@ -148,13 +158,15 @@ export async function getSourcingRequestById(id: string): Promise<SourcingReques
 }
 
 // Get sourcing requests for a buyer
-export async function getBuyerSourcingRequests(buyerId: string): Promise<SourcingRequest[]> {
+export async function getBuyerSourcingRequests(
+  buyerId: string
+): Promise<SourcingRequest[]> {
   const requestsQuery = `
     SELECT 
       sr.*,
       COALESCE(
         json_agg(
-          DISTINCT json_build_object(
+          json_build_object(
             'id', sa.id,
             'sourcingRequestId', sa.sourcing_request_id,
             'fileName', sa.file_name,
@@ -217,7 +229,7 @@ export async function getAllSourcingRequests(
       ) as buyer,
       COALESCE(
         json_agg(
-          DISTINCT json_build_object(
+          json_build_object(
             'id', sa.id,
             'sourcingRequestId', sa.sourcing_request_id,
             'fileName', sa.file_name,
@@ -235,7 +247,7 @@ export async function getAllSourcingRequests(
     LEFT JOIN sourcing_attachments sa ON sr.id = sa.sourcing_request_id
   `;
 
-  const params: any[] = [];
+  const params: unknown[] = [];
 
   if (status) {
     countQuery += ' WHERE status = $1';
@@ -243,7 +255,11 @@ export async function getAllSourcingRequests(
     params.push(status);
   }
 
-  requestsQuery += ' GROUP BY sr.id, u.id ORDER BY sr.created_at DESC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
+  requestsQuery +=
+    ' GROUP BY sr.id, u.id ORDER BY sr.created_at DESC LIMIT $' +
+    (params.length + 1) +
+    ' OFFSET $' +
+    (params.length + 2);
   params.push(limit, offset);
 
   const countResult = await query(countQuery, status ? [status] : []);
@@ -274,7 +290,11 @@ export async function getAllSourcingRequests(
 }
 
 // Update sourcing request status
-export async function updateSourcingRequestStatus(id: string, status: string, adminNotes?: string): Promise<SourcingRequest | null> {
+export async function updateSourcingRequestStatus(
+  id: string,
+  status: string,
+  adminNotes?: string
+): Promise<SourcingRequest | null> {
   const updateQuery = `
     UPDATE sourcing_requests
     SET status = $1, admin_notes = COALESCE($2, admin_notes), updated_at = NOW()
@@ -310,7 +330,9 @@ export async function updateSourcingRequestStatus(id: string, status: string, ad
 }
 
 // Get sourcing request with full details including quotes
-export async function getSourcingRequestWithQuotes(id: string): Promise<SourcingRequest | null> {
+export async function getSourcingRequestWithQuotes(
+  id: string
+): Promise<SourcingRequest | null> {
   const requestQuery = `
     SELECT 
       sr.*,
@@ -324,7 +346,7 @@ export async function getSourcingRequestWithQuotes(id: string): Promise<Sourcing
       ) as buyer,
       COALESCE(
         json_agg(
-          DISTINCT json_build_object(
+          json_build_object(
             'id', sa.id,
             'sourcingRequestId', sa.sourcing_request_id,
             'fileName', sa.file_name,
@@ -401,25 +423,27 @@ export async function getSourcingRequestWithQuotes(id: string): Promise<Sourcing
     status: row.status,
     adminNotes: row.admin_notes,
     attachments: row.attachments || [],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     quotes: quotesResult.rows.map((q: any) => ({
-      id: q.id,
-      sourcingRequestId: q.sourcing_request_id,
-      buyerId: q.buyer_id,
+      id: q.id as string,
+      sourcingRequestId: q.sourcing_request_id as string,
+      buyerId: q.buyer_id as string,
       totalAmount: parseFloat(q.total_amount),
-      validUntil: q.valid_until,
-      status: q.status,
-      orderId: q.order_id,
-      lineItems: q.line_items.map((li: any) => ({
-        id: li.id,
-        quoteId: li.quoteId,
-        description: li.description,
-        specifications: li.specifications,
-        quantity: li.quantity,
+      validUntil: q.valid_until as string,
+      status: q.status as string,
+      orderId: q.order_id as string,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      lineItems: ((q.line_items as any[]) || []).map((li: any) => ({
+        id: li.id as string,
+        quoteId: li.quoteId as string,
+        description: li.description as string,
+        specifications: li.specifications as string,
+        quantity: li.quantity as number,
         unitPrice: parseFloat(li.unitPrice),
         subtotal: parseFloat(li.subtotal),
       })),
-      createdAt: q.created_at,
-      acceptedAt: q.accepted_at,
+      createdAt: q.created_at as string,
+      acceptedAt: q.accepted_at as string,
     })),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
