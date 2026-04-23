@@ -67,8 +67,12 @@ export function ProductCard({
   if (variant === 'list') {
     return (
       <div className="flex flex-col sm:flex-row overflow-hidden bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 focus-within:ring-2 focus-within:ring-[#1a6b50]">
-        {/* Image */}
-        <div className="relative w-full sm:w-36 h-44 sm:h-auto flex-shrink-0 bg-gray-100 rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none overflow-hidden">
+        {/* Image — links to product detail */}
+        <Link
+          href={`/product/${product.id}`}
+          className="relative block w-full sm:w-36 h-44 sm:h-auto flex-shrink-0 bg-gray-100 rounded-t-2xl sm:rounded-l-2xl sm:rounded-tr-none overflow-hidden"
+          tabIndex={-1}
+        >
           {product.imageUrls[0] ? (
             <Image
               src={product.imageUrls[0]}
@@ -82,7 +86,7 @@ export function ProductCard({
               <span className="text-4xl opacity-20">📦</span>
             </div>
           )}
-        </div>
+        </Link>
 
         {/* Content */}
         <div className="flex-1 flex flex-col p-5">
@@ -99,9 +103,14 @@ export function ProductCard({
               {availBadge.label}
             </span>
           </div>
-          <h3 className="font-bold text-sm text-gray-900 mb-1 line-clamp-2 leading-snug">
-            {product.name}
-          </h3>
+          <Link
+            href={`/product/${product.id}`}
+            className="hover:text-[#1a6b50] transition-colors"
+          >
+            <h3 className="font-bold text-sm text-gray-900 mb-1 line-clamp-2 leading-snug">
+              {product.name}
+            </h3>
+          </Link>
           <p className="text-xs text-gray-400 line-clamp-2 mb-3 leading-relaxed">
             {product.description}
           </p>
@@ -158,8 +167,12 @@ export function ProductCard({
         'focus-within:ring-2 focus-within:ring-[#1a6b50]'
       )}
     >
-      {/* Image */}
-      <div className="relative w-full h-44 bg-gray-100 overflow-hidden">
+      {/* Image — links to product detail */}
+      <Link
+        href={`/product/${product.id}`}
+        className="relative block w-full h-44 bg-gray-100 overflow-hidden"
+        tabIndex={-1}
+      >
         {/* Payment badges */}
         <div className="absolute left-2.5 top-2.5 z-10 flex flex-col gap-1">
           {supportsMpesa(product.availability) && (
@@ -188,7 +201,7 @@ export function ProductCard({
             <span className="text-5xl opacity-20">📦</span>
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Content */}
       <div className="flex-1 flex flex-col px-4 pt-4 pb-3">
@@ -207,10 +220,15 @@ export function ProductCard({
           </span>
         </div>
 
-        {/* Name */}
-        <h3 className="font-bold text-sm text-gray-900 mb-3 line-clamp-2 leading-snug flex-1">
-          {product.name}
-        </h3>
+        {/* Name — links to product detail */}
+        <Link
+          href={`/product/${product.id}`}
+          className="hover:text-[#1a6b50] transition-colors"
+        >
+          <h3 className="font-bold text-sm text-gray-900 mb-3 line-clamp-2 leading-snug flex-1">
+            {product.name}
+          </h3>
+        </Link>
 
         {/* Price */}
         <div className="mb-3">
