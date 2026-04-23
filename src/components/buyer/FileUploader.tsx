@@ -1,7 +1,13 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { Upload, X, FileIcon, Image as ImageIcon, File as FileDocIcon } from 'lucide-react';
+import {
+  Upload,
+  X,
+  FileIcon,
+  Image as ImageIcon,
+  File as FileDocIcon,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAnnouncer } from '@/lib/hooks/useAccessibility';
@@ -40,14 +46,18 @@ export function FileUploader({
 
   const maxSizeBytes = maxSizeMB * 1024 * 1024;
 
-  const validateFiles = (files: File[]): { valid: File[]; errors: string[] } => {
+  const validateFiles = (
+    files: File[]
+  ): { valid: File[]; errors: string[] } => {
     const validFiles: File[] = [];
     const newErrors: string[] = [];
 
     for (const file of files) {
       // Check file type
       if (!acceptedTypes.includes(file.type)) {
-        newErrors.push(`${file.name}: Invalid file type. Allowed: JPEG, PNG, PDF`);
+        newErrors.push(
+          `${file.name}: Invalid file type. Allowed: JPEG, PNG, PDF`
+        );
         continue;
       }
 
@@ -96,7 +106,10 @@ export function FileUploader({
 
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
-      announce(`${validationErrors.length} files failed validation`, 'assertive');
+      announce(
+        `${validationErrors.length} files failed validation`,
+        'assertive'
+      );
       return;
     }
 
@@ -123,7 +136,7 @@ export function FileUploader({
     );
 
     // Call callback with all files
-    onFilesSelected(updatedFiles.map(uf => uf.file));
+    onFilesSelected(updatedFiles.map((uf) => uf.file));
 
     // Reset file input
     if (fileInputRef.current) {
@@ -143,7 +156,10 @@ export function FileUploader({
     e.preventDefault();
     e.stopPropagation();
     // Only set dragging to false if we're leaving the drop zone entirely
-    if (dropZoneRef.current && !dropZoneRef.current.contains(e.relatedTarget as Node)) {
+    if (
+      dropZoneRef.current &&
+      !dropZoneRef.current.contains(e.relatedTarget as Node)
+    ) {
       setIsDragging(false);
     }
   };
@@ -163,10 +179,10 @@ export function FileUploader({
   };
 
   const handleRemoveFile = (id: string) => {
-    const fileToRemove = uploadedFiles.find(uf => uf.id === id);
-    const updatedFiles = uploadedFiles.filter(uf => uf.id !== id);
+    const fileToRemove = uploadedFiles.find((uf) => uf.id === id);
+    const updatedFiles = uploadedFiles.filter((uf) => uf.id !== id);
     setUploadedFiles(updatedFiles);
-    onFilesSelected(updatedFiles.map(uf => uf.file));
+    onFilesSelected(updatedFiles.map((uf) => uf.file));
 
     if (fileToRemove) {
       announce(`Removed ${fileToRemove.file.name}`, 'polite');
@@ -203,10 +219,10 @@ export function FileUploader({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onKeyDown={handleKeyDown}
-        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500 ${
+        className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-[#1a6b50] ${
           isDragging
-            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-            : 'border-slate-300 dark:border-slate-700 hover:border-slate-400'
+            ? 'border-[#1a6b50] bg-[#e8f4f0]'
+            : 'border-gray-200 bg-gray-50 hover:border-[#1a6b50] hover:bg-[#f0faf6]'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         role="button"
         tabIndex={disabled ? -1 : 0}
@@ -225,50 +241,44 @@ export function FileUploader({
         />
 
         <div className="flex flex-col items-center gap-2">
-          <Upload 
-            className="h-8 w-8 text-slate-400" 
-            aria-hidden="true"
-          />
+          <div className="w-10 h-10 rounded-full bg-[#e8f4f0] flex items-center justify-center mb-2">
+            <Upload className="h-5 w-5 text-[#1a6b50]" aria-hidden="true" />
+          </div>
           <div>
-            <p className="font-semibold text-slate-900 dark:text-slate-50">
-              Drag and drop files here
+            <p className="font-semibold text-gray-700 text-sm">
+              Upload Reference Files
             </p>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              or{' '}
+            <p className="text-xs text-gray-500 mt-1">
+              Drag and drop or{' '}
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={disabled}
-                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 rounded"
+                className="text-[#1a6b50] hover:text-[#155a42] underline focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#1a6b50] rounded"
                 aria-label="Click to browse and select files"
               >
                 click to browse
               </button>
             </p>
           </div>
-          <p 
-            id="upload-instructions"
-            className="text-xs text-slate-500 dark:text-slate-400 mt-2"
-          >
-            Supported formats: JPEG, PNG, PDF • Max size: {maxSizeMB}MB • Max files: {maxFiles}
+          <p id="upload-instructions" className="text-xs text-gray-400 mt-1">
+            JPEG, PNG, PDF • Max {maxSizeMB}MB
           </p>
         </div>
       </div>
 
       {/* Error Messages */}
       {errors.length > 0 && (
-        <Card 
-          className="border-red-200 bg-red-50 dark:bg-red-900/20"
+        <Card
+          className="border-red-200 bg-red-50"
           role="alert"
           aria-live="polite"
         >
           <CardContent className="pt-6">
             <div className="space-y-1">
-              <h3 className="font-medium text-red-800 dark:text-red-200 mb-2">
-                Upload Errors:
-              </h3>
+              <h3 className="font-medium text-red-800 mb-2">Upload Errors:</h3>
               {errors.map((error, index) => (
-                <p key={index} className="text-sm text-red-700 dark:text-red-300">
+                <p key={index} className="text-sm text-red-700">
                   • {error}
                 </p>
               ))}
@@ -280,11 +290,11 @@ export function FileUploader({
       {/* Uploaded Files List */}
       {uploadedFiles.length > 0 && (
         <div className="space-y-2">
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+          <p className="text-sm font-medium text-gray-700">
             Uploaded Files ({uploadedFiles.length}/{maxFiles})
           </p>
 
-          <div 
+          <div
             className="space-y-2"
             role="list"
             aria-label="Uploaded files list"
@@ -292,7 +302,7 @@ export function FileUploader({
             {uploadedFiles.map((uploadedFile) => (
               <div
                 key={uploadedFile.id}
-                className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-800 rounded-lg bg-slate-50 dark:bg-slate-900/50 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+                className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-[#1a6b50]"
                 role="listitem"
               >
                 {/* Preview or Icon */}
@@ -304,8 +314,8 @@ export function FileUploader({
                       className="h-12 w-12 object-cover rounded"
                     />
                   ) : (
-                    <div 
-                      className="h-12 w-12 flex items-center justify-center bg-slate-200 dark:bg-slate-800 rounded"
+                    <div
+                      className="h-12 w-12 flex items-center justify-center bg-[#e8f4f0] rounded"
                       role="img"
                       aria-label={`${getFileTypeLabel(uploadedFile.file.type)} file icon`}
                     >
@@ -316,10 +326,10 @@ export function FileUploader({
 
                 {/* File Info */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-900 dark:text-slate-50 truncate">
+                  <p className="text-sm font-medium text-gray-900 truncate">
                     {uploadedFile.file.name}
                   </p>
-                  <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
                     <span>{getFileTypeLabel(uploadedFile.file.type)}</span>
                     <span aria-hidden="true">•</span>
                     <span>{(uploadedFile.file.size / 1024).toFixed(1)} KB</span>
@@ -331,7 +341,7 @@ export function FileUploader({
                   type="button"
                   onClick={() => handleRemoveFile(uploadedFile.id)}
                   disabled={disabled}
-                  className="p-1 text-slate-400 hover:text-red-600 dark:text-slate-500 dark:hover:text-red-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 rounded min-h-[44px] min-w-[44px] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-1 text-gray-400 hover:text-red-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 rounded min-h-[44px] min-w-[44px] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   aria-label={`Remove ${uploadedFile.file.name} file`}
                 >
                   <X className="h-4 w-4" aria-hidden="true" />
