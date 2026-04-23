@@ -11,7 +11,7 @@ require('dotenv').config({ path: '.env.local' });
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false },
 });
 
 async function updatePasswords() {
@@ -26,20 +26,20 @@ async function updatePasswords() {
     // Define users with their passwords
     const users = [
       {
-        email: 'admin@smartsupply.co.ke',
+        email: 'smartsupplysourcing@gmail.com',
         password: 'admin123',
-        role: 'Admin'
+        role: 'Admin',
       },
       {
         email: 'buyer@example.com',
         password: 'buyer123',
-        role: 'Buyer'
+        role: 'Buyer',
       },
       {
         email: 'mary@manufacturing.co.ke',
         password: 'mary123',
-        role: 'Buyer'
-      }
+        role: 'Buyer',
+      },
     ];
 
     console.log('🔨 Generating password hashes and updating database...\n');
@@ -80,7 +80,6 @@ async function updatePasswords() {
     console.log('│ Password: mary123                                       │');
     console.log('└─────────────────────────────────────────────────────────┘');
     console.log('\n⚠️  IMPORTANT: Change these passwords in production!\n');
-
   } catch (error) {
     console.error('❌ Password update failed:', error.message);
     console.error('\nError details:', error);

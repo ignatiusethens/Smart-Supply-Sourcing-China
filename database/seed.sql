@@ -3,7 +3,7 @@
 
 -- Insert sample users
 INSERT INTO users (id, email, name, phone, company_name, role, password_hash) VALUES
-('550e8400-e29b-41d4-a716-446655440001', 'admin@smartsupply.co.ke', 'Admin User', '+254712345678', 'Smart Supply Ltd', 'admin', '$2b$10$example_hash_for_admin'),
+('550e8400-e29b-41d4-a716-446655440001', 'smartsupplysourcing@gmail.com', 'Admin User', '+254712345678', 'Smart Supply Ltd', 'admin', '$2b$10$example_hash_for_admin'),
 ('550e8400-e29b-41d4-a716-446655440002', 'buyer@example.com', 'John Doe', '+254723456789', 'Industrial Solutions Ltd', 'buyer', '$2b$10$example_hash_for_buyer'),
 ('550e8400-e29b-41d4-a716-446655440003', 'mary@manufacturing.co.ke', 'Mary Wanjiku', '+254734567890', 'Kenya Manufacturing Co', 'buyer', '$2b$10$example_hash_for_mary');
 
