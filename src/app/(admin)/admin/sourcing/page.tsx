@@ -154,7 +154,8 @@ export default function SourcingRequestsPage() {
               filteredRequests.map((request) => (
                 <tr
                   key={request.id}
-                  className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                  className="border-b border-gray-200 hover:bg-blue-50 transition-colors cursor-pointer"
+                  onClick={() => router.push(`/admin/sourcing/${request.id}`)}
                 >
                   <td className="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">
                     {request.itemDescription}
