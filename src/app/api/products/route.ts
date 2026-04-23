@@ -1,21 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProducts, createProduct } from '@/lib/database/queries/products';
-import { productFiltersSchema, createProductSchema } from '@/lib/validation/schemas';
+import {
+  productFiltersSchema,
+  createProductSchema,
+} from '@/lib/validation/schemas';
 import { ApiResponse, PaginatedResponse } from '@/types/api';
 import { Product } from '@/types';
+import { requireAdmin } from '@/lib/auth/middleware';
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    
+
     // Parse query parameters
     const categories = searchParams.getAll('categories');
     const availability = searchParams.getAll('availability');
-    const minPrice = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : 0;
-    const maxPrice = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : Number.MAX_SAFE_INTEGER;
+    const minPrice = searchParams.get('minPrice')
+      ? Number(searchParams.get('minPrice'))
+      : 0;
+    const maxPrice = searchParams.get('maxPrice')
+      ? Number(searchParams.get('maxPrice'))
+      : Number.MAX_SAFE_INTEGER;
     const search = searchParams.get('search') || '';
-    const page = searchParams.get('page') ? Number(searchParams.get('page')) : 1;
-    const limit = searchParams.get('limit') ? Number(searchParams.get('limit')) : 20;
+    const page = searchParams.get('page')
+      ? Number(searchParams.get('page'))
+      : 1;
+    const limit = searchParams.get('limit')
+      ? Number(searchParams.get('limit'))
+      : 20;
 
     // Validate filters
     const filters = productFiltersSchema.parse({
@@ -46,10 +58,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching products:', error);
-    
+
     const response: ApiResponse = {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch products',
+      error:
+        error instanceof Error ? error.message : 'Failed to fetch products',
     };
 
     return NextResponse.json(response, { status: 500 });
@@ -57,17 +70,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    // Check admin authentication (TODO: implement proper auth)
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
-      const response: ApiResponse = {
-        success: false,
-        error: 'Unauthorized',
-      };
-      return NextResponse.json(response, { status: 401 });
-    }
+  const auth = await requireAdmin(request);
+  if (!auth.success) return auth.response;
 
+  try {
     const body = await request.json();
 
     // Validate request body
@@ -96,7 +102,8 @@ export async function POST(request: NextRequest) {
 
     const response: ApiResponse = {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to create product',
+      error:
+        error instanceof Error ? error.message : 'Failed to create product',
     };
 
     return NextResponse.json(response, { status: 500 });

@@ -8,6 +8,7 @@ import {
   ShoppingCart,
   BookOpen,
   Package,
+  ShoppingBag,
   LogOut,
 } from 'lucide-react';
 import { authFetch } from '@/lib/api/auth-client';
@@ -21,6 +22,7 @@ const navItems = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { href: '/admin/ledger', label: 'Quotes & Ledger', icon: BookOpen },
+  { href: '/admin/catalog', label: 'Catalog', icon: ShoppingBag },
   { href: '/admin/inventory', label: 'Inventory', icon: Package },
 ];
 
