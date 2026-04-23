@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/middleware';
-import { getDb } from '@/lib/database/connection';
+import { getPool } from '@/lib/database/connection';
 
 // PUT /api/admin/categories/[id] — rename a category
 export async function PUT(
@@ -20,7 +20,7 @@ export async function PUT(
       );
     }
 
-    const db = getDb();
+    const db = getPool();
     const result = await db.query(
       'UPDATE product_categories SET label = $1 WHERE id = $2 RETURNING id, slug, label, sort_order',
       [label.trim(), id]
@@ -52,7 +52,7 @@ export async function DELETE(
 
   try {
     const { id } = await params;
-    const db = getDb();
+    const db = getPool();
 
     // Null out products that used this category
     const cat = await db.query(

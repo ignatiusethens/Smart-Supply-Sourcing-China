@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/middleware';
-import { getDb } from '@/lib/database/connection';
+import { getPool } from '@/lib/database/connection';
 
 // GET /api/admin/categories — list all categories
 export async function GET() {
   try {
-    const db = getDb();
+    const db = getPool();
     const result = await db.query(
       'SELECT id, slug, label, sort_order FROM product_categories ORDER BY sort_order ASC, label ASC'
     );
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
-    const db = getDb();
+    const db = getPool();
 
     const result = await db.query(
       `INSERT INTO product_categories (slug, label, sort_order)
