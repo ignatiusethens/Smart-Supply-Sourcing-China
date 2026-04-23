@@ -13,128 +13,151 @@ export function LandingPage({
   recentQuotes,
 }: LandingPageProps) {
   return (
-    <div className="min-h-screen bg-white">
-      {/* ================================================================
-          HERO — Light teal/mint background, two-column layout
-          ================================================================ */}
-      <section
-        className="bg-[#e8f4f0] px-4 py-16 sm:px-6 lg:px-8 lg:py-24"
-        aria-label="Hero"
-      >
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-            {/* Left: text */}
-            <div>
-              {/* Brand label */}
-              <h1 className="mb-3 text-2xl font-bold text-[#2a7a5e] tracking-wide">
-                SMART SUPPLY SOURCING CHINA
-              </h1>
-
-              {/* Headline */}
-              <h1 className="mb-5 text-4xl font-black leading-tight text-gray-900 sm:text-5xl lg:text-[3.25rem]">
-                <span className="text-[#1a6b50]">Source</span> Smarter.
-                <br />
-                <span className="text-[#1a6b50]">Pay</span> Faster.
-                <br />
-                Deliver Better.
-              </h1>
-
-              {/* Subheadline */}
-              <p className="mb-8 max-w-lg text-base leading-relaxed text-gray-600">
-                Kenya&apos;s most trusted B2B procurement gateway connecting
-                local businesses with verified Chinese suppliers. Instant
-                payments and end-to-end logistics.
-              </p>
-
-              {/* CTAs */}
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="/sourcing/request"
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1a6b50] px-7 py-3.5 text-sm font-bold text-white shadow-md transition-all hover:bg-[#155a42] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a6b50]"
-                >
-                  Start Sourcing →
-                </Link>
-                <Link
-                  href="/catalog"
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-[#1a6b50] bg-white px-7 py-3.5 text-sm font-bold text-[#1a6b50] transition-all hover:bg-[#e8f4f0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1a6b50]"
-                >
-                  Browse Catalog
-                </Link>
-              </div>
-
-              {/* Stats row */}
-              <div className="mt-10 flex flex-wrap gap-8">
-                {[
-                  { icon: '📦', value: '500+', label: 'PRODUCTS SOURCED' },
-                  { icon: '💳', value: 'KES 300K', label: 'M-PESA LIMIT' },
-                  { icon: '⚡', value: '24–48h', label: 'QUOTE TURNAROUND' },
-                ].map((stat) => (
-                  <div key={stat.label} className="flex items-center gap-2">
-                    <span className="text-xl">{stat.icon}</span>
-                    <div>
-                      <p className="text-lg font-black text-gray-900">
-                        {stat.value}
-                      </p>
-                      <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
-                        {stat.label}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right: warehouse image */}
-            <div className="relative h-72 w-full overflow-hidden rounded-2xl shadow-lg lg:h-[420px]">
-              <Image
-                src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&q=80"
-                alt="Warehouse and supply chain operations"
-                fill
-                className="object-cover"
-                priority
-                unoptimized
-              />
+    <div className="font-sans text-slate-900 bg-white antialiased">
+      {/* ── HERO ── */}
+      <section className="relative min-h-[600px] flex items-center overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1600&q=80')",
+          }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(to right, rgba(5,46,22,1) 40%, rgba(5,46,22,0.4) 100%)',
+          }}
+        />
+        <div className="container mx-auto px-6 lg:px-20 relative z-10 py-20">
+          <div className="max-w-2xl">
+            <p className="text-white/80 font-bold uppercase tracking-wider text-sm mb-4">
+              SMART SUPPLY SOURCING CHINA
+            </p>
+            <h1 className="text-5xl lg:text-7xl font-extrabold leading-tight mb-6 text-white">
+              <span className="text-green-400">Source</span> Smarter.
+              <br />
+              <span className="text-green-400">Pay</span>{' '}
+              <span className="text-orange-400">Faster.</span>
+              <br />
+              Deliver Better.
+            </h1>
+            <p className="text-white/80 text-lg mb-10 max-w-lg">
+              Kenya&apos;s most trusted B2B procurement gateway connecting local
+              businesses with verified Chinese suppliers. Instant payments and
+              end-to-end logistics.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/sourcing/request"
+                className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-8 rounded-md transition-colors"
+              >
+                Start Sourcing →
+              </Link>
+              <Link
+                href="/catalog"
+                className="border-2 border-orange-500 text-orange-400 hover:bg-orange-500 hover:text-white font-bold py-3 px-8 rounded-md transition-all"
+              >
+                Browse Catalog
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ================================================================
-          TRUST BAR
-          ================================================================ */}
-      <section className="border-y border-gray-100 bg-white px-4 py-5 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      {/* ── VALUE PROPS BAR ── */}
+      <section className="relative -mt-12 z-20 px-6">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               {
-                icon: '📦',
+                icon: (
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                    />
+                  </svg>
+                ),
                 title: 'B2B Sourcing',
                 desc: 'Custom RFQs & Quotes',
               },
               {
-                icon: '📄',
+                icon: (
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                ),
                 title: 'Pro-forma Invoices',
                 desc: 'Bank-ready documents',
               },
               {
-                icon: '🚢',
+                icon: (
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064"
+                    />
+                  </svg>
+                ),
                 title: 'Global Logistics',
-                desc: 'Air & Sea freight',
+                desc: 'Air & Sea Freight',
               },
               {
-                icon: '✅',
+                icon: (
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                ),
                 title: 'Verified Vendors',
                 desc: 'Quality guaranteed',
               },
-            ].map((f) => (
+            ].map((item) => (
               <div
-                key={f.title}
-                className="flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 p-4"
+                key={item.title}
+                className="bg-white p-6 rounded-lg shadow-xl flex items-center space-x-4 hover:-translate-y-1 transition-transform duration-200"
               >
-                <span className="text-2xl shrink-0">{f.icon}</span>
+                <div className="bg-orange-100 p-3 rounded-lg text-orange-500 shrink-0">
+                  {item.icon}
+                </div>
                 <div>
-                  <p className="text-sm font-bold text-gray-800">{f.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{f.desc}</p>
+                  <h4 className="font-bold text-slate-800">{item.title}</h4>
+                  <p className="text-xs text-slate-500">{item.desc}</p>
                 </div>
               </div>
             ))}
@@ -142,66 +165,117 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* ================================================================
-          HOW IT WORKS — Light background
-          ================================================================ */}
-      <section className="bg-white px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="text-center mb-14">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#1a6b50]">
+      {/* ── HOW IT WORKS ── */}
+      <section className="py-24 bg-gray-50">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <p className="text-orange-500 font-bold uppercase text-xs tracking-widest mb-2">
               Simple Process
-            </span>
-            <h2 className="mt-2 text-3xl font-black text-gray-900">
+            </p>
+            <h2 className="text-3xl font-extrabold text-slate-900 mb-4">
               How SmartSupplySourcingChina Works
             </h2>
-            <p className="mt-3 text-gray-500 max-w-xl mx-auto text-sm leading-relaxed">
+            <p className="text-slate-500 max-w-2xl mx-auto">
               From initial request to final delivery — we handle the complexity
               so you can focus on growing your business.
             </p>
           </div>
-
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
-                step: '01',
-                icon: '📝',
+                num: '01',
+                icon: (
+                  <svg
+                    className="h-8 w-8 text-orange-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                ),
                 title: 'Submit Request',
-                desc: 'Describe what you need — quantity, specs, certifications. Takes less than 2 minutes via our portal.',
+                desc: 'Describe what you need — quantity, specs, certifications. Takes less than 3 minutes on our portal.',
               },
               {
-                step: '02',
-                icon: '🔍',
+                num: '02',
+                icon: (
+                  <svg
+                    className="h-8 w-8 text-orange-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                ),
                 title: 'We Source It',
-                desc: 'Our team finds verified Chinese suppliers and negotiates the absolute best factory-direct price.',
+                desc: 'Our team finds verified Chinese suppliers and negotiates the absolute best factory direct price.',
               },
               {
-                step: '03',
-                icon: '💳',
+                num: '03',
+                icon: (
+                  <svg
+                    className="h-8 w-8 text-orange-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                    />
+                  </svg>
+                ),
                 title: 'Pay Securely',
-                desc: 'Pay via M-Pesa (instant) or Bank Transfer. Pro-forma invoice provided for your records immediately.',
+                desc: 'Pay via M-Pesa (instant) or Bank Transfer. Pro-forma Invoice provided for your records immediately.',
               },
               {
-                step: '04',
-                icon: '🚀',
+                num: '04',
+                icon: (
+                  <svg
+                    className="h-8 w-8 text-orange-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                    />
+                  </svg>
+                ),
                 title: 'We Deliver',
                 desc: 'Air or sea freight straight to your door in Kenya. Track every step of the journey via our dashboard.',
               },
-            ].map((item) => (
+            ].map((step) => (
               <div
-                key={item.step}
-                className="rounded-2xl border border-gray-100 bg-gray-50 p-6 hover:shadow-md transition-shadow"
+                key={step.num}
+                className="bg-white p-8 rounded-xl shadow-sm border border-slate-100"
               >
-                <div className="mb-4 flex items-center gap-3">
-                  <span className="text-2xl">{item.icon}</span>
-                  <span className="text-4xl font-black text-[#1a6b50] opacity-30">
-                    {item.step}
+                <div className="flex items-center space-x-3 mb-6">
+                  {step.icon}
+                  <span className="text-4xl font-black text-orange-500 opacity-40">
+                    {step.num}
                   </span>
                 </div>
-                <h3 className="text-base font-bold text-gray-900 mb-2">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-gray-500 leading-relaxed">
-                  {item.desc}
+                <h3 className="text-xl font-bold mb-3">{step.title}</h3>
+                <p className="text-slate-600 text-sm leading-relaxed">
+                  {step.desc}
                 </p>
               </div>
             ))}
@@ -209,35 +283,29 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* ================================================================
-          RECENT QUOTES (only shown when logged in / data exists)
-          ================================================================ */}
+      {/* ── RECENT QUOTES ── */}
       {recentQuotes.length > 0 && (
-        <section
-          className="bg-[#e8f4f0] px-4 py-16 sm:px-6 lg:px-8"
-          aria-label="Recent quotes"
-        >
-          <div className="mx-auto max-w-7xl">
+        <section className="py-16 bg-white" aria-label="Recent quotes">
+          <div className="container mx-auto px-6">
             <div className="mb-8 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <span className="text-xs font-bold uppercase tracking-widest text-[#1a6b50]">
+                <p className="text-orange-500 font-bold uppercase text-xs tracking-widest mb-1">
                   Action Required
-                </span>
-                <h2 className="mt-1 text-2xl font-black text-gray-900">
+                </p>
+                <h2 className="text-2xl font-extrabold text-slate-900">
                   Recent Live Quotes
                 </h2>
-                <p className="mt-1 text-sm text-gray-600">
+                <p className="mt-1 text-sm text-slate-500">
                   Complete payment to secure your stock.
                 </p>
               </div>
               <Link
                 href="/dashboard"
-                className="text-sm font-semibold text-[#1a6b50] hover:text-[#155a42]"
+                className="text-sm font-semibold text-orange-500 hover:text-orange-600"
               >
                 View all quotes →
               </Link>
             </div>
-
             <div className="grid gap-5 lg:grid-cols-3">
               {recentQuotes.slice(0, 3).map((quote) => {
                 const daysLeft = getDaysUntilExpiration(quote.validUntil);
@@ -246,14 +314,14 @@ export function LandingPage({
                   <Link
                     key={quote.id}
                     href={`/sourcing/quote/${quote.id}`}
-                    className="block rounded-xl border border-[#b2d8cc] bg-white p-6 transition-all hover:border-[#1a6b50] hover:shadow-md hover:-translate-y-0.5"
+                    className="block rounded-xl border border-slate-200 bg-white p-6 transition-all hover:border-orange-400 hover:shadow-md hover:-translate-y-0.5"
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold">
+                        <p className="text-xs text-slate-400 uppercase tracking-wide font-semibold">
                           Quote Ref
                         </p>
-                        <p className="font-mono text-sm font-bold text-gray-900">
+                        <p className="font-mono text-sm font-bold text-slate-900">
                           {quoteRef}
                         </p>
                       </div>
@@ -267,10 +335,10 @@ export function LandingPage({
                         </span>
                       )}
                     </div>
-                    <p className="text-3xl font-black text-[#1a6b50] mb-1">
+                    <p className="text-3xl font-black text-orange-500 mb-1">
                       KES {quote.totalAmount.toLocaleString()}
                     </p>
-                    <p className="text-xs text-gray-400 mb-4">
+                    <p className="text-xs text-slate-400 mb-4">
                       Issued{' '}
                       {new Date(quote.createdAt).toLocaleDateString('en-KE', {
                         day: 'numeric',
@@ -278,7 +346,7 @@ export function LandingPage({
                         year: 'numeric',
                       })}
                     </p>
-                    <span className="inline-flex items-center gap-1 text-sm font-bold text-[#1a6b50]">
+                    <span className="inline-flex items-center gap-1 text-sm font-bold text-orange-500">
                       Complete Payment →
                     </span>
                   </Link>
@@ -289,86 +357,93 @@ export function LandingPage({
         </section>
       )}
 
-      {/* ================================================================
-          FEATURED INVENTORY
-          ================================================================ */}
-      <section
-        className="bg-[#f0faf6] px-4 py-20 sm:px-6 lg:px-8"
-        aria-label="Featured inventory"
-      >
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-10 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      {/* ── FEATURED INVENTORY ── */}
+      <section className="py-24 bg-white" aria-label="Featured inventory">
+        <div className="container mx-auto px-6">
+          <div className="flex justify-between items-end mb-12">
             <div>
-              <span className="text-xs font-bold uppercase tracking-widest text-[#1a6b50]">
+              <p className="text-orange-500 font-bold uppercase text-xs tracking-widest mb-2">
                 Ready to Ship
-              </span>
-              <h2 className="mt-1 text-3xl font-black text-gray-900">
+              </p>
+              <h2 className="text-3xl font-extrabold text-slate-900">
                 Featured Inventory
               </h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="text-slate-500 mt-2">
                 In-stock products available for instant M-Pesa payment.
               </p>
             </div>
             <Link
               href="/catalog"
-              className="inline-flex items-center gap-1 text-sm font-bold text-[#1a6b50] hover:text-[#155a42]"
+              className="text-orange-500 font-bold hover:underline flex items-center gap-1"
             >
-              Browse Full Catalogue →
+              Browse Full Catalogue <span>→</span>
             </Link>
           </div>
 
           {featuredProducts.length > 0 ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {featuredProducts.slice(0, 3).map((product) => (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+              {featuredProducts.slice(0, 5).map((product) => (
                 <Link
                   key={product.id}
                   href={`/product/${product.id}`}
-                  className="group block overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-lg hover:-translate-y-1"
+                  className="group cursor-pointer"
                 >
-                  {/* Image */}
-                  <div className="relative h-48 w-full bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
-                    {product.imageUrls && product.imageUrls.length > 0 ? (
+                  <div className="bg-slate-100 aspect-square rounded-xl mb-4 overflow-hidden flex items-center justify-center p-4">
+                    {product.imageUrls?.[0] ? (
                       <Image
                         src={product.imageUrls[0]}
                         alt={product.name}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        width={200}
+                        height={200}
+                        className="object-contain group-hover:scale-110 transition-transform duration-300"
                         unoptimized
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <span className="text-5xl opacity-20">📦</span>
-                      </div>
+                      <span className="text-5xl opacity-20">📦</span>
                     )}
                   </div>
-
-                  {/* Info */}
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900 group-hover:text-[#1a6b50] line-clamp-2 text-sm mb-3">
+                  <div className="bg-white p-4 border border-slate-100 rounded-xl shadow-md">
+                    <p className="text-xs text-slate-400 font-semibold mb-1 uppercase tracking-tighter line-clamp-1">
                       {product.name}
-                    </h3>
-                    <p className="text-xs text-gray-400 mb-0.5">From</p>
-                    <div className="flex items-center justify-between">
-                      <p className="text-lg font-black text-[#1a6b50]">
+                    </p>
+                    <p className="text-xs text-slate-500">KES</p>
+                    <div className="flex justify-between items-center mt-1">
+                      <p className="text-lg font-extrabold text-slate-900">
                         KES {product.price.toLocaleString()}
                       </p>
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1a6b50] text-white font-black text-lg group-hover:bg-[#155a42] transition-colors">
-                        +
-                      </span>
+                      <button
+                        className="bg-orange-500 text-white p-2 rounded-lg hover:bg-orange-600 transition-colors"
+                        aria-label={`Add ${product.name} to cart`}
+                        onClick={(e) => e.preventDefault()}
+                      >
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={3}
+                            d="M12 4v16m8-8H4"
+                          />
+                        </svg>
+                      </button>
                     </div>
                   </div>
                 </Link>
               ))}
             </div>
           ) : (
-            <div className="rounded-2xl border-2 border-dashed border-gray-200 p-16 text-center bg-white">
+            <div className="rounded-2xl border-2 border-dashed border-slate-200 p-16 text-center">
               <p className="text-4xl mb-3">📦</p>
-              <p className="text-gray-500 font-medium">
+              <p className="text-slate-500 font-medium">
                 Products coming soon. Check back shortly.
               </p>
               <Link
                 href="/sourcing/request"
-                className="mt-4 inline-block text-sm font-bold text-[#1a6b50] hover:text-[#155a42]"
+                className="mt-4 inline-block text-sm font-bold text-orange-500 hover:text-orange-600"
               >
                 Request a custom sourcing quote →
               </Link>
@@ -377,65 +452,68 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* ================================================================
-          PAYMENT SECTION
-          ================================================================ */}
-      <section
-        className="bg-white px-4 py-20 sm:px-6 lg:px-8"
-        aria-label="Payment options"
-      >
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-10 lg:grid-cols-2 items-center">
+      {/* ── PAYMENTS SECTION ── */}
+      <section className="py-24 bg-gray-50">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left */}
             <div>
-              <span className="text-xs font-bold uppercase tracking-widest text-[#1a6b50]">
+              <p className="text-orange-500 font-bold uppercase text-xs tracking-widest mb-2">
                 Flexible Payments
-              </span>
-              <h2 className="mt-2 text-3xl font-black text-gray-900">
+              </p>
+              <h2 className="text-4xl font-extrabold text-slate-900 mb-6">
                 Pay Your Way
               </h2>
-              <p className="mt-3 text-gray-600 leading-relaxed text-sm">
-                Whether you&apos;re paying KES 5,000 or KES 5,000,000 — we have
-                a payment method that works for your cash flow.
+              <p className="text-slate-500 mb-10 text-lg">
+                Whether you&apos;re ordering KES 5,500 or KES 5,000,000 — we
+                have a payment method that fits.
               </p>
-
-              <div className="mt-8 space-y-4">
-                {/* M-Pesa */}
-                <div className="flex items-start gap-4 rounded-2xl border border-gray-200 bg-gray-50 p-5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-600 text-white font-black text-base">
+              <div className="space-y-4">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-start space-x-6">
+                  <div className="bg-orange-500 text-white font-bold h-10 w-10 flex items-center justify-center rounded-lg shrink-0 text-sm">
                     M
                   </div>
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-bold text-gray-900 text-sm">
+                    <div className="flex items-center space-x-3 mb-1">
+                      <h4 className="font-bold text-slate-800">
                         M-Pesa Instant
-                      </p>
-                      <span className="rounded-full bg-green-100 border border-green-200 px-2 py-0.5 text-xs font-bold text-green-700">
+                      </h4>
+                      <span className="bg-orange-100 text-orange-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
                         Instant
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500">
-                      Available for orders up to KES 300,000. Confirmed in
-                      seconds with zero paperwork required.
+                    <p className="text-sm text-slate-500">
+                      Available for orders up to KES 500,000. Confirmed in
+                      seconds with zero delay.
                     </p>
                   </div>
                 </div>
-
-                {/* Bank Transfer */}
-                <div className="flex items-start gap-4 rounded-2xl border border-gray-200 bg-gray-50 p-5">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-xl">
-                    🏦
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-start space-x-6 opacity-80">
+                  <div className="bg-orange-100 text-orange-500 h-10 w-10 flex items-center justify-center rounded-lg shrink-0">
+                    <svg
+                      className="h-6 w-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                      />
+                    </svg>
                   </div>
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-bold text-gray-900 text-sm">
+                    <div className="flex items-center space-x-3 mb-1">
+                      <h4 className="font-bold text-slate-800">
                         Bank Transfer
-                      </p>
-                      <span className="rounded-full bg-blue-100 border border-blue-200 px-2 py-0.5 text-xs font-bold text-blue-700">
+                      </h4>
+                      <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
                         1-3 Days
                       </span>
                     </div>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-slate-500">
                       No transaction limits. Ideal for large sea-freight orders.
                       Detailed pro-forma invoices provided for all wire
                       transfers.
@@ -445,127 +523,87 @@ export function LandingPage({
               </div>
             </div>
 
-            {/* Right — orange/amber security card matching PDF */}
-            <div className="rounded-2xl bg-[#f97316] p-8 text-white shadow-lg">
-              <div className="mb-5 flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/20 text-2xl">
-                  🛡️
-                </div>
-                <div>
-                  <h3 className="text-lg font-black">Secured Transactions</h3>
-                  <p className="text-sm text-orange-100">
-                    Enterprise-grade protection
-                  </p>
-                </div>
-              </div>
-              <p className="mb-5 text-sm leading-relaxed text-orange-50">
-                Every transaction on Smart Supply Sourcing China is protected by
-                enterprise-grade security protocols. Your payments and business
-                data are always safe.
-              </p>
-              <ul className="mb-8 space-y-2.5">
-                {[
-                  'Automated Payment Reconciliation',
-                  'Escrow-enabled Multi-Vendor Support',
-                  'Full Ledger Export for Auditing',
-                  'SSL-encrypted Data Transmission',
-                ].map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-center gap-2 text-sm text-orange-50 font-medium"
+            {/* Right — orange security card */}
+            <div className="bg-orange-500 p-12 rounded-3xl text-white text-center shadow-2xl relative overflow-hidden">
+              <div className="absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full" />
+              <div className="relative z-10 flex flex-col items-center">
+                <div className="bg-white/20 p-4 rounded-2xl mb-8">
+                  <svg
+                    className="h-12 w-12"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <span className="text-white font-black">✓</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/sourcing/request"
-                className="inline-flex items-center justify-center w-full rounded-xl bg-white px-6 py-3 text-sm font-bold text-[#f97316] transition-colors hover:bg-orange-50"
-              >
-                Start Your First Order
-              </Link>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-3xl font-extrabold mb-4">
+                  Secured Transactions
+                </h3>
+                <p className="text-white/80 font-medium mb-4">
+                  Enterprise-grade protocols.
+                </p>
+                <p className="text-white/90 text-lg mb-10 leading-relaxed">
+                  Every transaction on Smart Supply Sourcing China is protected
+                  by enterprise-grade security protocols. Your payments and
+                  business data are always safe.
+                </p>
+                <Link
+                  href="/sourcing/request"
+                  className="bg-white text-orange-500 font-black py-4 px-12 rounded-lg hover:bg-slate-100 transition-colors w-full text-center"
+                >
+                  Start Your First Order
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ================================================================
-          CTA BANNER — Dark navy matching PDF
-          ================================================================ */}
-      <section className="bg-[#1e3a5f] px-4 py-20 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-black text-white sm:text-4xl">
-            Ready to source from China?
-          </h2>
-          <p className="mt-4 text-base text-blue-200">
-            Join hundreds of Kenyan businesses already using Smart Supply
-            Sourcing China to streamline their supply chain and grow their
-            margins.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Link
-              href="/register"
-              className="inline-flex items-center justify-center rounded-xl bg-white px-8 py-4 text-sm font-black text-[#1e3a5f] shadow-lg transition-all hover:bg-blue-50 hover:-translate-y-0.5"
-            >
-              Create Free Account
-            </Link>
-            <Link
-              href="/catalog"
-              className="inline-flex items-center justify-center rounded-xl border-2 border-white/30 px-8 py-4 text-sm font-bold text-white transition-all hover:border-white/60 hover:bg-white/10"
-            >
-              Browse Catalog
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ================================================================
-          FOOTER
-          ================================================================ */}
+      {/* ── FOOTER ── */}
       <footer
-        className="bg-white border-t border-gray-100 text-gray-700"
+        className="bg-[#052e16] text-white py-20"
         aria-label="Site footer"
       >
-        <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-          <div className="grid gap-10 lg:grid-cols-4">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
             {/* Brand */}
             <div className="lg:col-span-1">
-              <div className="flex items-center gap-3 mb-4">
-                <Image
-                  src="/logo.png"
-                  alt="Smart Supply Sourcing logo"
-                  width={44}
-                  height={44}
-                  className="rounded-full"
-                  unoptimized
-                />
-                <div>
-                  <p className="text-sm font-black text-gray-900 leading-tight">
-                    Smart Supply Sourcing China
-                  </p>
-                  <p className="text-xs text-[#1a6b50] font-semibold leading-tight">
-                    China
-                  </p>
-                </div>
+              <div className="flex items-center space-x-3 mb-6">
+                <div className="bg-orange-500 h-8 w-8 rounded-full shrink-0" />
+                <span className="font-bold text-lg leading-tight">
+                  Smart Supply Sourcing China
+                </span>
               </div>
-              <p className="text-sm text-gray-500 mb-5 leading-relaxed">
-                Kenya&apos;s trusted B2B gateway for sourcing quality goods from
-                China. Fast, secure, and reliable.
+              <p className="text-white/60 text-sm mb-8">
+                Kenya&apos;s trusted B2B gateway for sourcing quality products
+                from China. Fast, secure, and logistics-ready.
               </p>
-              <div className="space-y-1 text-sm text-gray-400">
-                <p>📍 Nairobi, Kenya</p>
-                <p>✉️ hello@smartsupply.com</p>
-                <p>📞 +254 700 000 000</p>
+              <div className="space-y-3 text-sm text-white/80">
+                {[
+                  { icon: '📍', text: 'Nairobi, Kenya' },
+                  { icon: '✉️', text: 'hello@smartsupply.com' },
+                  { icon: '📞', text: '+254 700 000 000' },
+                ].map((item) => (
+                  <div key={item.text} className="flex items-center space-x-3">
+                    <span>{item.icon}</span>
+                    <span>{item.text}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Services */}
             <div>
-              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
+              <h5 className="font-bold uppercase text-xs tracking-widest text-white/50 mb-6">
                 Services
-              </h3>
-              <ul className="space-y-2.5 text-sm text-gray-500">
+              </h5>
+              <ul className="space-y-4 text-sm text-white/80">
                 {[
                   { label: 'Product Catalog', href: '/catalog' },
                   { label: 'Custom Sourcing', href: '/sourcing/request' },
@@ -575,7 +613,7 @@ export function LandingPage({
                   <li key={l.label}>
                     <Link
                       href={l.href}
-                      className="hover:text-[#1a6b50] transition-colors"
+                      className="hover:text-orange-400 transition-colors"
                     >
                       {l.label}
                     </Link>
@@ -586,22 +624,22 @@ export function LandingPage({
 
             {/* Support */}
             <div>
-              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
+              <h5 className="font-bold uppercase text-xs tracking-widest text-white/50 mb-6">
                 Support
-              </h3>
-              <ul className="space-y-2.5 text-sm text-gray-500">
+              </h5>
+              <ul className="space-y-4 text-sm text-white/80">
                 {[
-                  { label: 'Help Center', href: '/' },
-                  { label: 'Contact Us', href: '/' },
-                  { label: 'Shipping Info', href: '/' },
-                  { label: 'Returns Policy', href: '/' },
+                  'Help Center',
+                  'Contact Us',
+                  'Shipping Info',
+                  'Returns Policy',
                 ].map((l) => (
-                  <li key={l.label}>
+                  <li key={l}>
                     <Link
-                      href={l.href}
-                      className="hover:text-[#1a6b50] transition-colors"
+                      href="/"
+                      className="hover:text-orange-400 transition-colors"
                     >
-                      {l.label}
+                      {l}
                     </Link>
                   </li>
                 ))}
@@ -610,37 +648,60 @@ export function LandingPage({
 
             {/* Legal */}
             <div>
-              <h3 className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">
+              <h5 className="font-bold uppercase text-xs tracking-widest text-white/50 mb-6">
                 Legal
-              </h3>
-              <ul className="space-y-2.5 text-sm text-gray-500">
+              </h5>
+              <ul className="space-y-4 text-sm text-white/80">
                 {[
-                  { label: 'Privacy Policy', href: '/' },
-                  { label: 'Terms of Service', href: '/' },
-                  { label: 'Compliance', href: '/' },
-                  { label: 'Security', href: '/' },
+                  'Privacy Policy',
+                  'Terms of Service',
+                  'Compliance',
+                  'Security',
                 ].map((l) => (
-                  <li key={l.label}>
+                  <li key={l}>
                     <Link
-                      href={l.href}
-                      className="hover:text-[#1a6b50] transition-colors"
+                      href="/"
+                      className="hover:text-orange-400 transition-colors"
                     >
-                      {l.label}
+                      {l}
                     </Link>
                   </li>
                 ))}
               </ul>
             </div>
+
+            {/* Social */}
+            <div>
+              <h5 className="font-bold uppercase text-xs tracking-widest text-white/50 mb-6">
+                Follow Us
+              </h5>
+              <div className="flex space-x-3">
+                {['facebook', 'instagram', 'twitter', 'youtube'].map((s) => (
+                  <a
+                    key={s}
+                    href="#"
+                    className="bg-white/10 p-2 rounded-full hover:bg-orange-500 transition-colors"
+                  >
+                    <span className="sr-only">{s}</span>
+                    <svg
+                      className="h-5 w-5"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="mt-10 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-400">
-              © {new Date().getFullYear()} Smart Supply Sourcing China · All
+          <div className="border-t border-white/10 mt-16 pt-8 flex flex-col md:flex-row justify-between items-center text-white/40 text-xs gap-4">
+            <p>
+              © {new Date().getFullYear()} Smart Supply Sourcing China. All
               rights reserved.
             </p>
-            <p className="text-xs text-gray-400">
-              Connecting Kenyan businesses with global suppliers
-            </p>
+            <p>Connecting Kenyan businesses with global suppliers</p>
           </div>
         </div>
       </footer>
