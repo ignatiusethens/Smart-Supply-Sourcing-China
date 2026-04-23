@@ -1,8 +1,8 @@
 // Application Constants
 export const APP_NAME = 'Smart Supply Sourcing';
 export const MPESA_LIMIT = 300000; // KES 300,000
-export const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
-export const SESSION_WARNING_TIME = 28 * 60 * 1000; // 28 minutes in milliseconds
+export const SESSION_TIMEOUT = 365 * 24 * 60 * 60 * 1000; // 1 year — effectively no timeout
+export const SESSION_WARNING_TIME = 365 * 24 * 60 * 60 * 1000; // disabled
 
 // Reference Code Configuration
 export const REFERENCE_CODE_PREFIX = 'SSS';
@@ -10,7 +10,11 @@ export const REFERENCE_CODE_LENGTH = 6;
 
 // File Upload Limits
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-export const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
+export const ALLOWED_FILE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'application/pdf',
+];
 
 // Categories
 export const CATEGORIES = [
