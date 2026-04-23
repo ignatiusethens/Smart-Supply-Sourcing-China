@@ -30,19 +30,9 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
       description: 'Browse product inventory',
     },
     {
-      href: '/#how-it-works',
-      label: 'How It Works',
-      description: 'How our process works',
-    },
-    {
-      href: '/#payments',
-      label: 'Payments',
-      description: 'Payment options',
-    },
-    {
-      href: '/',
-      label: 'Support',
-      description: 'Get support',
+      href: '/cart',
+      label: 'Check Out',
+      description: 'Go to checkout',
     },
   ];
 
