@@ -26,9 +26,9 @@ export function LandingPage({
             {/* Left: text */}
             <div>
               {/* Brand label */}
-              <p className="mb-3 text-sm font-semibold text-[#2a7a5e] tracking-wide">
+              <h1 className="mb-3 text-2xl font-bold text-[#2a7a5e] tracking-wide">
                 SmartSupplySourcingChina.com
-              </p>
+              </h1>
 
               {/* Headline */}
               <h1 className="mb-5 text-4xl font-black leading-tight text-gray-900 sm:text-5xl lg:text-[3.25rem]">
