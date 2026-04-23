@@ -437,8 +437,11 @@ export default function CatalogPage() {
                 <h3 className="text-xs font-bold mb-3">Availability</h3>
                 <div className="space-y-2 text-xs">
                   {[
-                    { value: 'in-stock', label: 'Ready Stock (M-Pesa)' },
-                    { value: 'pre-order', label: 'Pre-order (Bank)' },
+                    {
+                      value: 'in-stock' as const,
+                      label: 'Ready Stock (M-Pesa)',
+                    },
+                    { value: 'pre-order' as const, label: 'Pre-order (Bank)' },
                   ].map((opt) => (
                     <label
                       key={opt.value}
