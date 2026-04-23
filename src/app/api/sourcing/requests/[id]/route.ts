@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
   getSourcingRequestWithQuotes,
+  getSourcingRequestById,
   updateSourcingRequestStatus,
 } from '@/lib/database/queries/sourcing';
 import { requireAdmin } from '@/lib/auth/middleware';
@@ -9,7 +10,6 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // Allow both admin and buyer to fetch (buyer needs to see their own request)
   try {
     const { id } = await params;
 
@@ -20,7 +20,17 @@ export async function GET(
       );
     }
 
-    const sourcingRequest = await getSourcingRequestWithQuotes(id);
+    // Try full query with quotes first, fall back to simpler query
+    let sourcingRequest = null;
+    try {
+      sourcingRequest = await getSourcingRequestWithQuotes(id);
+    } catch (queryError) {
+      console.error(
+        'getSourcingRequestWithQuotes failed, trying fallback:',
+        queryError
+      );
+      sourcingRequest = await getSourcingRequestById(id);
+    }
 
     if (!sourcingRequest) {
       return NextResponse.json(
