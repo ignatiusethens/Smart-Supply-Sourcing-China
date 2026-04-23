@@ -49,8 +49,49 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  // Require authentication
-  const auth = await requireAuth(request);
+  // Require authentication — also check token in form data as fallback
+  // (some proxies strip Authorization headers from multipart requests)
+  let auth = await requireAuth(request);
+
+  if (!auth.success) {
+    // Try reading token from form data as fallback
+    try {
+      const clonedRequest = request.clone();
+      const formData = await clonedRequest.formData();
+      const tokenFromForm = formData.get('_token') as string | null;
+      if (tokenFromForm) {
+        const { verifyToken } = await import('@/lib/auth/jwt');
+        const { getPool } = await import('@/lib/database/connection');
+        const payload = verifyToken(tokenFromForm);
+        if (payload) {
+          const pool = getPool();
+          const result = await pool.query(
+            'SELECT id, email, name, phone, company_name, role, created_at, updated_at FROM users WHERE id = $1',
+            [payload.userId]
+          );
+          if (result.rows.length > 0) {
+            const dbUser = result.rows[0];
+            auth = {
+              success: true,
+              user: {
+                id: dbUser.id,
+                email: dbUser.email,
+                name: dbUser.name,
+                phone: dbUser.phone,
+                companyName: dbUser.company_name,
+                role: dbUser.role,
+                createdAt: dbUser.created_at,
+                updatedAt: dbUser.updated_at,
+              },
+            };
+          }
+        }
+      }
+    } catch {
+      // ignore fallback errors
+    }
+  }
+
   if (!auth.success) {
     return auth.response;
   }

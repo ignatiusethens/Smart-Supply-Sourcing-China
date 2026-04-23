@@ -121,6 +121,15 @@ export function SourcingRequestForm({
         submitFormData.append('attachments', file);
       });
 
+      // Append token as form field fallback (some proxies strip Authorization headers)
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('auth-token')
+          : null;
+      if (token) {
+        submitFormData.append('_token', token);
+      }
+
       const response = await authFetch('/api/sourcing/requests', {
         method: 'POST',
         body: submitFormData,
