@@ -262,18 +262,32 @@ export default function LedgerPage() {
     );
   }
 
-  // Derived KPI counts from records
-  const unmatchedCount =
-    records.filter((r) => r.reconciliationStatus === 'pending').length || 12;
-  const pendingVerificationCount =
-    records.filter((r) => r.paymentStatus === 'pending-reconciliation')
-      .length || 8;
-  const clearedToday =
-    records
-      .filter((r) => r.reconciliationStatus === 'reconciled')
-      .reduce((sum, r) => sum + r.amount, 0) || 2400000;
-  const rejectedCount =
-    records.filter((r) => r.reconciliationStatus === 'rejected').length || 2;
+  // Derived KPI counts from real records only
+  const unmatchedCount = records.filter(
+    (r) => r.reconciliationStatus === 'pending'
+  ).length;
+  const pendingVerificationCount = records.filter(
+    (r) => r.paymentStatus === 'pending-reconciliation'
+  ).length;
+  const clearedToday = records
+    .filter((r) => r.reconciliationStatus === 'reconciled')
+    .reduce((sum, r) => sum + r.amount, 0);
+  const rejectedCount = records.filter(
+    (r) => r.reconciliationStatus === 'rejected'
+  ).length;
+
+  // Health score derived from real data
+  const totalRecords = records.length;
+  const reconciledCount = records.filter(
+    (r) => r.reconciliationStatus === 'reconciled'
+  ).length;
+  const healthScore =
+    totalRecords > 0 ? Math.round((reconciledCount / totalRecords) * 100) : 0;
+  const pendingPct =
+    totalRecords > 0 ? Math.round((unmatchedCount / totalRecords) * 100) : 0;
+  const rejectedPct =
+    totalRecords > 0 ? Math.round((rejectedCount / totalRecords) * 100) : 0;
+  const healthDashArray = `${healthScore} ${100 - healthScore}`;
 
   const filteredRecords = bankTransferOnly
     ? records.filter((r) => r.paymentMethod === 'bank_transfer')
@@ -494,29 +508,37 @@ export default function LedgerPage() {
                 fill="none"
                 stroke="#2563eb"
                 strokeWidth="3"
-                strokeDasharray="94 6"
+                strokeDasharray={healthDashArray}
                 strokeLinecap="round"
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-2xl font-bold text-blue-600">94%</span>
+              <span className="text-2xl font-bold text-blue-600">
+                {healthScore}%
+              </span>
             </div>
           </div>
           <p className="text-xs text-slate-500">
-            Excellent reconciliation rate
+            {healthScore >= 90
+              ? 'Excellent reconciliation rate'
+              : healthScore >= 70
+                ? 'Good reconciliation rate'
+                : healthScore > 0
+                  ? 'Needs attention'
+                  : 'No data yet'}
           </p>
           <div className="mt-3 w-full space-y-1.5">
             <div className="flex justify-between text-xs text-slate-500">
               <span>Matched</span>
-              <span className="font-medium text-slate-700">94%</span>
+              <span className="font-medium text-slate-700">{healthScore}%</span>
             </div>
             <div className="flex justify-between text-xs text-slate-500">
               <span>Pending</span>
-              <span className="font-medium text-yellow-600">4%</span>
+              <span className="font-medium text-yellow-600">{pendingPct}%</span>
             </div>
             <div className="flex justify-between text-xs text-slate-500">
               <span>Rejected</span>
-              <span className="font-medium text-red-600">2%</span>
+              <span className="font-medium text-red-600">{rejectedPct}%</span>
             </div>
           </div>
         </div>
