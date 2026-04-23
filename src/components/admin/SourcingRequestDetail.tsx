@@ -10,13 +10,17 @@ import {
   MessageSquare,
   XCircle,
   FileOutput,
+  ChevronRight,
+  Clock,
+  Eye,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface SourcingRequestDetailProps {
   request: SourcingRequest;
   onGenerateInvoice?: (request: SourcingRequest) => void;
-  onUpdateStatus?: (status: string) => void;
+  onUpdateStatus?: (status: string, notes?: string) => void;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -27,6 +31,13 @@ const STATUS_COLORS: Record<string, string> = {
   rejected: 'bg-red-100 text-red-800 border-red-200',
 };
 
+const STATUS_STEPS = [
+  { key: 'submitted', label: 'Submitted', icon: FileText },
+  { key: 'under-review', label: 'Under Review', icon: Eye },
+  { key: 'quoted', label: 'Quoted', icon: FileOutput },
+  { key: 'accepted', label: 'Accepted', icon: CheckCircle },
+];
+
 export function SourcingRequestDetail({
   request,
   onGenerateInvoice,
@@ -34,11 +45,18 @@ export function SourcingRequestDetail({
 }: SourcingRequestDetailProps) {
   const [adminNotes, setAdminNotes] = useState(request.adminNotes || '');
   const [savingNotes, setSavingNotes] = useState(false);
+  const [showMoreInfoModal, setShowMoreInfoModal] = useState(false);
+  const [moreInfoMessage, setMoreInfoMessage] = useState('');
+  const [sendingMoreInfo, setSendingMoreInfo] = useState(false);
+  const [actionSuccess, setActionSuccess] = useState('');
 
   const refCode = `SRC-${request.id.slice(-4).toUpperCase()}`;
   const statusLabel = request.status
     .replace('-', ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
+  const currentStepIdx = STATUS_STEPS.findIndex(
+    (s) => s.key === request.status
+  );
 
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString('en-KE', {
@@ -51,8 +69,46 @@ export function SourcingRequestDetail({
 
   const handleSaveNotes = async () => {
     setSavingNotes(true);
-    await onUpdateStatus?.('under-review');
+    await onUpdateStatus?.('under-review', adminNotes);
     setSavingNotes(false);
+    setActionSuccess('Notes saved and status updated to Under Review');
+    setTimeout(() => setActionSuccess(''), 3000);
+  };
+
+  const handleMarkUnderReview = async () => {
+    await onUpdateStatus?.('under-review');
+    setActionSuccess('Status updated to Under Review');
+    setTimeout(() => setActionSuccess(''), 3000);
+  };
+
+  const handleRequestMoreInfo = async () => {
+    if (!moreInfoMessage.trim()) return;
+    setSendingMoreInfo(true);
+    // Send email to buyer via API
+    try {
+      await fetch('/api/sourcing/request-info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requestId: request.id,
+          buyerEmail: request.buyer?.email,
+          buyerName: request.buyer?.name,
+          message: moreInfoMessage,
+          itemDescription: request.itemDescription,
+        }),
+      });
+      await onUpdateStatus?.('under-review');
+      setShowMoreInfoModal(false);
+      setMoreInfoMessage('');
+      setActionSuccess(
+        'Message sent to buyer and status updated to Under Review'
+      );
+      setTimeout(() => setActionSuccess(''), 4000);
+    } catch {
+      // ignore
+    } finally {
+      setSendingMoreInfo(false);
+    }
   };
 
   return (
@@ -62,7 +118,7 @@ export function SourcingRequestDetail({
         <Link href="/admin/sourcing" className="hover:text-blue-600">
           Sourcing Management
         </Link>
-        <span>›</span>
+        <ChevronRight className="w-3 h-3" />
         <span className="text-gray-700 font-medium">Request Details</span>
       </div>
 
@@ -101,6 +157,54 @@ export function SourcingRequestDetail({
         </div>
       </div>
 
+      {/* ── Success message ── */}
+      {actionSuccess && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 font-medium">
+          ✓ {actionSuccess}
+        </div>
+      )}
+
+      {/* ── Status timeline ── */}
+      <div className="bg-white rounded-xl border border-gray-200 p-5 mb-5">
+        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">
+          Workflow Status
+        </h3>
+        <div className="flex items-center gap-0">
+          {STATUS_STEPS.map((step, idx) => {
+            const isCompleted = idx < currentStepIdx;
+            const isCurrent = idx === currentStepIdx;
+            const Icon = step.icon;
+            return (
+              <React.Fragment key={step.key}>
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
+                      isCompleted
+                        ? 'bg-blue-600 border-blue-600 text-white'
+                        : isCurrent
+                          ? 'bg-blue-50 border-blue-600 text-blue-600'
+                          : 'bg-gray-50 border-gray-200 text-gray-400'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <span
+                    className={`text-xs mt-1 font-medium ${isCurrent ? 'text-blue-600' : isCompleted ? 'text-gray-700' : 'text-gray-400'}`}
+                  >
+                    {step.label}
+                  </span>
+                </div>
+                {idx < STATUS_STEPS.length - 1 && (
+                  <div
+                    className={`flex-1 h-0.5 mb-5 mx-1 ${idx < currentStepIdx ? 'bg-blue-600' : 'bg-gray-200'}`}
+                  />
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ── LEFT: Main content ── */}
         <div className="lg:col-span-2 space-y-5">
@@ -112,7 +216,7 @@ export function SourcingRequestDetail({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                  <span className="text-sm">🏢</span>
+                  🏢
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 uppercase tracking-wide">
@@ -125,7 +229,7 @@ export function SourcingRequestDetail({
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                  <span className="text-sm">✉️</span>
+                  ✉️
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 uppercase tracking-wide">
@@ -138,7 +242,7 @@ export function SourcingRequestDetail({
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                  <span className="text-sm">📞</span>
+                  📞
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 uppercase tracking-wide">
@@ -158,7 +262,6 @@ export function SourcingRequestDetail({
               Requested Items
             </h2>
             <div className="space-y-4">
-              {/* Parse items from itemDescription */}
               {request.itemDescription.split(', ').map((item, idx) => (
                 <div
                   key={idx}
@@ -195,7 +298,6 @@ export function SourcingRequestDetail({
               ))}
             </div>
 
-            {/* Specs */}
             {request.specifications && (
               <div className="mt-4 p-4 rounded-lg bg-blue-50 border border-blue-100">
                 <p className="text-xs font-bold text-blue-700 uppercase tracking-wide mb-1">
@@ -207,7 +309,6 @@ export function SourcingRequestDetail({
               </div>
             )}
 
-            {/* Logistics */}
             <div className="mt-4 grid grid-cols-2 gap-4">
               {request.deliveryLocation && (
                 <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
@@ -229,6 +330,59 @@ export function SourcingRequestDetail({
               )}
             </div>
           </div>
+
+          {/* Attached Images */}
+          {request.attachments && request.attachments.length > 0 && (
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <h2 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4">
+                Attached Documents ({request.attachments.length})
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {request.attachments.map((att) =>
+                  att.fileType.startsWith('image') ? (
+                    <a
+                      key={att.id}
+                      href={att.cloudinaryUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-blue-400 transition-colors"
+                    >
+                      <Image
+                        src={att.cloudinaryUrl}
+                        alt={att.fileName}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <Download className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <p className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs px-2 py-1 truncate">
+                        {att.fileName}
+                      </p>
+                    </a>
+                  ) : (
+                    <a
+                      key={att.id}
+                      href={att.cloudinaryUrl}
+                      download={att.fileName}
+                      className="flex items-center gap-2 p-3 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                    >
+                      <FileText className="w-5 h-5 text-gray-500 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-gray-800 truncate">
+                          {att.fileName}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {(att.fileSize / 1024).toFixed(1)} KB
+                        </p>
+                      </div>
+                    </a>
+                  )
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Admin Internal Notes */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
@@ -295,68 +449,48 @@ export function SourcingRequestDetail({
             )}
           </div>
 
-          {/* Attached Documents */}
-          {request.attachments && request.attachments.length > 0 && (
-            <div className="bg-white rounded-xl border border-gray-200 p-6">
-              <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-4">
-                Attached Documents
-              </h3>
-              <div className="space-y-2">
-                {request.attachments.map((att) => (
-                  <div
-                    key={att.id}
-                    className="flex items-center justify-between p-3 rounded-lg border border-gray-100 bg-gray-50"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      {att.fileType.startsWith('image') ? (
-                        <ImageIcon className="w-4 h-4 text-blue-500 shrink-0" />
-                      ) : (
-                        <FileText className="w-4 h-4 text-gray-500 shrink-0" />
-                      )}
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold text-gray-800 truncate">
-                          {att.fileName}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {(att.fileSize / 1024).toFixed(1)} MB
-                        </p>
-                      </div>
-                    </div>
-                    <a
-                      href={att.cloudinaryUrl}
-                      download={att.fileName}
-                      className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors"
-                    >
-                      <Download className="w-4 h-4" />
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Actions */}
           <div className="bg-white rounded-xl border border-gray-200 p-6">
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">
               Actions
             </h3>
             <div className="space-y-2">
+              {/* Mark Under Review */}
               {request.status === 'submitted' && (
                 <button
-                  onClick={() => onUpdateStatus?.('under-review')}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-green-700 hover:bg-green-50 rounded-lg transition-colors border border-green-200"
+                  onClick={handleMarkUnderReview}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-yellow-700 hover:bg-yellow-50 rounded-lg transition-colors border border-yellow-200"
                 >
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  Match to Existing Order
+                  <Clock className="w-4 h-4 text-yellow-600" />
+                  Mark as Under Review
                 </button>
               )}
-              <button
-                onClick={() => onUpdateStatus?.('under-review')}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200"
-              >
-                <MessageSquare className="w-4 h-4 text-gray-500" />
-                Request More Info
-              </button>
+
+              {/* Generate Pro-Forma */}
+              {(request.status === 'submitted' ||
+                request.status === 'under-review') && (
+                <button
+                  onClick={() => onGenerateInvoice?.(request)}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200"
+                >
+                  <FileOutput className="w-4 h-4 text-blue-600" />
+                  Generate Pro-Forma Invoice
+                </button>
+              )}
+
+              {/* Request More Info */}
+              {(request.status === 'submitted' ||
+                request.status === 'under-review') && (
+                <button
+                  onClick={() => setShowMoreInfoModal(true)}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200"
+                >
+                  <MessageSquare className="w-4 h-4 text-gray-500" />
+                  Request More Info from Buyer
+                </button>
+              )}
+
+              {/* Reject */}
               {(request.status === 'submitted' ||
                 request.status === 'under-review') && (
                 <button
@@ -367,10 +501,69 @@ export function SourcingRequestDetail({
                   Reject Request
                 </button>
               )}
+
+              {request.status === 'quoted' && (
+                <div className="p-3 rounded-lg bg-purple-50 border border-purple-200 text-sm text-purple-700 font-medium text-center">
+                  ✓ Pro-forma invoice sent to buyer
+                </div>
+              )}
+
+              {request.status === 'accepted' && (
+                <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-sm text-green-700 font-medium text-center">
+                  ✓ Quote accepted by buyer
+                </div>
+              )}
+
+              {request.status === 'rejected' && (
+                <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700 font-medium text-center">
+                  ✗ Request rejected
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* ── Request More Info Modal ── */}
+      {showMoreInfoModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              Request More Information
+            </h3>
+            <p className="text-sm text-gray-500 mb-4">
+              This message will be sent to{' '}
+              <strong>{request.buyer?.name}</strong> ({request.buyer?.email})
+              via email.
+            </p>
+            <textarea
+              value={moreInfoMessage}
+              onChange={(e) => setMoreInfoMessage(e.target.value)}
+              rows={5}
+              placeholder="e.g. Could you please provide the exact dimensions, material specifications, and any certifications required for this product?"
+              className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none mb-4"
+            />
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowMoreInfoModal(false);
+                  setMoreInfoMessage('');
+                }}
+                className="flex-1 px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRequestMoreInfo}
+                disabled={sendingMoreInfo || !moreInfoMessage.trim()}
+                className="flex-1 px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-60"
+              >
+                {sendingMoreInfo ? 'Sending...' : 'Send Message'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
