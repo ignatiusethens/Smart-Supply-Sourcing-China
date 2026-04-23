@@ -42,7 +42,7 @@ export default function RegisterPage() {
       }
 
       login(data.user, data.token);
-      router.push('/dashboard');
+      router.push('/');
     } catch {
       setError('Something went wrong. Please try again.');
     } finally {
@@ -125,15 +125,17 @@ export default function RegisterPage() {
                 htmlFor="phone"
                 className="block text-sm font-medium text-gray-700 mb-1.5"
               >
-                Phone number
+                Phone number (WhatsApp preferred){' '}
+                <span className="text-red-500">*</span>
               </label>
               <input
                 id="phone"
                 name="phone"
                 type="tel"
+                required
                 value={form.phone}
                 onChange={handleChange}
-                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1a6b50] focus:border-[#1a6b50]"
                 placeholder="+254 700 000 000"
               />
             </div>
