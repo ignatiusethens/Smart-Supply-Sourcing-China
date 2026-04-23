@@ -449,14 +449,59 @@ export default function DashboardPage() {
         </div>
 
         {/* ── Overview tab ─────────────────────────────────────────────────── */}
-        {activeTab === 'overview' && dashboardData && (
-          <DashboardSummary
-            outstandingBalance={dashboardData.outstandingBalance}
-            pendingReconciliation={dashboardData.pendingReconciliation}
-            totalOrders={dashboardData.totalOrders}
-            completedOrders={dashboardData.completedOrders}
-          />
-        )}
+        {activeTab === 'overview' &&
+          (dashboardData ? (
+            <DashboardSummary
+              outstandingBalance={dashboardData.outstandingBalance}
+              pendingReconciliation={dashboardData.pendingReconciliation}
+              totalOrders={dashboardData.totalOrders}
+              completedOrders={dashboardData.completedOrders}
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                {
+                  label: 'Outstanding Balance',
+                  value: 'KES 0',
+                  icon: '💳',
+                  color: 'bg-blue-50 border-blue-100',
+                },
+                {
+                  label: 'Pending Reconciliation',
+                  value: '0',
+                  icon: '⏳',
+                  color: 'bg-orange-50 border-orange-100',
+                },
+                {
+                  label: 'Total Orders',
+                  value: '0',
+                  icon: '📦',
+                  color: 'bg-purple-50 border-purple-100',
+                },
+                {
+                  label: 'Completed Orders',
+                  value: '0',
+                  icon: '✅',
+                  color: 'bg-green-50 border-green-100',
+                },
+              ].map((card) => (
+                <div
+                  key={card.label}
+                  className={`rounded-xl border p-6 ${card.color}`}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-2xl">{card.icon}</span>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      {card.label}
+                    </p>
+                  </div>
+                  <p className="text-2xl font-black text-gray-900">
+                    {card.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ))}
 
         {/* ── Orders tab ───────────────────────────────────────────────────── */}
         {activeTab === 'orders' && (
@@ -654,13 +699,107 @@ export default function DashboardPage() {
 
         {/* ── Settings tab ─────────────────────────────────────────────────── */}
         {activeTab === 'settings' && (
-          <div className="bg-white border border-primary-200 rounded-xl shadow-sm p-6">
-            <h2 className="text-lg font-bold text-primary-900 mb-4">
-              Account Settings
-            </h2>
-            <p className="text-sm text-primary-500">
-              Manage your account preferences and notification settings.
-            </p>
+          <div className="space-y-6">
+            <div className="bg-white border border-primary-200 rounded-xl shadow-sm p-6">
+              <h2 className="text-lg font-bold text-primary-900 mb-1">
+                Account Settings
+              </h2>
+              <p className="text-sm text-primary-500 mb-6">
+                Manage your profile and preferences.
+              </p>
+              <div className="space-y-4 max-w-lg">
+                <div>
+                  <label className="block text-xs font-semibold text-primary-500 uppercase tracking-wide mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2.5 text-sm border border-primary-300 rounded-lg bg-primary-50 text-primary-700"
+                    placeholder="Your name"
+                    readOnly
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-primary-500 uppercase tracking-wide mb-1">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    className="w-full px-3 py-2.5 text-sm border border-primary-300 rounded-lg bg-primary-50 text-primary-700"
+                    placeholder="your@email.com"
+                    readOnly
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-primary-500 uppercase tracking-wide mb-1">
+                    Company Name
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2.5 text-sm border border-primary-300 rounded-lg bg-primary-50 text-primary-700"
+                    placeholder="Your company"
+                    readOnly
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-primary-500 uppercase tracking-wide mb-1">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    className="w-full px-3 py-2.5 text-sm border border-primary-300 rounded-lg bg-primary-50 text-primary-700"
+                    placeholder="+254 700 000 000"
+                    readOnly
+                  />
+                </div>
+                <p className="text-xs text-primary-400">
+                  To update your profile details, contact{' '}
+                  <span className="text-blue-600">
+                    smartsupplysourcing@gmail.com
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white border border-primary-200 rounded-xl shadow-sm p-6">
+              <h2 className="text-base font-bold text-primary-900 mb-1">
+                Notifications
+              </h2>
+              <p className="text-sm text-primary-500 mb-4">
+                Choose what updates you receive.
+              </p>
+              <div className="space-y-3">
+                {[
+                  {
+                    label: 'Quote ready notifications',
+                    desc: 'Get notified when a quote is ready for review',
+                  },
+                  {
+                    label: 'Payment confirmations',
+                    desc: 'Receive confirmation when payments are processed',
+                  },
+                  {
+                    label: 'Order status updates',
+                    desc: 'Track your order from processing to delivery',
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center justify-between py-2 border-b border-primary-100 last:border-0"
+                  >
+                    <div>
+                      <p className="text-sm font-medium text-primary-800">
+                        {item.label}
+                      </p>
+                      <p className="text-xs text-primary-400">{item.desc}</p>
+                    </div>
+                    <div className="w-10 h-6 bg-blue-600 rounded-full flex items-center justify-end px-1">
+                      <div className="w-4 h-4 bg-white rounded-full" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </main>

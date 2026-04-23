@@ -1,21 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getBuyerDashboardSummary } from '@/lib/database/queries/orders';
 import { ApiResponse } from '@/types/api';
+import { requireAuth } from '@/lib/auth/middleware';
 
 export async function GET(request: NextRequest) {
+  const auth = await requireAuth(request);
+  if (!auth.success) return auth.response;
+
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const userId = searchParams.get('userId');
-
-    if (!userId) {
-      const response: ApiResponse = {
-        success: false,
-        error: 'userId parameter required',
-      };
-      return NextResponse.json(response, { status: 400 });
-    }
-
-    const summary = await getBuyerDashboardSummary(userId);
+    const summary = await getBuyerDashboardSummary(auth.user.id);
 
     const response: ApiResponse = {
       success: true,
@@ -28,7 +21,10 @@ export async function GET(request: NextRequest) {
 
     const response: ApiResponse = {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to fetch dashboard summary',
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Failed to fetch dashboard summary',
     };
 
     return NextResponse.json(response, { status: 500 });
