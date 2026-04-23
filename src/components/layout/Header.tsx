@@ -108,7 +108,7 @@ export function Header({ userRole = 'buyer' }: HeaderProps) {
             className="rounded-full"
           />
           <span className="hidden sm:inline text-[#1a6b50] font-bold text-base md:text-lg whitespace-nowrap">
-            Smart Supply Sourcing China
+            SMART SUPPLY SOURCING CHINA
           </span>
         </Link>
 

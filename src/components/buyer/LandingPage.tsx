@@ -27,7 +27,7 @@ export function LandingPage({
             <div>
               {/* Brand label */}
               <h1 className="mb-3 text-2xl font-bold text-[#2a7a5e] tracking-wide">
-                Smart Supply Sourcing China
+                SMART SUPPLY SOURCING CHINA
               </h1>
 
               {/* Headline */}
