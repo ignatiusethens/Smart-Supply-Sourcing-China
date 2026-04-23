@@ -205,7 +205,6 @@ export default function AdminCatalogPage() {
         stockLevel: parseInt(form.stockLevel),
         description: form.description,
         imageUrls: form.imageUrls,
-        specifications: [],
       };
 
       const res = await authFetch(

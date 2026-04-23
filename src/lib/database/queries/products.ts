@@ -8,10 +8,10 @@ export async function getProducts(
   limit: number = 20
 ): Promise<{ products: Product[]; total: number }> {
   const offset = (page - 1) * limit;
-  
+
   // Build WHERE clause dynamically
   const conditions: string[] = [];
-  const params: any[] = [];
+  const params: unknown[] = [];
   let paramIndex = 1;
 
   if (filters.categories.length > 0) {
@@ -48,7 +48,8 @@ export async function getProducts(
     paramIndex++;
   }
 
-  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const whereClause =
+    conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
   // Get total count
   const countQuery = `
@@ -56,7 +57,7 @@ export async function getProducts(
     FROM products p
     ${whereClause}
   `;
-  
+
   const countResult = await query(countQuery, params);
   const total = parseInt(countResult.rows[0].total);
 
@@ -84,10 +85,10 @@ export async function getProducts(
   `;
 
   params.push(limit, offset);
-  
+
   const result = await query(productsQuery, params);
-  
-  const products: Product[] = result.rows.map(row => ({
+
+  const products: Product[] = result.rows.map((row) => ({
     id: row.id,
     name: row.name,
     category: row.category,
@@ -97,7 +98,9 @@ export async function getProducts(
     description: row.description,
     warrantyDuration: row.warranty_duration,
     warrantyTerms: row.warranty_terms,
-    depositAmount: row.deposit_amount ? parseFloat(row.deposit_amount) : undefined,
+    depositAmount: row.deposit_amount
+      ? parseFloat(row.deposit_amount)
+      : undefined,
     depositPercentage: row.deposit_percentage,
     batchArrivalDate: row.batch_arrival_date,
     escrowDetails: row.escrow_details,
@@ -133,13 +136,13 @@ export async function getProductById(id: string): Promise<Product | null> {
   `;
 
   const result = await query(productQuery, [id]);
-  
+
   if (result.rows.length === 0) {
     return null;
   }
 
   const row = result.rows[0];
-  
+
   return {
     id: row.id,
     name: row.name,
@@ -150,7 +153,9 @@ export async function getProductById(id: string): Promise<Product | null> {
     description: row.description,
     warrantyDuration: row.warranty_duration,
     warrantyTerms: row.warranty_terms,
-    depositAmount: row.deposit_amount ? parseFloat(row.deposit_amount) : undefined,
+    depositAmount: row.deposit_amount
+      ? parseFloat(row.deposit_amount)
+      : undefined,
     depositPercentage: row.deposit_percentage,
     batchArrivalDate: row.batch_arrival_date,
     escrowDetails: row.escrow_details,
@@ -216,13 +221,13 @@ export async function createProduct(productData: {
           VALUES ($1, $2, $3)
           RETURNING *
         `;
-        
+
         const specResult = await client.query(specQuery, [
           product.id,
           spec.label,
           spec.value,
         ]);
-        
+
         specifications.push({
           id: specResult.rows[0].id,
           productId: specResult.rows[0].product_id,
@@ -242,7 +247,9 @@ export async function createProduct(productData: {
       description: product.description,
       warrantyDuration: product.warranty_duration,
       warrantyTerms: product.warranty_terms,
-      depositAmount: product.deposit_amount ? parseFloat(product.deposit_amount) : undefined,
+      depositAmount: product.deposit_amount
+        ? parseFloat(product.deposit_amount)
+        : undefined,
       depositPercentage: product.deposit_percentage,
       batchArrivalDate: product.batch_arrival_date,
       escrowDetails: product.escrow_details,
@@ -273,18 +280,40 @@ export async function updateProduct(
     imageUrls: string[];
   }>
 ): Promise<Product | null> {
-  const fields = Object.keys(updates).filter(key => updates[key as keyof typeof updates] !== undefined);
-  
-  if (fields.length === 0) {
+  const COLUMN_MAP: Record<string, string> = {
+    name: 'name',
+    category: 'category',
+    price: 'price',
+    availability: 'availability',
+    stockLevel: 'stock_level',
+    description: 'description',
+    warrantyDuration: 'warranty_duration',
+    warrantyTerms: 'warranty_terms',
+    depositAmount: 'deposit_amount',
+    depositPercentage: 'deposit_percentage',
+    batchArrivalDate: 'batch_arrival_date',
+    escrowDetails: 'escrow_details',
+    imageUrls: 'image_urls',
+  };
+
+  const validFields = Object.keys(updates).filter(
+    (key) =>
+      COLUMN_MAP[key] !== undefined &&
+      updates[key as keyof typeof updates] !== undefined
+  );
+
+  if (validFields.length === 0) {
     return getProductById(id);
   }
 
-  const setClause = fields.map((field, index) => {
-    const dbField = field.replace(/([A-Z])/g, '_$1').toLowerCase();
-    return `${dbField} = $${index + 2}`;
-  }).join(', ');
+  const setClause = validFields
+    .map((field, index) => `${COLUMN_MAP[field]} = $${index + 2}`)
+    .join(', ');
 
-  const values = [id, ...fields.map(field => updates[field as keyof typeof updates])];
+  const values = [
+    id,
+    ...validFields.map((field) => updates[field as keyof typeof updates]),
+  ];
 
   const updateQuery = `
     UPDATE products 
@@ -294,7 +323,7 @@ export async function updateProduct(
   `;
 
   const result = await query(updateQuery, values);
-  
+
   if (result.rows.length === 0) {
     return null;
   }
@@ -310,13 +339,16 @@ export async function deleteProduct(id: string): Promise<boolean> {
 }
 
 // Update stock level
-export async function updateStockLevel(id: string, newLevel: number): Promise<boolean> {
+export async function updateStockLevel(
+  id: string,
+  newLevel: number
+): Promise<boolean> {
   const updateQuery = `
     UPDATE products 
     SET stock_level = $2, updated_at = NOW()
     WHERE id = $1
   `;
-  
+
   const result = await query(updateQuery, [id, newLevel]);
   return (result.rowCount ?? 0) > 0;
 }
