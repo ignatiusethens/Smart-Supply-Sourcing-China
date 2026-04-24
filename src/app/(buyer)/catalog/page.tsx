@@ -177,6 +177,40 @@ export default function CatalogPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Custom CSS for range sliders */}
+      <style jsx>{`
+        .range-slider::-webkit-slider-thumb {
+          appearance: none;
+          height: 16px;
+          width: 16px;
+          border-radius: 50%;
+          background: #f47a20;
+          cursor: pointer;
+          border: 2px solid white;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .range-slider::-moz-range-thumb {
+          height: 16px;
+          width: 16px;
+          border-radius: 50%;
+          background: #f47a20;
+          cursor: pointer;
+          border: 2px solid white;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .range-slider::-webkit-slider-track {
+          background: transparent;
+          height: 4px;
+        }
+
+        .range-slider::-moz-range-track {
+          background: transparent;
+          height: 4px;
+        }
+      `}</style>
+
       {/* Main Header */}
       <header className="bg-[#002d1a] text-white">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-6">
@@ -315,7 +349,7 @@ export default function CatalogPage() {
                 </label>
                 <div className="flex gap-2 mb-2">
                   <input
-                    className="w-1/2 text-xs border-gray-300 rounded p-1"
+                    className="w-1/2 text-xs border-gray-300 rounded p-1 focus:outline-none focus:ring-1 focus:ring-[#f47a20] focus:border-[#f47a20]"
                     placeholder="KES 0"
                     type="text"
                     value={
@@ -330,10 +364,11 @@ export default function CatalogPage() {
                         ...p,
                         priceRange: { ...p.priceRange, min: val },
                       }));
+                      setPage(1);
                     }}
                   />
                   <input
-                    className="w-1/2 text-xs border-gray-300 rounded p-1"
+                    className="w-1/2 text-xs border-gray-300 rounded p-1 focus:outline-none focus:ring-1 focus:ring-[#f47a20] focus:border-[#f47a20]"
                     placeholder="KES 50,000+"
                     type="text"
                     value={
@@ -348,12 +383,83 @@ export default function CatalogPage() {
                         ...p,
                         priceRange: { ...p.priceRange, max: val },
                       }));
+                      setPage(1);
                     }}
                   />
                 </div>
-                <div className="h-1 bg-gray-200 rounded relative">
-                  <div className="absolute inset-y-0 left-0 right-1/4 bg-[#f47a20] rounded"></div>
-                  <div className="absolute -top-1 right-1/4 w-3 h-3 bg-white border-2 border-orange-500 rounded-full"></div>
+
+                {/* Interactive Price Range Slider */}
+                <div className="relative mb-4">
+                  <div className="h-1 bg-gray-200 rounded-full">
+                    <div
+                      className="absolute h-1 bg-[#f47a20] rounded-full"
+                      style={{
+                        left: `${(filters.priceRange.min / 1000000) * 100}%`,
+                        right: `${100 - (filters.priceRange.max / 1000000) * 100}%`,
+                      }}
+                    />
+                  </div>
+
+                  {/* Min Range Slider */}
+                  <input
+                    type="range"
+                    min="0"
+                    max="1000000"
+                    step="1000"
+                    value={filters.priceRange.min}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      if (val <= filters.priceRange.max) {
+                        setFilters((p) => ({
+                          ...p,
+                          priceRange: { ...p.priceRange, min: val },
+                        }));
+                        setPage(1);
+                      }
+                    }}
+                    className="absolute top-0 left-0 w-full h-1 bg-transparent appearance-none cursor-pointer range-slider"
+                    style={{
+                      zIndex: 1,
+                      background: 'transparent',
+                      WebkitAppearance: 'none',
+                    }}
+                  />
+
+                  {/* Max Range Slider */}
+                  <input
+                    type="range"
+                    min="0"
+                    max="1000000"
+                    step="1000"
+                    value={filters.priceRange.max}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      if (val >= filters.priceRange.min) {
+                        setFilters((p) => ({
+                          ...p,
+                          priceRange: { ...p.priceRange, max: val },
+                        }));
+                        setPage(1);
+                      }
+                    }}
+                    className="absolute top-0 left-0 w-full h-1 bg-transparent appearance-none cursor-pointer range-slider"
+                    style={{
+                      zIndex: 2,
+                      background: 'transparent',
+                      WebkitAppearance: 'none',
+                    }}
+                  />
+                </div>
+
+                {/* Price Range Display */}
+                <div className="flex justify-between text-[10px] text-gray-500">
+                  <span>KES {filters.priceRange.min.toLocaleString()}</span>
+                  <span>
+                    KES{' '}
+                    {filters.priceRange.max >= 1000000
+                      ? '1M+'
+                      : filters.priceRange.max.toLocaleString()}
+                  </span>
                 </div>
               </div>
 
