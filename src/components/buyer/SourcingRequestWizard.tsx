@@ -96,6 +96,53 @@ export function SourcingRequestWizard({
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Navigation Header */}
+      <nav className="bg-[#053018] text-white py-4 px-6 md:px-12 flex justify-between items-center sticky top-0 z-50 shadow-md">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+            <span className="text-xs font-bold text-white">S</span>
+          </div>
+          <div className="font-bold text-lg leading-tight">
+            Smart Supply
+            <br />
+            <span className="font-semibold text-sm">Sourcing China</span>
+          </div>
+        </div>
+        <div className="hidden md:flex gap-8 text-sm font-medium">
+          <Link href="/" className="hover:text-orange-400 transition-colors">
+            Home
+          </Link>
+          <Link
+            href="/catalog"
+            className="hover:text-orange-400 transition-colors"
+          >
+            Services
+          </Link>
+          <Link href="#" className="hover:text-orange-400 transition-colors">
+            About Us
+          </Link>
+          <Link href="#" className="hover:text-orange-400 transition-colors">
+            Contact Us
+          </Link>
+        </div>
+        {/* Mobile Menu Toggle */}
+        <div className="md:hidden">
+          <svg
+            className="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </div>
+      </nav>
+
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* ── SIDEBAR: Progress ── */}
         <aside className="lg:col-span-3">
@@ -103,7 +150,8 @@ export function SourcingRequestWizard({
             Sourcing Progress
           </h2>
           <div className="relative flex flex-col gap-12">
-            <div className="absolute left-[15px] top-4 bottom-4 w-px bg-gray-300 -z-0" />
+            {/* Vertical Progress Line */}
+            <div className="absolute left-[15px] top-4 bottom-4 w-px bg-gray-400 -z-0" />
 
             {[
               { num: 1, label: 'Product Details' },
@@ -124,7 +172,17 @@ export function SourcingRequestWizard({
                   }`}
                 >
                   {step > s.num ? (
-                    <Check className="w-5 h-5" />
+                    <svg
+                      className="h-5 w-5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
                   ) : (
                     <span
                       className={step === s.num ? 'font-bold' : 'text-gray-400'}
@@ -247,7 +305,7 @@ export function SourcingRequestWizard({
                 type="button"
                 disabled={!canProceedToStep2}
                 onClick={() => setStep(2)}
-                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 px-8 rounded-lg font-bold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg"
+                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 px-8 rounded-lg font-bold text-lg flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-lg"
               >
                 Continue to Logistics <ArrowRight className="w-5 h-5" />
               </button>
@@ -319,7 +377,7 @@ export function SourcingRequestWizard({
                   type="button"
                   disabled={!canProceedToStep3}
                   onClick={() => setStep(3)}
-                  className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-6 rounded-lg font-bold flex items-center justify-center gap-2 transition-all"
+                  className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-6 rounded-lg font-bold flex items-center justify-center gap-2 transition-transform"
                 >
                   Continue to Review <ArrowRight className="w-5 h-5" />
                 </button>
@@ -406,7 +464,7 @@ export function SourcingRequestWizard({
                   type="button"
                   disabled={isLoading}
                   onClick={handleSubmit}
-                  className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white py-4 px-8 rounded-lg font-bold text-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg"
+                  className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white py-4 px-8 rounded-lg font-bold text-lg flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-lg"
                 >
                   {isLoading ? 'Submitting...' : 'Submit Request'}{' '}
                   <ArrowRight className="w-6 h-6" />
@@ -420,12 +478,13 @@ export function SourcingRequestWizard({
       {/* Footer */}
       <footer className="bg-[#042512] text-white py-12 px-6 md:px-12 mt-auto">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+          {/* Company Info Column */}
           <div className="lg:col-span-1 space-y-6">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
                 <span className="text-xs font-bold text-white">S</span>
               </div>
-              <div className="font-bold text-base leading-tight">
+              <div className="font-bold text-lg leading-tight">
                 Smart Supply
                 <br />
                 <span className="font-semibold text-sm">Sourcing China</span>
@@ -435,7 +494,7 @@ export function SourcingRequestWizard({
               Kenya&apos;s most trusted delivery connecting quality verified
               suppliers from China. Fast, secure, and logistics-ready.
             </p>
-            <div className="space-y-3 text-xs text-gray-300">
+            <div className="space-y-3 text-xs">
               <div className="flex items-center gap-3">
                 <span className="text-orange-500">📍</span>
                 <span>Nairobi, Kenya</span>
@@ -450,71 +509,142 @@ export function SourcingRequestWizard({
               </div>
             </div>
           </div>
-          {[
-            {
-              title: 'Services',
-              links: [
-                'Product Catalog',
-                'Custom Sourcing',
-                'Order Management',
-                'Payment Solutions',
-              ],
-            },
-            {
-              title: 'Support',
-              links: [
-                'Help Center',
-                'Contact Us',
-                'Shipping Info',
-                'Returns Policy',
-              ],
-            },
-            {
-              title: 'Legal',
-              links: [
-                'Privacy Policy',
-                'Terms of Service',
-                'Compliance',
-                'Security',
-              ],
-            },
-          ].map((col) => (
-            <div key={col.title} className="space-y-4">
-              <h3 className="text-xs font-bold tracking-widest text-gray-500 uppercase">
-                {col.title}
-              </h3>
-              <ul className="text-sm space-y-2 text-gray-300">
-                {col.links.map((l) => (
-                  <li key={l}>
-                    <Link
-                      href="/"
-                      className="hover:text-white transition-colors"
-                    >
-                      {l}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+
+          {/* Services Column */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold tracking-widest text-gray-500 uppercase">
+              Services
+            </h3>
+            <ul className="text-sm space-y-2 text-gray-300">
+              <li>
+                <Link
+                  href="/catalog"
+                  className="hover:text-white transition-colors"
+                >
+                  Product Catalog
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/sourcing/request"
+                  className="hover:text-white transition-colors"
+                >
+                  Custom Sourcing
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/dashboard"
+                  className="hover:text-white transition-colors"
+                >
+                  Order Management
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="hover:text-white transition-colors">
+                  Payment Solutions
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Support Column */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold tracking-widest text-gray-500 uppercase">
+              Support
+            </h3>
+            <ul className="text-sm space-y-2 text-gray-300">
+              <li>
+                <Link href="#" className="hover:text-white transition-colors">
+                  Help Center
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="hover:text-white transition-colors">
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="hover:text-white transition-colors">
+                  Shipping Info
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="hover:text-white transition-colors">
+                  Returns Policy
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal Column */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold tracking-widest text-gray-500 uppercase">
+              Legal
+            </h3>
+            <ul className="text-sm space-y-2 text-gray-300">
+              <li>
+                <Link href="#" className="hover:text-white transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="hover:text-white transition-colors">
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="hover:text-white transition-colors">
+                  Compliance
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="hover:text-white transition-colors">
+                  Security
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Social Media Column */}
           <div className="space-y-4">
             <h3 className="text-xs font-bold tracking-widest text-gray-500 uppercase">
               Follow Us
             </h3>
             <div className="flex gap-3">
-              {['facebook', 'instagram', 'twitter', 'youtube'].map((s) => (
-                <a
-                  key={s}
-                  href="#"
-                  className="w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center hover:bg-gray-700 transition-colors"
-                >
-                  <span className="sr-only">{s}</span>
-                  <span className="text-xs">•</span>
-                </a>
-              ))}
+              <a
+                href="#"
+                className="w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center hover:bg-gray-700 transition-colors"
+              >
+                <span className="sr-only">Facebook</span>
+                <span className="text-xs">f</span>
+              </a>
+              <a
+                href="#"
+                className="w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center hover:bg-gray-700 transition-colors"
+              >
+                <span className="sr-only">Instagram</span>
+                <span className="text-xs">i</span>
+              </a>
+              <a
+                href="#"
+                className="w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center hover:bg-gray-700 transition-colors"
+              >
+                <span className="sr-only">Twitter</span>
+                <span className="text-xs">t</span>
+              </a>
+              <a
+                href="#"
+                className="w-8 h-8 rounded-full border border-gray-600 flex items-center justify-center hover:bg-gray-700 transition-colors"
+              >
+                <span className="sr-only">YouTube</span>
+                <span className="text-xs">y</span>
+              </a>
             </div>
           </div>
         </div>
+
+        {/* Bottom Bar */}
         <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-500 uppercase tracking-widest gap-2">
           <p>
             © {new Date().getFullYear()} Smart Supply Sourcing China - All
