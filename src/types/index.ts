@@ -35,6 +35,7 @@ export interface User {
   phone?: string;
   companyName?: string;
   role: UserRole;
+  status?: 'verified' | 'pending' | 'suspended';
   createdAt: string;
   updatedAt: string;
 }

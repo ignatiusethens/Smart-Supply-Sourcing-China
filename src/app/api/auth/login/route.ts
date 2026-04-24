@@ -20,7 +20,9 @@ interface LoginResponse {
  * POST /api/auth/login
  * Authenticate user with email and password, return JWT token
  */
-export async function POST(request: NextRequest): Promise<NextResponse<LoginResponse>> {
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse<LoginResponse>> {
   try {
     const body: LoginRequest = await request.json();
 
@@ -36,7 +38,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<LoginResp
 
     // Query user from database (including password_hash for verification)
     const result = await pool.query(
-      'SELECT id, email, name, phone, company_name, role, password_hash, created_at, updated_at FROM users WHERE email = $1',
+      'SELECT id, email, name, phone, company_name, role, password_hash, status, created_at, updated_at FROM users WHERE email = $1',
       [body.email]
     );
 
@@ -49,8 +51,22 @@ export async function POST(request: NextRequest): Promise<NextResponse<LoginResp
 
     const user = result.rows[0];
 
+    // Check if user is suspended
+    if (user.status === 'suspended') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Your account has been suspended. Please contact support.',
+        },
+        { status: 403 }
+      );
+    }
+
     // Verify password
-    const isPasswordValid = await verifyPassword(body.password, user.password_hash);
+    const isPasswordValid = await verifyPassword(
+      body.password,
+      user.password_hash
+    );
     if (!isPasswordValid) {
       return NextResponse.json(
         { success: false, error: 'Invalid email or password' },
@@ -66,6 +82,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<LoginResp
       phone: user.phone,
       companyName: user.company_name,
       role: user.role,
+      status: user.status || 'verified',
       createdAt: user.created_at,
       updatedAt: user.updated_at,
     };
