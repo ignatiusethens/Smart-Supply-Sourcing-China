@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Catalog API</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        pre { background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        .section { margin-bottom: 30px; }
+        h2 { color: #333; }
+    </style>
+</head>
+<body>
+    <h1>Catalog API Test</h1>
+    
+    <div class="section">
+        <h2>Test 1: Default Query (no filters)</h2>
+        <button onclick="test1()">Run Test</button>
+        <pre id="result1">Click button to run test...</pre>
+    </div>
+    
+    <div class="section">
+        <h2>Test 2: With Price Range (0-1000000)</h2>
+        <button onclick="test2()">Run Test</button>
+        <pre id="result2">Click button to run test...</pre>
+    </div>
+    
+    <div class="section">
+        <h2>Test 3: Exact Catalog Page Query</h2>
+        <button onclick="test3()">Run Test</button>
+        <pre id="result3">Click button to run test...</pre>
+    </div>
+
+    <script>
+        async function test1() {
+            const result = document.getElementById('result1');
+            result.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch('/api/products?limit=9');
+                const data = await response.json();
+                result.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        async function test2() {
+            const result = document.getElementById('result2');
+            result.textContent = 'Loading...';
+            
+            try {
+                const response = await fetch('/api/products?minPrice=0&maxPrice=1000000&page=1&limit=9');
+                const data = await response.json();
+                result.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                result.textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        async function test3() {
+            const result = document.getElementById('result3');
+            result.textContent = 'Loading...';
+            
+            try {
+                // This is exactly what the catalog page sends
+                const params = new URLSearchParams();
+                params.append('minPrice', '0');
+                params.append('maxPrice', '1000000');
+                params.append('page', '1');
+                params.append('limit', '9');
+                
+                const response = await fetch('/api/products?' + params.toString());
+                const data = await response.json();
+                
+                result.textContent = 'URL: /api/products?' + params.toString() + '\n\n';
+                result.textContent += 'Response:\n' + JSON.stringify(data, null, 2);
+                
+                if (data.success && data.data) {
+                    result.textContent += '\n\nProducts array length: ' + (data.data.data?.length || 0);
+                    result.textContent += '\nTotal: ' + (data.data.pagination?.total || 0);
+                }
+            } catch (error) {
+                result.textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

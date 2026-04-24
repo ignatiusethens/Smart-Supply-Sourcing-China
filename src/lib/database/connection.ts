@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Pool, PoolClient } from 'pg';
 import { handlePoolError } from './errorHandler';
 
 // Create a singleton pool instance
@@ -8,17 +8,25 @@ export function getPool(): Pool {
   if (!pool) {
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      ssl: {
+        rejectUnauthorized: false,
+      },
       max: 20, // Maximum number of clients in the pool
       idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
-      connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection could not be established
+      connectionTimeoutMillis: 10000, // Return an error after 10 seconds if connection could not be established
+      query_timeout: 10000, // Query timeout in milliseconds
     });
 
     // Handle pool errors with comprehensive error handling
     pool.on('error', (err) => {
       handlePoolError(err);
-      if (err.message?.includes('ECONNREFUSED') || err.message?.includes('ENOTFOUND')) {
-        console.error('Critical database connection error: Cannot reach database endpoint.');
+      if (
+        err.message?.includes('ECONNREFUSED') ||
+        err.message?.includes('ENOTFOUND')
+      ) {
+        console.error(
+          'Critical database connection error: Cannot reach database endpoint.'
+        );
       }
     });
   }
@@ -27,18 +35,18 @@ export function getPool(): Pool {
 }
 
 // Helper function to execute queries
-export async function query(text: string, params?: any[]) {
+export async function query(text: string, params?: unknown[]) {
   const pool = getPool();
   const start = Date.now();
-  
+
   try {
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
-    
+
     if (process.env.NODE_ENV === 'development') {
       console.log('Executed query', { text, duration, rows: res.rowCount });
     }
-    
+
     return res;
   } catch (error) {
     console.error('Database query error:', error);
@@ -48,11 +56,11 @@ export async function query(text: string, params?: any[]) {
 
 // Helper function for transactions
 export async function transaction<T>(
-  callback: (client: any) => Promise<T>
+  callback: (client: PoolClient) => Promise<T>
 ): Promise<T> {
   const pool = getPool();
   const client = await pool.connect();
-  
+
   try {
     await client.query('BEGIN');
     const result = await callback(client);
