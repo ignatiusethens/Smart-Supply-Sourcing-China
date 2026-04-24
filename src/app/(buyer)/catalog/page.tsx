@@ -3,114 +3,168 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ProductFilters, Product } from '@/types';
 import {
   Search,
   User,
   ShoppingCart,
   ChevronDown,
   MapPin,
-  ArrowUpDown,
   ArrowUp,
   ArrowDown,
 } from 'lucide-react';
+import useSWR from 'swr';
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  moq: number;
-  image: string;
-  trending?: boolean;
-  featured?: boolean;
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+const SHIPPING_OPTIONS = [
+  'Express (1-3 Days)',
+  'Standard (7-14 Days)',
+  'Air Freight (7-14 Days)',
+  'Sea Freight (30-45 Days)',
+];
+
+// Mini sparkline chart — fixed path per index to avoid Math.random in render
+const CHART_PATHS = [
+  'M0 15 Q 10 5, 20 12 T 40 8 T 60 15 T 80 5 T 100 10',
+  'M0 10 Q 20 18, 40 12 T 60 5 T 100 15',
+  'M0 5 Q 30 15, 60 10 T 100 5',
+  'M0 18 Q 50 2, 100 18',
+  'M0 10 Q 50 18, 100 10',
+];
+
+function MiniChart({
+  index = 0,
+  color = '#f47a20',
+}: {
+  index?: number;
+  color?: string;
+}) {
+  const path = CHART_PATHS[index % CHART_PATHS.length];
+  return (
+    <svg className="w-full h-full" viewBox="0 0 100 20">
+      <path d={path} fill="none" stroke={color} strokeWidth="2" />
+    </svg>
+  );
 }
 
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'High-Performance Smartphone X10',
-    price: 15000,
-    moq: 50,
-    image: '/api/placeholder/300/200',
-    trending: true,
-  },
-  {
-    id: '2',
-    name: 'Organic Cotton T-Shirts - Bulk',
-    price: 500,
-    moq: 200,
-    image: '/api/placeholder/300/200',
-    trending: true,
-  },
-  {
-    id: '3',
-    name: 'Industrial Cordless Drill Set',
-    price: 8000,
-    moq: 10,
-    image: '/api/placeholder/300/200',
-    trending: true,
-  },
-  {
-    id: '4',
-    name: 'Luxury Skincare Set - 5 Piece',
-    price: 3200,
-    moq: 100,
-    image: '/api/placeholder/400/350',
-    trending: true,
-    featured: true,
-  },
-  {
-    id: '5',
-    name: 'Ceramic Brake Pads - Universal',
-    price: 8000,
-    moq: 10,
-    image: '/api/placeholder/300/250',
-  },
-  {
-    id: '6',
-    name: 'Power Promoting Coverage',
-    price: 6500,
-    moq: 20,
-    image: '/api/placeholder/300/200',
-  },
-  {
-    id: '7',
-    name: 'Cars & Parts - B Supply',
-    price: 3200,
-    moq: 100,
-    image: '/api/placeholder/300/200',
-  },
-  {
-    id: '8',
-    name: 'Cosmetic Art Set - Piece',
-    price: 3200,
-    moq: 100,
-    image: '/api/placeholder/300/200',
-  },
-];
+// Product card matching the design
+function CatalogProductCard({
+  product,
+  index,
+  onRequestQuote,
+}: {
+  product: Product;
+  index: number;
+  onRequestQuote: () => void;
+}) {
+  const isInStock = product.availability === 'in-stock';
+  return (
+    <div className="bg-white p-4 border border-gray-100 flex flex-col h-full hover:shadow-lg transition-shadow">
+      <label className="flex items-center gap-2 text-[10px] text-gray-400 mb-2">
+        <input className="w-3 h-3 rounded border-gray-300" type="checkbox" />
+        Compare
+      </label>
 
-const categories = [
-  'Electronics',
-  'Textiles & Apparel',
-  'Machinery & Tools',
-  'Home & Garden',
-  'Beauty & Personal Care',
-  'Automotive Parts',
-  'Office Supplies',
-];
+      <Link href={`/product/${product.id}`} className="block">
+        <div className="bg-gray-100 flex-grow mb-4 relative min-h-[200px] flex items-center justify-center">
+          {product.imageUrls?.[0] ? (
+            <Image
+              src={product.imageUrls[0]}
+              alt={product.name}
+              fill
+              className="object-contain hover:scale-105 transition-transform duration-300"
+              unoptimized
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+              <span className="text-gray-500 text-sm">Product Image</span>
+            </div>
+          )}
+          {isInStock && (
+            <span className="absolute bottom-2 left-2 bg-[#f47a20] text-[9px] text-white px-2 py-0.5 font-bold italic">
+              TRENDING NOW
+            </span>
+          )}
+        </div>
+      </Link>
+
+      <Link
+        href={`/product/${product.id}`}
+        className="hover:text-orange-500 transition-colors"
+      >
+        <h4 className="font-bold text-sm mb-1">{product.name}</h4>
+      </Link>
+      <div className="text-xs font-bold mb-1">
+        KES {product.price.toLocaleString()}
+      </div>
+      <div className="text-[10px] text-gray-400 mb-2">
+        MOQ: {product.stockLevel || 1} UNITS
+      </div>
+
+      <div className="mt-auto">
+        <div className="mb-3 h-8">
+          <MiniChart index={index} />
+        </div>
+        <button
+          onClick={onRequestQuote}
+          className="bg-[#f47a20] text-white text-xs font-bold py-2 w-full rounded hover:bg-orange-600 transition-colors"
+        >
+          Add to Cart
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export default function CatalogPage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
-  const [moqRange, setMoqRange] = useState({ min: '', max: '' });
+  const [filters, setFilters] = useState<ProductFilters>({
+    categories: [],
+    availability: [],
+    priceRange: { min: 0, max: 1000000 },
+    searchQuery: '',
+  });
+  const [page, setPage] = useState(1);
   const [shippingFilters, setShippingFilters] = useState<string[]>([]);
 
-  const handleProductSelect = (productId: string) => {
-    setSelectedProducts((prev) =>
-      prev.includes(productId)
-        ? prev.filter((id) => id !== productId)
-        : [...prev, productId]
-    );
+  // Fetch products from API
+  const queryParams = new URLSearchParams();
+  filters.categories.forEach((cat) => queryParams.append('categories', cat));
+  filters.availability.forEach((avail) =>
+    queryParams.append('availability', avail)
+  );
+  queryParams.append('minPrice', filters.priceRange.min.toString());
+  queryParams.append('maxPrice', filters.priceRange.max.toString());
+  if (filters.searchQuery) queryParams.append('search', filters.searchQuery);
+  queryParams.append('page', page.toString());
+  queryParams.append('limit', '9');
+
+  const { data, isLoading, error } = useSWR(
+    `/api/products?${queryParams.toString()}`,
+    fetcher
+  );
+  const { data: catData } = useSWR('/api/admin/categories', fetcher);
+  const { data: userData } = useSWR('/api/auth/me', fetcher);
+
+  const products: Product[] = data?.data?.data || [];
+  const pagination = data?.data?.pagination;
+  const categories: { slug: string; label: string }[] = catData?.data || [];
+  const totalResults = pagination?.total ?? products.length;
+  const user = userData?.user;
+
+  const handleCategoryClick = (slug: string) => {
+    const already = filters.categories.includes(slug);
+    setFilters((prev) => ({
+      ...prev,
+      categories: already
+        ? prev.categories.filter((c) => c !== slug)
+        : [...prev.categories, slug],
+    }));
+    setPage(1);
+  };
+
+  const handleRequestQuote = () => {
+    window.location.href = `/sourcing/request`;
   };
 
   const handleShippingFilter = (filter: string) => {
@@ -143,8 +197,11 @@ export default function CatalogPage() {
                 className="w-full py-2 px-4 rounded-l text-gray-800 focus:outline-none focus:ring-0 border-none"
                 placeholder="Search for products, suppliers, categories..."
                 type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={filters.searchQuery}
+                onChange={(e) => {
+                  setFilters((p) => ({ ...p, searchQuery: e.target.value }));
+                  setPage(1);
+                }}
               />
               <button className="bg-gray-800 px-4 py-2 rounded-r flex items-center justify-center">
                 <Search className="w-5 h-5" />
@@ -154,10 +211,23 @@ export default function CatalogPage() {
 
           {/* User Actions */}
           <div className="flex items-center gap-6 text-sm font-medium">
-            <Link href="/login" className="flex items-center gap-2">
-              <User className="w-5 h-5" />
-              Log In / Sign Up
+            <Link
+              href="/dashboard"
+              className="hover:text-gray-300 transition-colors"
+            >
+              Sourcing Dashboard
             </Link>
+            {user ? (
+              <div className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                <span>Welcome, {user.name || user.email}</span>
+              </div>
+            ) : (
+              <Link href="/login" className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Log In / Sign Up
+              </Link>
+            )}
             <Link href="/cart" className="bg-[#f47a20] p-2 rounded relative">
               <ShoppingCart className="w-5 h-5" fill="white" />
             </Link>
@@ -168,36 +238,23 @@ export default function CatalogPage() {
       {/* Sub Navigation */}
       <nav className="bg-[#002d1a] border-t border-green-900 text-white text-sm">
         <div className="container mx-auto px-4 py-2 flex gap-8">
-          <Link href="/" className="hover:text-gray-300 transition-colors">
-            Home
-          </Link>
-          <Link
-            href="/services"
-            className="hover:text-gray-300 transition-colors"
-          >
-            Services
-          </Link>
-          <Link href="/about" className="hover:text-gray-300 transition-colors">
-            About Us
-          </Link>
-          <Link
-            href="/dashboard"
-            className="hover:text-gray-300 transition-colors"
-          >
-            Sourcing Dashboard
-          </Link>
           <div className="flex items-center gap-1 cursor-pointer">
             <span>Categories</span>
             <ChevronDown className="w-4 h-4" />
           </div>
-          <div className="flex items-center gap-1 cursor-pointer">
-            <span>Textiles & Apparel</span>
-            <ChevronDown className="w-4 h-4" />
-          </div>
-          <div className="flex items-center gap-1 cursor-pointer">
-            <span>Beauty & Health</span>
-            <ChevronDown className="w-4 h-4" />
-          </div>
+          {categories.slice(0, 3).map((cat) => (
+            <button
+              key={cat.slug}
+              onClick={() => handleCategoryClick(cat.slug)}
+              className={`hover:text-gray-200 transition-colors ${
+                filters.categories.includes(cat.slug)
+                  ? 'text-orange-300 font-bold'
+                  : ''
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
         </div>
       </nav>
 
@@ -210,11 +267,36 @@ export default function CatalogPage() {
               <h3 className="font-bold text-sm uppercase tracking-wider mb-4">
                 Categories
               </h3>
-              <ul className="space-y-2 text-sm text-gray-500">
-                {categories.map((category, index) => (
-                  <li key={index} className="flex items-center gap-2">
+              <ul className="space-y-3 text-sm">
+                <li>
+                  <button
+                    onClick={() => {
+                      setFilters((p) => ({ ...p, categories: [] }));
+                      setPage(1);
+                    }}
+                    className={`flex items-center gap-3 w-full text-left transition-colors ${
+                      filters.categories.length === 0
+                        ? 'text-[#002d1a] font-bold'
+                        : 'text-gray-600 hover:text-green-800'
+                    }`}
+                  >
                     <div className="w-3 h-3 bg-gray-200"></div>
-                    {category}
+                    All Products
+                  </button>
+                </li>
+                {categories.map((cat) => (
+                  <li key={cat.slug}>
+                    <button
+                      onClick={() => handleCategoryClick(cat.slug)}
+                      className={`flex items-center gap-3 w-full text-left transition-colors ${
+                        filters.categories.includes(cat.slug)
+                          ? 'text-[#002d1a] font-bold'
+                          : 'text-gray-600 hover:text-green-800'
+                      }`}
+                    >
+                      <div className="w-3 h-3 bg-gray-200"></div>
+                      {cat.label}
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -236,25 +318,37 @@ export default function CatalogPage() {
                     className="w-1/2 text-xs border-gray-300 rounded p-1"
                     placeholder="KES 0"
                     type="text"
-                    value={priceRange.min}
-                    onChange={(e) =>
-                      setPriceRange((prev) => ({
-                        ...prev,
-                        min: e.target.value,
-                      }))
+                    value={
+                      filters.priceRange.min > 0
+                        ? `KES ${filters.priceRange.min.toLocaleString()}`
+                        : ''
                     }
+                    onChange={(e) => {
+                      const val =
+                        parseInt(e.target.value.replace(/\D/g, '')) || 0;
+                      setFilters((p) => ({
+                        ...p,
+                        priceRange: { ...p.priceRange, min: val },
+                      }));
+                    }}
                   />
                   <input
                     className="w-1/2 text-xs border-gray-300 rounded p-1"
                     placeholder="KES 50,000+"
                     type="text"
-                    value={priceRange.max}
-                    onChange={(e) =>
-                      setPriceRange((prev) => ({
-                        ...prev,
-                        max: e.target.value,
-                      }))
+                    value={
+                      filters.priceRange.max < 1000000
+                        ? `KES ${filters.priceRange.max.toLocaleString()}`
+                        : ''
                     }
+                    onChange={(e) => {
+                      const val =
+                        parseInt(e.target.value.replace(/\D/g, '')) || 1000000;
+                      setFilters((p) => ({
+                        ...p,
+                        priceRange: { ...p.priceRange, max: val },
+                      }));
+                    }}
                   />
                 </div>
                 <div className="h-1 bg-gray-200 rounded relative">
@@ -281,11 +375,7 @@ export default function CatalogPage() {
                   Shipping Time
                 </label>
                 <div className="space-y-1">
-                  {[
-                    'Express (1-5 Days)',
-                    'Standard (7-14 Days)',
-                    'Sea Freight (30-45 Days)',
-                  ].map((option) => (
+                  {SHIPPING_OPTIONS.map((option) => (
                     <label
                       key={option}
                       className="flex items-center gap-2 text-xs text-gray-600"
@@ -302,28 +392,43 @@ export default function CatalogPage() {
                 </div>
               </div>
 
-              {/* MOQ */}
+              {/* Availability */}
               <div className="mb-6">
-                <label className="block text-xs font-semibold mb-2">MOQ</label>
-                <div className="flex gap-2">
-                  <input
-                    className="w-1/2 text-xs border-gray-300 rounded p-1"
-                    placeholder="MIN"
-                    type="text"
-                    value={moqRange.min}
-                    onChange={(e) =>
-                      setMoqRange((prev) => ({ ...prev, min: e.target.value }))
-                    }
-                  />
-                  <input
-                    className="w-1/2 text-xs border-gray-300 rounded p-1"
-                    placeholder="MAX"
-                    type="text"
-                    value={moqRange.max}
-                    onChange={(e) =>
-                      setMoqRange((prev) => ({ ...prev, max: e.target.value }))
-                    }
-                  />
+                <label className="block text-xs font-semibold mb-2">
+                  Availability
+                </label>
+                <div className="space-y-1">
+                  {[
+                    {
+                      value: 'in-stock' as const,
+                      label: 'Ready Stock (M-Pesa)',
+                    },
+                    { value: 'pre-order' as const, label: 'Pre-order (Bank)' },
+                  ].map((opt) => (
+                    <label
+                      key={opt.value}
+                      className="flex items-center gap-2 text-xs text-gray-600"
+                    >
+                      <input
+                        className="rounded text-orange-500 focus:ring-orange-500 w-3 h-3"
+                        type="checkbox"
+                        checked={filters.availability.includes(opt.value)}
+                        onChange={() => {
+                          const already = filters.availability.includes(
+                            opt.value
+                          );
+                          setFilters((p) => ({
+                            ...p,
+                            availability: already
+                              ? p.availability.filter((a) => a !== opt.value)
+                              : [...p.availability, opt.value],
+                          }));
+                          setPage(1);
+                        }}
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
                 </div>
               </div>
 
@@ -348,177 +453,96 @@ export default function CatalogPage() {
 
           {/* Product Grid Section */}
           <section className="flex-grow">
-            {/* Row 1 */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
-              {mockProducts.slice(0, 3).map((product) => (
-                <div
-                  key={product.id}
-                  className="bg-white p-4 border border-gray-100 flex flex-col h-full hover:shadow-lg transition-shadow"
-                >
-                  <label className="flex items-center gap-2 text-[10px] text-gray-400 mb-2">
-                    <input
-                      className="w-3 h-3 rounded border-gray-300"
-                      type="checkbox"
-                      checked={selectedProducts.includes(product.id)}
-                      onChange={() => handleProductSelect(product.id)}
-                    />
-                    Compare
-                  </label>
-                  <div className="bg-gray-100 flex-grow mb-4 relative min-h-[200px] flex items-center justify-center">
-                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                      <span className="text-gray-500 text-sm">
-                        Product Image
-                      </span>
-                    </div>
-                    {product.trending && (
-                      <span className="absolute bottom-2 left-2 bg-[#f47a20] text-[9px] text-white px-2 py-0.5 font-bold italic">
-                        TRENDING NOW
-                      </span>
-                    )}
-                  </div>
-                  <h4 className="font-bold text-sm mb-1">{product.name}</h4>
-                  <div className="text-xs font-bold mb-1">
-                    KES {product.price.toLocaleString()}
-                  </div>
-                  <div className="text-[10px] text-gray-400 mb-2">
-                    MOQ: {product.moq} UNITS
-                  </div>
-                  <div className="h-2 w-15 bg-gradient-to-r from-[#f47a20] to-orange-400 rounded-full mb-4 mx-auto"></div>
-                  <button className="bg-[#f47a20] text-white text-xs font-bold py-2 w-full rounded hover:bg-orange-600 transition-colors">
-                    Add to Cart
-                  </button>
-                </div>
-              ))}
-            </div>
+            {/* Result count */}
+            <p className="text-xs text-gray-500 mb-4">
+              Showing{' '}
+              <span className="font-bold text-gray-800">
+                {totalResults} results
+              </span>
+            </p>
 
-            {/* Row 2 (Featured Wide Item) */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
-              {/* Featured Large Card (Spans 2 columns) */}
-              <div className="bg-white p-4 border border-gray-100 flex flex-col col-span-2 h-full hover:shadow-lg transition-shadow">
-                <label className="flex items-center gap-2 text-[10px] text-gray-400 mb-2">
-                  <input
-                    className="w-3 h-3 rounded border-gray-300"
-                    type="checkbox"
-                    checked={selectedProducts.includes(mockProducts[3].id)}
-                    onChange={() => handleProductSelect(mockProducts[3].id)}
-                  />
-                  Compare
-                </label>
-                <div className="bg-gray-100 flex-grow mb-4 relative flex items-center justify-center p-8 min-h-[350px]">
-                  <div className="w-full h-full bg-gradient-to-br from-pink-200 to-pink-300 flex items-center justify-center rounded">
-                    <span className="text-pink-700 text-lg font-semibold">
-                      Luxury Skincare
-                    </span>
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-white border border-gray-200 rounded-lg p-4 animate-pulse"
+                  >
+                    <div className="aspect-square bg-gray-200 rounded mb-4" />
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                    <div className="h-4 bg-gray-200 rounded w-1/2" />
                   </div>
-                  <span className="absolute top-4 right-4 bg-[#f47a20] text-[9px] text-white px-3 py-1 font-bold italic tracking-wider">
-                    TRENDING NOW
-                  </span>
-                </div>
-                <div className="flex flex-col items-start">
-                  <h4 className="font-bold text-base mb-1">
-                    {mockProducts[3].name}
-                  </h4>
-                  <div className="text-lg font-bold mb-1">
-                    KES {mockProducts[3].price.toLocaleString()}
-                  </div>
-                  <div className="text-[10px] text-gray-400 mb-4 uppercase">
-                    MOQ: {mockProducts[3].moq} Units
-                  </div>
-                  <div className="h-2 w-15 bg-gradient-to-r from-[#f47a20] to-orange-400 rounded-full mb-4"></div>
-                  <button className="bg-[#f47a20] text-white text-sm font-bold py-3 w-full rounded hover:bg-orange-600 transition-colors">
-                    Add to Cart
-                  </button>
-                </div>
+                ))}
               </div>
-
-              {/* Product 4 */}
-              <div className="bg-white p-4 border border-gray-100 flex flex-col h-full hover:shadow-lg transition-shadow">
-                <label className="flex items-center gap-2 text-[10px] text-gray-400 mb-2">
-                  <input
-                    className="w-3 h-3 rounded border-gray-300"
-                    type="checkbox"
-                    checked={selectedProducts.includes(mockProducts[4].id)}
-                    onChange={() => handleProductSelect(mockProducts[4].id)}
-                  />
-                  Compare
-                </label>
-                <div className="bg-gray-100 flex-grow mb-4 relative min-h-[250px] flex items-center justify-center">
-                  <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                    <span className="text-gray-500 text-sm">Brake Pads</span>
-                  </div>
-                </div>
-                <h4 className="font-bold text-sm mb-1">
-                  {mockProducts[4].name}
-                </h4>
-                <div className="text-xs font-bold mb-1">
-                  KES {mockProducts[4].price.toLocaleString()}
-                </div>
-                <div className="text-[10px] text-gray-400 mb-2">
-                  MOQ: {mockProducts[4].moq} UNITS
-                </div>
-                <div className="h-2 w-15 bg-gradient-to-r from-[#f47a20] to-orange-400 rounded-full mb-4 mx-auto"></div>
-                <button className="bg-[#f47a20] text-white text-xs font-bold py-2 w-full rounded hover:bg-orange-600 transition-colors">
-                  Add to Cart
-                </button>
+            ) : products.length === 0 ? (
+              <div className="text-center py-20 border-2 border-dashed border-gray-200 rounded-xl">
+                <p className="text-5xl mb-3">📦</p>
+                <p className="text-gray-500 font-medium">No products found</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Try adjusting your filters
+                </p>
               </div>
-            </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map((product, i) => (
+                  <CatalogProductCard
+                    key={product.id}
+                    product={product}
+                    index={i}
+                    onRequestQuote={handleRequestQuote}
+                  />
+                ))}
+              </div>
+            )}
 
-            {/* Row 3 */}
-            <div className="grid grid-cols-3 gap-6 mb-12">
-              {mockProducts.slice(5, 8).map((product) => (
-                <div
-                  key={product.id}
-                  className="bg-white p-4 border border-gray-100 flex flex-col h-full hover:shadow-lg transition-shadow"
-                >
-                  <label className="flex items-center gap-2 text-[10px] text-gray-400 mb-2">
-                    <input
-                      className="w-3 h-3 rounded border-gray-300"
-                      type="checkbox"
-                      checked={selectedProducts.includes(product.id)}
-                      onChange={() => handleProductSelect(product.id)}
-                    />
-                    Compare
-                  </label>
-                  <div className="bg-gray-100 flex-grow mb-4 min-h-[200px] flex items-center justify-center">
-                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                      <span className="text-gray-500 text-sm">Product</span>
-                    </div>
-                  </div>
-                  <h4 className="font-bold text-sm mb-1">{product.name}</h4>
-                  <div className="text-xs font-bold mb-1">
-                    KES {product.price.toLocaleString()}
-                  </div>
-                  <div className="text-[10px] text-gray-400 mb-2">
-                    MOQ: {product.moq} UNITS
-                  </div>
-                  <div className="h-2 w-15 bg-gradient-to-r from-[#f47a20] to-orange-400 rounded-full mb-4 mx-auto"></div>
-                  <button className="bg-[#f47a20] text-white text-xs font-bold py-2 w-full rounded hover:bg-orange-600 transition-colors">
-                    Add to Cart
-                  </button>
-                </div>
-              ))}
-            </div>
+            {error && (
+              <div
+                className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm mt-4"
+                role="alert"
+              >
+                Failed to load products. Please try again.
+              </div>
+            )}
 
             {/* Pagination */}
-            <div className="flex justify-center items-center gap-4 text-xs font-medium text-gray-500">
-              <button className="hover:text-gray-800 transition-colors">
-                Previous
-              </button>
-              <div className="flex gap-2">
-                <button className="w-8 h-8 rounded bg-[#002d1a] text-white flex items-center justify-center">
-                  1
+            {pagination && pagination.totalPages > 1 && (
+              <div className="flex justify-center items-center gap-4 text-xs font-medium text-gray-500 mt-12">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage(page - 1)}
+                  className="hover:text-gray-800 transition-colors disabled:opacity-40"
+                >
+                  Previous
                 </button>
-                <button className="w-8 h-8 rounded hover:bg-gray-200 flex items-center justify-center transition-colors">
-                  2
-                </button>
-                <button className="w-8 h-8 rounded hover:bg-gray-200 flex items-center justify-center transition-colors">
-                  3
+                <div className="flex gap-2">
+                  {Array.from({
+                    length: Math.min(pagination.totalPages, 5),
+                  }).map((_, i) => {
+                    const p = i + 1;
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p)}
+                        className={`w-8 h-8 rounded flex items-center justify-center font-bold text-sm ${
+                          page === p
+                            ? 'bg-[#002d1a] text-white'
+                            : 'hover:bg-gray-200 text-gray-500 transition-colors'
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button
+                  disabled={page === pagination.totalPages}
+                  onClick={() => setPage(page + 1)}
+                  className="hover:text-gray-800 transition-colors disabled:opacity-40"
+                >
+                  Next
                 </button>
               </div>
-              <button className="hover:text-gray-800 transition-colors">
-                Next
-              </button>
-            </div>
+            )}
           </section>
         </div>
       </main>
