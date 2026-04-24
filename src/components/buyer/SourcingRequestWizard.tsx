@@ -123,8 +123,11 @@ export function SourcingRequestWizard({
           <Link href="#" className="hover:text-orange-400 transition-colors">
             About Us
           </Link>
-          <Link href="#" className="hover:text-orange-400 transition-colors">
-            Contact Us
+          <Link
+            href="/dashboard"
+            className="hover:text-orange-400 transition-colors"
+          >
+            Sourcing Dashboard
           </Link>
         </div>
         {/* Mobile Menu Toggle */}
