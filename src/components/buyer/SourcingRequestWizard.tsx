@@ -96,37 +96,6 @@ export function SourcingRequestWizard({
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Nav */}
-      <nav className="bg-[#053018] text-white py-4 px-6 md:px-12 flex justify-between items-center sticky top-0 z-50 shadow-md">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-            <span className="text-xs font-bold text-white">S</span>
-          </div>
-          <div className="font-bold text-base leading-tight">
-            Smart Supply
-            <br />
-            <span className="font-semibold text-sm">Sourcing China</span>
-          </div>
-        </div>
-        <div className="hidden md:flex gap-8 text-sm font-medium">
-          <Link href="/" className="hover:text-orange-400 transition-colors">
-            Home
-          </Link>
-          <Link
-            href="/catalog"
-            className="hover:text-orange-400 transition-colors"
-          >
-            Services
-          </Link>
-          <Link href="/" className="hover:text-orange-400 transition-colors">
-            About Us
-          </Link>
-          <Link href="/" className="hover:text-orange-400 transition-colors">
-            Contact Us
-          </Link>
-        </div>
-      </nav>
-
       <main className="flex-grow max-w-7xl mx-auto w-full px-4 py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* ── SIDEBAR: Progress ── */}
         <aside className="lg:col-span-3">
