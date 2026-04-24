@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth/middleware';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization — avoids crash during build when env var is missing
+function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!key || key === 're_your_api_key_here') return null;
+  return new Resend(key);
+}
+
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ||
@@ -13,13 +19,21 @@ export async function POST(request: NextRequest) {
   if (!auth.success) return auth.response;
 
   try {
-    const { requestId, buyerEmail, buyerName, message, itemDescription } =
+    const { buyerEmail, buyerName, message, itemDescription } =
       await request.json();
 
     if (!buyerEmail || !message) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields' },
         { status: 400 }
+      );
+    }
+
+    const resend = getResend();
+    if (!resend) {
+      return NextResponse.json(
+        { success: false, error: 'Email service not configured' },
+        { status: 500 }
       );
     }
 
