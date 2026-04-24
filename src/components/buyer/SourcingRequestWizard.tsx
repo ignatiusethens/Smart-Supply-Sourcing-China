@@ -95,7 +95,7 @@ export function SourcingRequestWizard({
   const canProceedToStep3 = canProceedToStep2 && destinationCity.trim();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="bg-gray-50 flex flex-col">
       {/* Navigation Header */}
       <nav className="bg-[#053018] text-white py-4 px-6 md:px-12 flex justify-between items-center sticky top-0 z-50 shadow-md">
         <div className="flex items-center gap-2">
@@ -476,7 +476,7 @@ export function SourcingRequestWizard({
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#042512] text-white py-12 px-6 md:px-12 mt-auto">
+      <footer className="bg-[#042512] text-white py-12 px-6 md:px-12">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
           {/* Company Info Column */}
           <div className="lg:col-span-1 space-y-6">
