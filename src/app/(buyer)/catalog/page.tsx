@@ -564,7 +564,8 @@ export default function CatalogPage() {
               Showing{' '}
               <span className="font-bold text-gray-800">
                 {totalResults} results
-              </span>
+              </span>{' '}
+              with interactive price filtering
             </p>
 
             {isLoading ? (
