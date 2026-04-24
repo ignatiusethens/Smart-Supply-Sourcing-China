@@ -2,11 +2,23 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 import { authFetch } from '@/lib/api/auth-client';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Search } from 'lucide-react';
+import {
+  Search,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Package,
+  FileText,
+  ShoppingCart,
+  Users,
+  DollarSign,
+  FolderOpen,
+  Settings,
+  LogOut,
+  Loader2,
+} from 'lucide-react';
 
 interface OrderRecord {
   id: string;
@@ -16,6 +28,8 @@ interface OrderRecord {
   totalAmount: number;
   paymentStatus: string;
   orderStatus: string;
+  shippingAddress: string;
+  shippingCity: string;
   createdAt: string;
 }
 
@@ -24,188 +38,379 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<OrderRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [shippingModeFilter, setShippingModeFilter] = useState('');
+  const [dateRangeFilter, setDateRangeFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      setIsLoading(true);
-      try {
-        const response = await authFetch('/api/orders?admin=true');
-        const data = await response.json();
-
-        if (data.success) {
-          setOrders(data.data?.data || data.data || []);
-        } else {
-          console.error('Failed to fetch orders:', data.error);
-        }
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const filteredOrders = orders.filter(
-    (order) =>
+  const fetchOrders = async () => {
+    setIsLoading(true);
+    try {
+      const response = await authFetch('/api/orders?admin=true');
+      const data = await response.json();
+
+      if (data.success) {
+        setOrders(data.data?.data || data.data || []);
+      } else {
+        console.error('Failed to fetch orders:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getShipmentProgress = (orderStatus: string): number => {
+    const statusMap: Record<string, number> = {
+      'pending-payment': 1,
+      'payment-received': 2,
+      'processing': 2,
+      'shipped': 3,
+      'completed': 5,
+      'cancelled': 0,
+    };
+    return statusMap[orderStatus] || 1;
+  };
+
+  const getPaymentStatusBadge = (status: string) => {
+    const statusMap: Record<string, { label: string; className: string }> = {
+      'completed': { label: 'Paid', className: 'bg-green-100 text-green-700' },
+      'reconciled': { label: 'Paid', className: 'bg-green-100 text-green-700' },
+      'pending': { label: 'Awaiting Payment', className: 'bg-yellow-100 text-yellow-700' },
+      'pending-reconciliation': { label: 'Awaiting Payment', className: 'bg-yellow-100 text-yellow-700' },
+      'processing': { label: 'Processing', className: 'bg-blue-100 text-blue-700' },
+      'shipped': { label: 'Dispatched', className: 'bg-blue-100 text-blue-700' },
+    };
+    return statusMap[status] || { label: status, className: 'bg-gray-100 text-gray-700' };
+  };
+
+  const getShippingMode = (index: number): string => {
+    const modes = ['Air', 'Sea', 'Air', 'Sea'];
+    return modes[index % modes.length];
+  };
+
+  const filteredOrders = orders.filter((order) => {
+    const matchesSearch =
       order.referenceCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (order.buyer?.name || '')
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
-  );
+      (order.buyer?.name || '').toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesSearch;
+  });
 
-  const statusColors: Record<string, string> = {
-    'pending-payment': 'bg-yellow-100 text-yellow-800',
-    'payment-received': 'bg-blue-100 text-blue-800',
-    processing: 'bg-purple-100 text-purple-800',
-    shipped: 'bg-indigo-100 text-indigo-800',
-    completed: 'bg-green-100 text-green-800',
-    cancelled: 'bg-red-100 text-red-800',
+  // Pagination
+  const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    router.push('/login');
   };
 
-  const paymentStatusColors: Record<string, string> = {
-    pending: 'bg-gray-100 text-gray-800',
-    processing: 'bg-purple-100 text-purple-800',
-    completed: 'bg-green-100 text-green-800',
-    failed: 'bg-red-100 text-red-800',
-    'pending-reconciliation': 'bg-yellow-100 text-yellow-800',
-    received: 'bg-blue-100 text-blue-800',
-    reconciled: 'bg-green-100 text-green-800',
-    rejected: 'bg-red-100 text-red-800',
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-KE', {
-      style: 'currency',
-      currency: 'KES',
-    }).format(amount);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-KE', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+  const ShipmentProgressBar = ({ progress }: { progress: number }) => {
+    const stages = ['Ordered', 'Processing', 'Shipped', 'In Transit', 'Delivered'];
+    
+    return (
+      <div className="min-w-[320px]">
+        <div className="flex items-center">
+          {stages.map((stage, index) => {
+            const isCompleted = index < progress;
+            const isFirst = index === 0;
+            
+            return (
+              <div
+                key={stage}
+                className={`relative h-5 flex-1 flex items-center justify-center ${
+                  isFirst ? '' : '-ml-2'
+                }`}
+                style={{
+                  clipPath: isFirst
+                    ? 'polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%)'
+                    : 'polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%, 10% 50%)',
+                  backgroundColor: isCompleted ? '#2D5A3F' : '#D1D5DB',
+                }}
+              >
+                {isCompleted && (
+                  <Check className="w-3 h-3 text-white font-bold" strokeWidth={3} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex justify-between mt-1">
+          {stages.map((stage) => (
+            <span key={stage} className="text-[10px] text-gray-500 font-medium">
+              {stage}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
-        <p className="text-gray-600 mt-2">Manage and track all orders</p>
-      </div>
-
-      {/* Search */}
-      <div className="flex gap-2">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input
-            placeholder="Search by reference code or buyer name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <aside className="w-64 bg-[#2D5A3F] text-white flex flex-col sticky top-0 h-screen">
+        <div className="p-6">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-white/20 rounded flex items-center justify-center">
+              <Package className="w-5 h-5" />
+            </div>
+            <div className="leading-none">
+              <span className="block font-bold text-sm tracking-tight">SMART SUPPLY</span>
+              <span className="block text-[10px] tracking-widest opacity-80 uppercase">
+                Sourcing China
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* Orders Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                Reference Code
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                Buyer
-              </th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700">
-                Amount
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                Payment Status
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                Order Status
-              </th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                Date
-              </th>
-              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                  Loading...
-                </td>
-              </tr>
-            ) : filteredOrders.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                  No orders found
-                </td>
-              </tr>
-            ) : (
-              filteredOrders.map((order) => (
-                <tr
-                  key={order.id}
-                  className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-4 py-3 text-sm font-mono font-semibold text-blue-600">
-                    {order.referenceCode}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-700">
-                    {order.buyer?.name || 'Unknown'}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-right font-semibold text-gray-900">
-                    {formatCurrency(order.totalAmount)}
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <Badge
-                      className={
-                        paymentStatusColors[order.paymentStatus] ||
-                        'bg-gray-100 text-gray-800'
-                      }
-                    >
-                      {order.paymentStatus.replace('-', ' ')}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-sm">
-                    <Badge
-                      className={
-                        statusColors[order.orderStatus] ||
-                        'bg-gray-100 text-gray-800'
-                      }
-                    >
-                      {order.orderStatus.replace('-', ' ')}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">
-                    {formatDate(order.createdAt)}
-                  </td>
-                  <td className="px-4 py-3 text-center">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => router.push(`/admin/orders/${order.id}`)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      View
-                    </Button>
-                  </td>
+        <nav className="flex-1 px-4 space-y-1">
+          <a
+            href="/admin/dashboard"
+            className="flex items-center gap-3 px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+          >
+            <Package className="w-5 h-5" />
+            <span className="font-medium">Dashboard</span>
+          </a>
+          <a
+            href="/admin/sourcing"
+            className="flex items-center gap-3 px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+          >
+            <FileText className="w-5 h-5" />
+            <span className="font-medium">Requests</span>
+          </a>
+          <a
+            href="/admin/orders"
+            className="flex items-center gap-3 px-4 py-2 rounded-lg bg-white/15 text-white"
+          >
+            <ShoppingCart className="w-5 h-5" />
+            <span className="font-medium">Orders (Active)</span>
+          </a>
+          <a
+            href="/admin/users"
+            className="flex items-center gap-3 px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+          >
+            <Users className="w-5 h-5" />
+            <span className="font-medium">Users</span>
+          </a>
+          <a
+            href="/admin/financials"
+            className="flex items-center gap-3 px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+          >
+            <DollarSign className="w-5 h-5" />
+            <span className="font-medium">Financials</span>
+          </a>
+          <a
+            href="/admin/catalog"
+            className="flex items-center gap-3 px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+          >
+            <FolderOpen className="w-5 h-5" />
+            <span className="font-medium">Content Inventory</span>
+          </a>
+        </nav>
+
+        <div className="p-4 border-t border-white/10 mt-auto">
+          <a
+            href="/admin/settings"
+            className="flex items-center gap-3 px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-colors mb-2"
+          >
+            <Settings className="w-5 h-5" />
+            <span className="font-medium">Settings</span>
+          </a>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium">Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 p-10 overflow-auto">
+        <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 min-w-[1000px]">
+          {/* Header */}
+          <header className="mb-8">
+            <h1 className="text-4xl font-bold text-[#2D5A3F]">
+              Admin Orders & Shipments Tracker
+            </h1>
+          </header>
+
+          {/* Filter Bar */}
+          <div className="flex items-center space-x-3 mb-10">
+            {/* Search Input */}
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search Orders, Tracking #..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-[#2D5A3F] focus:border-[#2D5A3F] text-sm"
+              />
+            </div>
+
+            {/* Status Dropdown */}
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="appearance-none block w-32 pl-3 pr-10 py-2 border border-gray-300 rounded-lg text-sm focus:ring-[#2D5A3F] focus:border-[#2D5A3F] bg-white"
+              >
+                <option value="">Status</option>
+                <option value="pending">Pending</option>
+                <option value="processing">Processing</option>
+                <option value="shipped">Shipped</option>
+                <option value="completed">Completed</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
+            </div>
+
+            {/* Shipping Mode Dropdown */}
+            <div className="relative">
+              <select
+                value={shippingModeFilter}
+                onChange={(e) => setShippingModeFilter(e.target.value)}
+                className="appearance-none block w-40 pl-3 pr-10 py-2 border border-gray-300 rounded-lg text-sm focus:ring-[#2D5A3F] focus:border-[#2D5A3F] bg-white"
+              >
+                <option value="">Shipping Mode</option>
+                <option value="air">Air</option>
+                <option value="sea">Sea</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
+            </div>
+
+            {/* Date Range Dropdown */}
+            <div className="relative">
+              <select
+                value={dateRangeFilter}
+                onChange={(e) => setDateRangeFilter(e.target.value)}
+                className="appearance-none block w-40 pl-3 pr-10 py-2 border border-gray-300 rounded-lg text-sm focus:ring-[#2D5A3F] focus:border-[#2D5A3F] bg-white"
+              >
+                <option value="">Date Range</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
+            </div>
+
+            {/* Filter Button */}
+            <button className="bg-[#2D5A3F] text-white px-8 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity">
+              Filter
+            </button>
+          </div>
+
+          {/* Table Subtitle */}
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Active Purchase Orders</h2>
+
+          {/* Data Table */}
+          <div className="border border-gray-200 rounded-xl overflow-hidden">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-gray-50 text-gray-500 text-sm font-medium">
+                <tr>
+                  <th className="px-6 py-3 border-b border-gray-200">Supplier</th>
+                  <th className="px-6 py-3 border-b border-gray-200">Tracking No.</th>
+                  <th className="px-6 py-3 border-b border-gray-200">Shipping Mode</th>
+                  <th className="px-6 py-3 border-b border-gray-200">Destination</th>
+                  <th className="px-6 py-3 border-b border-gray-200">Payment Status</th>
+                  <th className="px-6 py-3 border-b border-gray-200">Shipment Progress</th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody className="text-sm divide-y divide-gray-200">
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center">
+                      <div className="flex items-center justify-center">
+                        <Loader2 className="w-6 h-6 animate-spin text-[#2D5A3F]" />
+                        <span className="ml-3 text-gray-500">Loading orders...</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : paginatedOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                      <Package className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                      <p className="text-lg font-medium">No orders found</p>
+                      <p className="text-sm text-gray-400 mt-1">
+                        {searchQuery ? 'Try adjusting your search' : 'Orders will appear here'}
+                      </p>
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedOrders.map((order, index) => {
+                    const paymentBadge = getPaymentStatusBadge(order.paymentStatus);
+                    const progress = getShipmentProgress(order.orderStatus);
+                    const shippingMode = getShippingMode(index);
+
+                    return (
+                      <tr key={order.id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => router.push(`/admin/orders/${order.id}`)}>
+                        <td className="px-6 py-6 text-gray-800">
+                          {order.buyer?.name || 'Unknown Supplier'}
+                        </td>
+                        <td className="px-6 py-6 text-gray-600 font-mono">
+                          {order.referenceCode}
+                        </td>
+                        <td className="px-6 py-6 text-gray-600">{shippingMode}</td>
+                        <td className="px-6 py-6 text-gray-600">
+                          {order.shippingCity || 'N/A'}
+                        </td>
+                        <td className="px-6 py-6">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${paymentBadge.className}`}
+                          >
+                            {paymentBadge.label}
+                          </span>
+                        </td>
+                        <td className="px-6 py-6">
+                          <ShipmentProgressBar progress={progress} />
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {!isLoading && filteredOrders.length > 0 && (
+            <footer className="mt-8 flex items-center justify-end space-x-6 text-sm text-gray-600">
+              <span className="text-gray-500">
+                Showing {startIndex + 1}-{Math.min(endIndex, filteredOrders.length)} of{' '}
+                {filteredOrders.length} orders
+              </span>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-2 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </footer>
+          )}
+        </section>
+      </main>
     </div>
   );
 }
