@@ -95,7 +95,7 @@ export function SourcingRequestWizard({
   const canProceedToStep3 = canProceedToStep2 && destinationCity.trim();
 
   return (
-    <div className="bg-gray-50 flex flex-col">
+    <div className="bg-gray-50">
       {/* Navigation Header */}
       <nav className="bg-[#053018] text-white py-3 sm:py-4 px-4 sm:px-6 md:px-12 flex justify-between items-center sticky top-0 z-50 shadow-md">
         <div className="flex items-center gap-2">
@@ -145,7 +145,7 @@ export function SourcingRequestWizard({
         </button>
       </nav>
 
-      <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
         {/* ── SIDEBAR: Progress ── */}
         <aside className="lg:col-span-3 mb-8 lg:mb-0">
           <h2 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-gray-900">
