@@ -97,18 +97,20 @@ export function SourcingRequestWizard({
   return (
     <div className="bg-gray-50 flex flex-col">
       {/* Navigation Header */}
-      <nav className="bg-[#053018] text-white py-4 px-6 md:px-12 flex justify-between items-center sticky top-0 z-50 shadow-md">
+      <nav className="bg-[#053018] text-white py-3 sm:py-4 px-4 sm:px-6 md:px-12 flex justify-between items-center sticky top-0 z-50 shadow-md">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-500 rounded-full flex items-center justify-center">
             <span className="text-xs font-bold text-white">S</span>
           </div>
-          <div className="font-bold text-lg leading-tight">
-            Smart Supply
-            <br />
-            <span className="font-semibold text-sm">Sourcing China</span>
+          <div className="font-bold text-sm sm:text-lg leading-tight">
+            <span className="block sm:inline">Smart Supply</span>
+            <br className="hidden sm:block" />
+            <span className="font-semibold text-xs sm:text-sm ml-1 sm:ml-0">
+              Sourcing China
+            </span>
           </div>
         </div>
-        <div className="hidden md:flex gap-8 text-sm font-medium">
+        <div className="hidden md:flex gap-6 lg:gap-8 text-sm font-medium">
           <Link href="/" className="hover:text-orange-400 transition-colors">
             Home
           </Link>
@@ -126,9 +128,9 @@ export function SourcingRequestWizard({
           </Link>
         </div>
         {/* Mobile Menu Toggle */}
-        <div className="md:hidden">
+        <button className="md:hidden p-1">
           <svg
-            className="h-6 w-6"
+            className="h-5 w-5 sm:h-6 sm:w-6"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -140,18 +142,20 @@ export function SourcingRequestWizard({
               d="M4 6h16M4 12h16M4 18h16"
             />
           </svg>
-        </div>
+        </button>
       </nav>
 
-      <main className="flex-grow max-w-7xl mx-auto w-full px-4 py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
         {/* ── SIDEBAR: Progress ── */}
-        <aside className="lg:col-span-3">
-          <h2 className="text-2xl font-bold mb-8 text-gray-900">
+        <aside className="lg:col-span-3 mb-8 lg:mb-0">
+          <h2 className="text-xl sm:text-2xl font-bold mb-6 sm:mb-8 text-gray-900">
             Sourcing Progress
           </h2>
-          <div className="relative flex flex-col gap-12">
-            {/* Vertical Progress Line */}
-            <div className="absolute left-[15px] top-4 bottom-4 w-px bg-gray-400 -z-0" />
+          <div className="relative flex flex-row lg:flex-col gap-8 lg:gap-12 overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0">
+            {/* Vertical Progress Line - hidden on mobile */}
+            <div className="hidden lg:block absolute left-[15px] top-4 bottom-4 w-px bg-gray-400 -z-0" />
+            {/* Horizontal Progress Line - visible on mobile */}
+            <div className="lg:hidden absolute top-[15px] left-4 right-4 h-px bg-gray-400 -z-0" />
 
             {[
               { num: 1, label: 'Product Details' },
@@ -160,7 +164,7 @@ export function SourcingRequestWizard({
             ].map((s) => (
               <div
                 key={s.num}
-                className="relative z-10 flex items-center gap-4"
+                className="relative z-10 flex flex-col lg:flex-row items-center lg:items-center gap-2 lg:gap-4 min-w-max lg:min-w-0"
               >
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center ring-4 ring-white ${
@@ -192,9 +196,11 @@ export function SourcingRequestWizard({
                   )}
                 </div>
                 <span
-                  className={`font-semibold ${step >= s.num ? 'text-[#053018]' : 'text-gray-500'}`}
+                  className={`font-semibold text-sm lg:text-base text-center lg:text-left ${step >= s.num ? 'text-[#053018]' : 'text-gray-500'}`}
                 >
-                  {s.num}. {s.label}
+                  <span className="lg:hidden">{s.num}.</span>
+                  <span className="hidden lg:inline">{s.num}. </span>
+                  {s.label}
                 </span>
               </div>
             ))}
@@ -202,7 +208,7 @@ export function SourcingRequestWizard({
         </aside>
 
         {/* ── FORM CARD ── */}
-        <section className="lg:col-span-9 bg-white rounded-xl shadow-sm border border-gray-100 p-8 md:p-12">
+        <section className="lg:col-span-9 bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 md:p-12">
           {errorMessage && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
               {errorMessage}
@@ -212,7 +218,7 @@ export function SourcingRequestWizard({
           {/* STEP 1: Product Details */}
           {step === 1 && (
             <div className="space-y-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-8">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">
                 Product Details
               </h1>
 
@@ -229,7 +235,7 @@ export function SourcingRequestWizard({
                   required
                   value={productName}
                   onChange={(e) => setProductName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
                 />
               </div>
 
@@ -245,7 +251,7 @@ export function SourcingRequestWizard({
                   required
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all bg-white"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all bg-white"
                 >
                   <option value="">Select Category</option>
                   <option value="electronics">Electronics</option>
@@ -272,7 +278,7 @@ export function SourcingRequestWizard({
                   required
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
                 />
               </div>
 
@@ -286,11 +292,11 @@ export function SourcingRequestWizard({
                 <textarea
                   id="specification"
                   required
-                  rows={8}
+                  rows={6}
                   value={specification}
                   onChange={(e) => setSpecification(e.target.value)}
                   placeholder="Describe your product specs, materials, dimensions, and any specific requirements."
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all resize-none"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all resize-none"
                 />
               </div>
 
@@ -305,9 +311,10 @@ export function SourcingRequestWizard({
                 type="button"
                 disabled={!canProceedToStep2}
                 onClick={() => setStep(2)}
-                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-4 px-8 rounded-lg font-bold text-lg flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-lg"
+                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 sm:py-4 px-6 sm:px-8 rounded-lg font-bold text-base sm:text-lg flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-lg"
               >
-                Continue to Logistics <ArrowRight className="w-5 h-5" />
+                Continue to Logistics{' '}
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           )}
@@ -315,7 +322,7 @@ export function SourcingRequestWizard({
           {/* STEP 2: Logistics */}
           {step === 2 && (
             <div className="space-y-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-8">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">
                 Logistics & Delivery
               </h1>
 
@@ -323,7 +330,7 @@ export function SourcingRequestWizard({
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Shipping Method<span className="text-red-500">*</span>
                 </label>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {[
                     { value: 'air', label: 'Air Freight', time: '7-14 Days' },
                     { value: 'sea', label: 'Sea Freight', time: '30-45 Days' },
@@ -334,13 +341,15 @@ export function SourcingRequestWizard({
                       onClick={() =>
                         setShippingMethod(opt.value as 'air' | 'sea')
                       }
-                      className={`p-4 rounded-lg border-2 transition-all text-left ${
+                      className={`p-3 sm:p-4 rounded-lg border-2 transition-all text-left ${
                         shippingMethod === opt.value
                           ? 'border-[#053018] bg-green-50'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
-                      <p className="font-bold text-gray-900">{opt.label}</p>
+                      <p className="font-bold text-gray-900 text-sm sm:text-base">
+                        {opt.label}
+                      </p>
                       <p className="text-xs text-gray-500">{opt.time}</p>
                     </button>
                   ))}
@@ -361,15 +370,15 @@ export function SourcingRequestWizard({
                   value={destinationCity}
                   onChange={(e) => setDestinationCity(e.target.value)}
                   placeholder="e.g. Nairobi, Mombasa, Kisumu"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
                 />
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="flex-1 border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                  className="w-full sm:flex-1 border border-gray-300 text-gray-700 py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
                 >
                   Back
                 </button>
@@ -377,9 +386,10 @@ export function SourcingRequestWizard({
                   type="button"
                   disabled={!canProceedToStep3}
                   onClick={() => setStep(3)}
-                  className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-6 rounded-lg font-bold flex items-center justify-center gap-2 transition-transform"
+                  className="w-full sm:flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg font-bold flex items-center justify-center gap-2 transition-transform"
                 >
-                  Continue to Review <ArrowRight className="w-5 h-5" />
+                  Continue to Review{' '}
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </div>
             </div>
@@ -388,15 +398,15 @@ export function SourcingRequestWizard({
           {/* STEP 3: Review */}
           {step === 3 && (
             <div className="space-y-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-8">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8">
                 Review Your Request
               </h1>
 
-              <div className="space-y-4 bg-gray-50 rounded-lg p-6 border border-gray-200">
-                <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="space-y-4 bg-gray-50 rounded-lg p-4 sm:p-6 border border-gray-200">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                   <div>
                     <span className="text-gray-500">Product Name:</span>{' '}
-                    <span className="font-semibold text-gray-900">
+                    <span className="font-semibold text-gray-900 break-words">
                       {productName}
                     </span>
                   </div>
@@ -420,7 +430,7 @@ export function SourcingRequestWizard({
                         : 'Sea Freight (30-45 Days)'}
                     </span>
                   </div>
-                  <div className="col-span-2">
+                  <div className="sm:col-span-2">
                     <span className="text-gray-500">Destination:</span>{' '}
                     <span className="font-semibold text-gray-900">
                       {destinationCity || 'Not specified'}
@@ -429,7 +439,7 @@ export function SourcingRequestWizard({
                 </div>
                 <div className="pt-3 border-t border-gray-200">
                   <p className="text-xs text-gray-500 mb-1">Specifications:</p>
-                  <p className="text-sm text-gray-700 whitespace-pre-line">
+                  <p className="text-sm text-gray-700 whitespace-pre-line break-words">
                     {specification}
                   </p>
                 </div>
@@ -442,7 +452,7 @@ export function SourcingRequestWizard({
                       {uploadedFiles.map((f, i) => (
                         <span
                           key={i}
-                          className="text-xs bg-white border border-gray-200 px-2 py-1 rounded"
+                          className="text-xs bg-white border border-gray-200 px-2 py-1 rounded break-all"
                         >
                           {f.name}
                         </span>
@@ -452,11 +462,11 @@ export function SourcingRequestWizard({
                 )}
               </div>
 
-              <div className="flex gap-3 pt-4">
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => setStep(2)}
-                  className="flex-1 border border-gray-300 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                  className="w-full sm:flex-1 border border-gray-300 text-gray-700 py-2.5 sm:py-3 px-4 sm:px-6 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
                 >
                   Back
                 </button>
@@ -464,10 +474,10 @@ export function SourcingRequestWizard({
                   type="button"
                   disabled={isLoading}
                   onClick={handleSubmit}
-                  className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white py-4 px-8 rounded-lg font-bold text-lg flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-lg"
+                  className="w-full sm:flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white py-3 sm:py-4 px-6 sm:px-8 rounded-lg font-bold text-base sm:text-lg flex items-center justify-center gap-2 transition-transform active:scale-[0.98] shadow-lg"
                 >
                   {isLoading ? 'Submitting...' : 'Submit Request'}{' '}
-                  <ArrowRight className="w-6 h-6" />
+                  <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               </div>
             </div>
@@ -476,8 +486,8 @@ export function SourcingRequestWizard({
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#042512] text-white py-12 px-6 md:px-12">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
+      <footer className="bg-[#042512] text-white py-8 sm:py-12 px-4 sm:px-6 md:px-12">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-10">
           {/* Company Info Column */}
           <div className="lg:col-span-1 space-y-6">
             <div className="flex items-center gap-2">
@@ -645,12 +655,14 @@ export function SourcingRequestWizard({
         </div>
 
         {/* Bottom Bar */}
-        <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-500 uppercase tracking-widest gap-2">
-          <p>
+        <div className="max-w-7xl mx-auto mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center text-[10px] text-gray-500 uppercase tracking-widest gap-2 sm:gap-4">
+          <p className="text-center sm:text-left">
             © {new Date().getFullYear()} Smart Supply Sourcing China - All
             rights reserved.
           </p>
-          <p>Connecting Kenyan businesses with global suppliers</p>
+          <p className="text-center sm:text-right">
+            Connecting Kenyan businesses with global suppliers
+          </p>
         </div>
       </footer>
     </div>
