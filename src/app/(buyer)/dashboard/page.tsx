@@ -10,9 +10,9 @@ export default function DashboardPage() {
       {/* Header & Progress Tracker */}
       <header className="bg-[#1a3020] text-white p-8 pb-16">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-semibold mb-10">
+          <h1 className="text-2xl font-semibold mb-10">
             Client Sourcing Dashboard
-          </h2>
+          </h1>
 
           {/* Progress Steps */}
           <div className="relative flex justify-between items-center max-w-4xl mx-auto">
@@ -73,7 +73,7 @@ export default function DashboardPage() {
           {/* Active Quotes Summary Table */}
           <section className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="p-5 border-b border-gray-50">
-              <h3 className="font-bold text-gray-800">Active Quotes Summary</h3>
+              <h2 className="font-bold text-gray-800">Active Quotes Summary</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
@@ -140,9 +140,9 @@ export default function DashboardPage() {
 
           {/* Sidebar Summary Info */}
           <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="font-bold text-gray-800 mb-4 border-b pb-2">
+            <h2 className="font-bold text-gray-800 mb-4 border-b pb-2">
               Shipment Tracking Status
-            </h3>
+            </h2>
             <div className="space-y-3">
               <div className="flex justify-between items-center border-b pb-2">
                 <span className="font-bold text-sm">Air Freight</span>
@@ -178,13 +178,13 @@ export default function DashboardPage() {
 
         {/* Detailed Shipment Tracking */}
         <section className="space-y-4">
-          <h3 className="font-bold text-gray-800 text-lg px-2">
+          <h2 className="font-bold text-gray-800 text-lg px-2">
             Shipment Tracking Status
-          </h3>
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Air Freight Card */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">
-              <h4 className="font-bold text-gray-800 mb-4">Air Freight</h4>
+              <h3 className="font-bold text-gray-800 mb-4">Air Freight</h3>
               <div className="space-y-2 text-sm text-gray-500 mb-4">
                 <p>Tracking #AF9982</p>
                 <div className="flex justify-between">
@@ -212,7 +212,7 @@ export default function DashboardPage() {
 
             {/* Sea Freight Card with Alert */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col h-full">
-              <h4 className="font-bold text-gray-800 mb-4">Sea Freight</h4>
+              <h3 className="font-bold text-gray-800 mb-4">Sea Freight</h3>
               <div className="space-y-2 text-sm text-gray-500 mb-6 flex-1">
                 <p>Tracking #SF7710</p>
                 <div className="flex justify-between">
@@ -245,9 +245,9 @@ export default function DashboardPage() {
 
         {/* Pro-forma Invoices Horizontal List */}
         <section className="space-y-4">
-          <h3 className="font-bold text-gray-800 text-lg px-2">
+          <h2 className="font-bold text-gray-800 text-lg px-2">
             Recent Pro-forma Invoices
-          </h3>
+          </h2>
           <div className="relative group">
             {/* Scroll Navigation Button */}
             <button
@@ -264,7 +264,7 @@ export default function DashboardPage() {
               {/* Invoice Card 1 (Pending) */}
               <div className="min-w-[300px] bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
                 <div className="space-y-1">
-                  <h4 className="font-bold text-gray-800">Invoice #INV-1045</h4>
+                  <h3 className="font-bold text-gray-800">Invoice #INV-1045</h3>
                   <p className="text-xs text-gray-500">
                     Amount:{' '}
                     <span className="text-gray-800 font-bold">$12,500</span>
@@ -288,7 +288,7 @@ export default function DashboardPage() {
               {/* Invoice Card 2 (Paid) */}
               <div className="min-w-[300px] bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
                 <div className="space-y-1">
-                  <h4 className="font-bold text-gray-800">Invoice #INV-1038</h4>
+                  <h3 className="font-bold text-gray-800">Invoice #INV-1038</h3>
                   <p className="text-xs text-gray-500">
                     Amount:{' '}
                     <span className="text-gray-800 font-bold">$5,200</span>
@@ -314,7 +314,7 @@ export default function DashboardPage() {
               {/* Invoice Card 3 (Paid) */}
               <div className="min-w-[300px] bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
                 <div className="space-y-1">
-                  <h4 className="font-bold text-gray-800">Invoice #INV-1039</h4>
+                  <h3 className="font-bold text-gray-800">Invoice #INV-1039</h3>
                   <p className="text-xs text-gray-500">
                     Amount:{' '}
                     <span className="text-gray-800 font-bold">$8,900</span>
