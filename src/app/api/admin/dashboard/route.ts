@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
 
     // Get recent activity (recent orders with payment info)
     const recentActivityResult = await query(
-      `SELECT o.id, o.order_number, o.total_amount, o.payment_status, o.created_at,
+      `SELECT o.id, o.reference_code, o.total_amount, o.payment_status, o.created_at,
               u.name as buyer_name
        FROM orders o
        LEFT JOIN users u ON o.buyer_id = u.id
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
 
     const recentActivity = recentActivityResult.rows.map((row) => ({
       id: row.id,
-      ref: row.order_number || `ORD-${row.id.slice(0, 8).toUpperCase()}`,
+      ref: row.reference_code || `ORD-${row.id.slice(0, 8).toUpperCase()}`,
       buyer: row.buyer_name || 'Unknown',
       amount: parseFloat(row.total_amount) || 0,
       status: row.payment_status || 'pending',
