@@ -10,6 +10,9 @@ import {
   Package,
   ShoppingBag,
   LogOut,
+  FileText,
+  Users,
+  DollarSign,
 } from 'lucide-react';
 import { authFetch } from '@/lib/api/auth-client';
 import { useAuthStore } from '@/lib/stores/authStore';
@@ -21,6 +24,9 @@ interface AdminLayoutProps {
 const navItems = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
+  { href: '/admin/sourcing', label: 'Sourcing Requests', icon: FileText },
+  { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/financials', label: 'Financials', icon: DollarSign },
   { href: '/admin/ledger', label: 'Quotes & Ledger', icon: BookOpen },
   { href: '/admin/catalog', label: 'Catalog', icon: ShoppingBag },
   { href: '/admin/inventory', label: 'Inventory', icon: Package },
@@ -51,15 +57,15 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
       <aside
-        className="w-56 flex-shrink-0 bg-slate-800 flex flex-col"
+        className="w-56 flex-shrink-0 bg-[#153e2a] flex flex-col"
         aria-label="Admin navigation sidebar"
       >
         {/* Logo / Brand */}
-        <div className="px-6 py-5 border-b border-slate-700">
+        <div className="px-6 py-5 border-b border-[#1a4d32]">
           <span className="text-white font-bold text-lg tracking-tight">
             Smart Supply
           </span>
-          <p className="text-slate-400 text-xs mt-0.5">Admin Portal</p>
+          <p className="text-emerald-200 text-xs mt-0.5">Admin Portal</p>
         </div>
 
         {/* Nav items */}
@@ -73,8 +79,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 href={href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-blue-600 text-white'
-                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                    ? 'bg-emerald-600 text-white'
+                    : 'text-emerald-100 hover:bg-[#1a4d32] hover:text-white'
                 }`}
                 aria-current={isActive ? 'page' : undefined}
               >
@@ -86,10 +92,10 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
 
         {/* Logout */}
-        <div className="px-3 py-4 border-t border-slate-700">
+        <div className="px-3 py-4 border-t border-[#1a4d32]">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition-colors w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-emerald-100 hover:bg-[#1a4d32] hover:text-white transition-colors w-full"
           >
             <LogOut className="w-4 h-4 flex-shrink-0" />
             Logout
