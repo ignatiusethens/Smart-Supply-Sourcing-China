@@ -40,6 +40,17 @@ export function SourcingRequestWizard({
       return;
     }
 
+    // Check total file size
+    const totalFileSize = uploadedFiles.reduce(
+      (sum, file) => sum + file.size,
+      0
+    );
+    const maxTotalSize = 10 * 1024 * 1024; // 10MB total
+    if (totalFileSize > maxTotalSize) {
+      onError?.('Total file size exceeds 10MB. Please remove some files.');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const submitFormData = new FormData();
@@ -71,6 +82,16 @@ export function SourcingRequestWizard({
         body: submitFormData,
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const textResponse = await response.text();
+        console.error('Non-JSON response:', textResponse);
+        throw new Error(
+          'Server returned an invalid response. Please try again.'
+        );
+      }
 
       if (!response.ok) {
         const error = await response.json();
