@@ -9,7 +9,6 @@ import {
   Clock,
   FileText,
   TrendingUp,
-  TrendingDown,
   AlertCircle,
   Download,
   BookOpen,
@@ -51,67 +50,30 @@ interface DashboardData {
     submissionDate: string;
     status: string;
   }>;
+  recentActivity: Array<{
+    id: string;
+    ref: string;
+    buyer: string;
+    amount: number;
+    status: string;
+    date: string;
+  }>;
+  priorityTasks: Array<{
+    id: number;
+    label: string;
+    done: boolean;
+    urgent: boolean;
+  }>;
 }
-
-const priorityTasks = [
-  {
-    id: 1,
-    label: 'Reconcile 3 pending bank transfers',
-    done: false,
-    urgent: true,
-  },
-  {
-    id: 2,
-    label: 'Review 2 new sourcing requests',
-    done: false,
-    urgent: false,
-  },
-  {
-    id: 3,
-    label: 'Update inventory for low-stock items',
-    done: true,
-    urgent: false,
-  },
-  {
-    id: 4,
-    label: 'Export monthly reconciliation report',
-    done: false,
-    urgent: false,
-  },
-];
-
-const recentActivity = [
-  {
-    id: 1,
-    ref: 'TXN-2024-001',
-    buyer: 'Acme Corp',
-    amount: 'KES 245,000',
-    status: 'reconciled',
-    date: 'Today, 09:14',
-  },
-  {
-    id: 2,
-    ref: 'TXN-2024-002',
-    buyer: 'BuildRight Ltd',
-    amount: 'KES 88,500',
-    status: 'pending',
-    date: 'Today, 08:52',
-  },
-  {
-    id: 3,
-    ref: 'TXN-2024-003',
-    buyer: 'TechPro Kenya',
-    amount: 'KES 1,200,000',
-    status: 'received',
-    date: 'Yesterday, 16:30',
-  },
-];
 
 const statusBadge: Record<string, string> = {
   reconciled: 'bg-green-100 text-green-700',
   pending: 'bg-yellow-100 text-yellow-700',
   received: 'bg-blue-100 text-blue-700',
   rejected: 'bg-red-100 text-red-700',
+  paid: 'bg-green-100 text-green-700',
+  processing: 'bg-blue-100 text-blue-700',
+  'pending-reconciliation': 'bg-yellow-100 text-yellow-700',
 };
 
 export default function AdminDashboard() {
@@ -139,8 +101,19 @@ export default function AdminDashboard() {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void fetchDashboardData();
+    let mounted = true;
+
+    const loadData = async () => {
+      if (mounted) {
+        await fetchDashboardData();
+      }
+    };
+
+    loadData();
+
+    return () => {
+      mounted = false;
+    };
   }, [fetchDashboardData]);
 
   // Auto-refresh every 30 seconds
@@ -153,6 +126,35 @@ export default function AdminDashboard() {
     if (value >= 1_000_000) return `KES ${(value / 1_000_000).toFixed(2)}M`;
     if (value >= 1_000) return `KES ${(value / 1_000).toFixed(0)}k`;
     return `KES ${value}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) return `${diffMins} min${diffMins !== 1 ? 's' : ''} ago`;
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+    if (diffDays === 0)
+      return (
+        'Today, ' +
+        date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+      );
+    if (diffDays === 1)
+      return (
+        'Yesterday, ' +
+        date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+      );
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   return (
@@ -216,14 +218,16 @@ export default function AdminDashboard() {
             <div className="h-8 bg-slate-100 rounded animate-pulse w-3/4" />
           ) : (
             <p className="text-2xl font-bold text-slate-900">
-              {formatCurrency(data?.kpis.outstandingTransfers || 1420000)}
+              {formatCurrency(data?.kpis.outstandingTransfers || 0)}
             </p>
           )}
-          <div className="flex items-center gap-1 mt-2">
-            <TrendingUp className="w-3 h-3 text-green-500" />
-            <span className="text-xs text-green-600 font-medium">+12.5%</span>
-            <span className="text-xs text-slate-400 ml-1">vs last week</span>
-          </div>
+          {!isLoading && data && (
+            <div className="flex items-center gap-1 mt-2">
+              <span className="text-xs text-slate-400">
+                From pending orders
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Pending Reconciliations */}
@@ -240,14 +244,14 @@ export default function AdminDashboard() {
             <div className="h-8 bg-slate-100 rounded animate-pulse w-1/2" />
           ) : (
             <p className="text-2xl font-bold text-slate-900">
-              {data?.kpis.pendingReconciliations ?? 18}
+              {data?.kpis.pendingReconciliations ?? 0}
             </p>
           )}
-          <div className="flex items-center gap-1 mt-2">
-            <TrendingDown className="w-3 h-3 text-red-500" />
-            <span className="text-xs text-red-600 font-medium">-4.2%</span>
-            <span className="text-xs text-slate-400 ml-1">vs last week</span>
-          </div>
+          {!isLoading && data && (
+            <div className="flex items-center gap-1 mt-2">
+              <span className="text-xs text-slate-400">Awaiting review</span>
+            </div>
+          )}
         </div>
 
         {/* Active Sourcing Requests */}
@@ -264,14 +268,14 @@ export default function AdminDashboard() {
             <div className="h-8 bg-slate-100 rounded animate-pulse w-1/2" />
           ) : (
             <p className="text-2xl font-bold text-slate-900">
-              {data?.kpis.activeSourcingRequests ?? 42}
+              {data?.kpis.activeSourcingRequests ?? 0}
             </p>
           )}
-          <div className="flex items-center gap-1 mt-2">
-            <TrendingUp className="w-3 h-3 text-green-500" />
-            <span className="text-xs text-green-600 font-medium">+8.1%</span>
-            <span className="text-xs text-slate-400 ml-1">vs last week</span>
-          </div>
+          {!isLoading && data && (
+            <div className="flex items-center gap-1 mt-2">
+              <span className="text-xs text-slate-400">Open requests</span>
+            </div>
+          )}
         </div>
 
         {/* Daily Gross Volume */}
@@ -288,14 +292,16 @@ export default function AdminDashboard() {
             <div className="h-8 bg-slate-100 rounded animate-pulse w-3/4" />
           ) : (
             <p className="text-2xl font-bold text-slate-900">
-              {formatCurrency(data?.kpis.dailyTransactionVolume || 840000)}
+              {formatCurrency(data?.kpis.dailyTransactionVolume || 0)}
             </p>
           )}
-          <div className="flex items-center gap-1 mt-2">
-            <TrendingUp className="w-3 h-3 text-green-500" />
-            <span className="text-xs text-green-600 font-medium">+2.4%</span>
-            <span className="text-xs text-slate-400 ml-1">vs yesterday</span>
-          </div>
+          {!isLoading && data && (
+            <div className="flex items-center gap-1 mt-2">
+              <span className="text-xs text-slate-400">
+                Today&apos;s transactions
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -420,24 +426,39 @@ export default function AdminDashboard() {
             <h3 className="font-semibold text-sm mb-3 text-slate-200">
               Priority Tasks
             </h3>
-            <ul className="space-y-2.5">
-              {priorityTasks.map((task) => (
-                <li key={task.id} className="flex items-start gap-2.5">
-                  {task.done ? (
-                    <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
-                  ) : (
-                    <Circle
-                      className={`w-4 h-4 flex-shrink-0 mt-0.5 ${task.urgent ? 'text-red-400' : 'text-slate-400'}`}
-                    />
-                  )}
-                  <span
-                    className={`text-xs leading-relaxed ${task.done ? 'line-through text-slate-500' : 'text-slate-200'}`}
-                  >
-                    {task.label}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            {isLoading ? (
+              <div className="space-y-2.5">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="h-5 bg-slate-700 rounded animate-pulse"
+                  />
+                ))}
+              </div>
+            ) : data?.priorityTasks && data.priorityTasks.length > 0 ? (
+              <ul className="space-y-2.5">
+                {data.priorityTasks.map((task) => (
+                  <li key={task.id} className="flex items-start gap-2.5">
+                    {task.done ? (
+                      <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                    ) : (
+                      <Circle
+                        className={`w-4 h-4 flex-shrink-0 mt-0.5 ${task.urgent ? 'text-red-400' : 'text-slate-400'}`}
+                      />
+                    )}
+                    <span
+                      className={`text-xs leading-relaxed ${task.done ? 'line-through text-slate-500' : 'text-slate-200'}`}
+                    >
+                      {task.label}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-slate-400">
+                No priority tasks at the moment
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -445,16 +466,14 @@ export default function AdminDashboard() {
       {/* Recent Reconciliation Activity */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="font-semibold text-slate-900">
-            Recent Reconciliation Activity
-          </h2>
+          <h2 className="font-semibold text-slate-900">Recent Activity</h2>
           <Button
             variant="ghost"
             size="sm"
             className="text-blue-600 hover:text-blue-700 text-xs"
-            onClick={() => (window.location.href = '/admin/ledger')}
+            onClick={() => (window.location.href = '/admin/orders')}
           >
-            View Ledger
+            View All Orders
           </Button>
         </div>
         <div className="overflow-x-auto">
@@ -479,30 +498,49 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {recentActivity.map((item) => (
-                <tr
-                  key={item.id}
-                  className="border-b border-slate-50 hover:bg-slate-50 transition-colors"
-                >
-                  <td className="px-4 py-3 font-mono text-xs text-blue-600 font-semibold">
-                    {item.ref}
-                  </td>
-                  <td className="px-4 py-3 text-slate-700">{item.buyer}</td>
-                  <td className="px-4 py-3 font-semibold text-slate-900">
-                    {item.amount}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${statusBadge[item.status] || 'bg-slate-100 text-slate-600'}`}
-                    >
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-slate-500 text-xs">
-                    {item.date}
+              {isLoading ? (
+                [1, 2, 3].map((i) => (
+                  <tr key={i} className="border-b border-slate-50">
+                    <td colSpan={5} className="px-4 py-3">
+                      <div className="h-5 bg-slate-100 rounded animate-pulse" />
+                    </td>
+                  </tr>
+                ))
+              ) : data?.recentActivity && data.recentActivity.length > 0 ? (
+                data.recentActivity.map((item) => (
+                  <tr
+                    key={item.id}
+                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors"
+                  >
+                    <td className="px-4 py-3 font-mono text-xs text-blue-600 font-semibold">
+                      {item.ref}
+                    </td>
+                    <td className="px-4 py-3 text-slate-700">{item.buyer}</td>
+                    <td className="px-4 py-3 font-semibold text-slate-900">
+                      {formatCurrency(item.amount)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${statusBadge[item.status] || 'bg-slate-100 text-slate-600'}`}
+                      >
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-slate-500 text-xs">
+                      {formatDate(item.date)}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-4 py-8 text-center text-slate-400 text-sm"
+                  >
+                    No recent activity
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
